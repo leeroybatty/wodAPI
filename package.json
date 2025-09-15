@@ -1,0 +1,19 @@
+{
+  "name": "bigdamnmush",
+  "version": "1.0.0",
+  "description": "An API for OWOD games for RP servers.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "leeroybatty",
+  "license": "ISC",
+  "dependencies": {
+    "@types/pg": "^8.15.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "node": "^24.8.0",
+    "pg": "^8.16.3",
+    "ts-node": "^10.9.2"
+  }
+}

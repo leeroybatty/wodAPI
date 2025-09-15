@@ -1,0 +1,4 @@
+[
+    "./schemas/main.sql",
+    "./schemas/shifter.sql",
+]

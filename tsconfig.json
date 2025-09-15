@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "*": ["*", "*/index"],
+      "@logger": ["./server/services/logger"],
+      "@logger/*": ["./server/services/logger/*"],
+    }
+  },
+  "ts-node": {
+    "esm": false
+  }
+}
