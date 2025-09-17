@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { queryDbConnection, getOneRowResult, QueryExecutionError, ValidationError, withTransaction } from '../sql';
+import { queryDbConnection, getOneRowResult, withTransaction } from '../sql';
 import { AuthenticatedRequest } from '../middleware/auth';
-import { handleError } from '../errors';
+import { handleError, ValidationError, QueryExecutionError } from '../errors';
 import { ApiSuccessResponse } from '../apiResponse.types'
 
 export async function getCharacterStat(req: AuthenticatedRequest, res: Response) {

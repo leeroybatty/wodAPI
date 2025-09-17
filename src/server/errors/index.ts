@@ -1,8 +1,38 @@
-import { CORE_ERROR_MAP } from './errorMap';
 import { ApiResponse, ApiErrorResponse, ApiSuccessResponse } from '../apiResponse.types'
-import { QueryExecutionError, ValidationError } from '../sql';
 import { ErrorKeys } from './errors.types';
 import { Request, Response } from 'express';
+import { CORE_ERROR_MAP } from './errorMap';
+
+export class ValidationError extends Error {
+  constructor(
+  message: string, 
+  public query: string, 
+  public params: any[], 
+  public errorKey: ErrorKeys = ErrorKeys.VALIDATION_ERROR
+  ) {
+  super(message);
+  this.name = 'ValidationError';
+  }
+}
+
+export class QueryExecutionError extends Error {
+  constructor(
+  message: string, 
+  public query: string, 
+  public params: any[], 
+  public errorKey: ErrorKeys = ErrorKeys.GENERAL_SERVER_ERROR
+  ) {
+  super(message);
+  this.name = 'QueryExecutionError';
+  }
+}
+
+export function createSuccessResponse<T>(data?: T): ApiSuccessResponse<T> {
+  return {
+    success: true,
+    data
+  };
+}
 
 export function createErrorResponse(
   errorKey: ErrorKeys, 

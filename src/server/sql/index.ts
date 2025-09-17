@@ -1,5 +1,6 @@
 import { PoolClient, QueryResult, QueryResultRow } from 'pg';
 import PoolConnection from './connection';
+import { QueryExecutionError, ValidationError } from '../errors';
 import { ErrorKeys } from '../errors/errors.types';
 import { logger } from '../services/logger';
 
@@ -8,30 +9,6 @@ export type QueryFunction = (client: PoolClient) => Promise<QueryResult>;
 export type GenericStringMap = {
   [key:string]: string | string[] | number[] | number | Date | boolean | null;
 };
-
-export class QueryExecutionError extends Error {
-  constructor(
-  message: string, 
-  public query: string, 
-  public params: any[], 
-  public errorKey: ErrorKeys = ErrorKeys.GENERAL_SERVER_ERROR
-  ) {
-  super(message);
-  this.name = 'QueryExecutionError';
-  }
-}
-
-export class ValidationError extends Error {
-  constructor(
-  message: string, 
-  public query: string, 
-  public params: any[], 
-  public errorKey: ErrorKeys = ErrorKeys.VALIDATION_ERROR
-  ) {
-  super(message);
-  this.name = 'ValidationError';
-  }
-}
 
 const handleUnknownError = function (): never {
   const unknownError = new Error('Unknown error.')

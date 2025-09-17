@@ -1,12 +1,13 @@
 import express, { Request, Response } from 'express';
 import { PoolConnection } from './sql/connection';
 import { getCharacterStat } from './routes/characters';
+import { getMonstersHandler } from './routes/monsters/getMonstersHandler';
 
 const app = express();
 app.use(express.json());
 
-app.get('/api/character/:id/stat/:statName', authorizeCharacterAccess, getCharacterStat);
-app.put('/api/character/:id/stat/:statName', authenticateStaff, authorizeCharacterAccess, setCharacterStat);
+app.get('/api/character/:id/stat/:statName', /* authorizeCharacterAccess, */ getCharacterStat);
+app.get('/api/monsters/:monster/clan', /* authorizeCharacterAccess, */ getMonstersHandler);
 
 app.get('/api/test', async (req, res) => {
   try {

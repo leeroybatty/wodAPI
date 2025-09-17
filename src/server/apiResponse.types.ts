@@ -5,7 +5,7 @@ export type ApplicationErrorKey =
 
 export interface ApiSuccessResponse<T> {
   success: true;
-  data: T;
+  data?: T;
 }
 
 export interface ApiErrorResponse {
@@ -19,3 +19,27 @@ export interface ApiErrorResponse {
 }
 
 export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
+
+export function createSuccessResponse<T>(data?: T): ApiSuccessResponse<T> {
+  return {
+    success: true,
+    data
+  };
+}
+
+export function createErrorResponse(
+  code: ApplicationErrorKey,
+  message: string,
+  details?: any,
+  endpoint?: string
+): ApiErrorResponse {
+  return {
+    success: false,
+    error: {
+      code,
+      message,
+      details,
+      endpoint
+    }
+  };
+}
