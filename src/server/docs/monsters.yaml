@@ -1,0 +1,249 @@
+paths:
+  /api/monsters/{monster}/type:
+    get:
+      summary: Get monster clans/types by source books
+      description: |
+        Retrieve available monster clans or types filtered by source books and in-character year.
+        Historical filtering automatically excludes clans that didn't exist in the specified year.
+      tags:
+        - Monsters
+      parameters:
+        - in: path
+          name: monster
+          required: true
+          schema:
+            type: string
+            enum: [vampire, werewolf, mage, changeling, wraith, hunter, demon, mummy]
+          description: The type of monster/supernatural being
+          example: vampire
+        - in: query
+          name: books
+          schema:
+            type: string
+          style: form
+          explode: false
+          description: |
+            Comma-separated list of book names. Can also be sent as multiple parameters.
+            Book names are case-insensitive.
+          example: "vampire 20th anniversary,dark ages core"
+        - in: query
+          name: year
+          schema:
+            type: integer
+            minimum: 1000
+            maximum: 2030
+            default: 2025
+          description: |
+            In-character year for historical filtering. Affects which clans are available:
+            - Pre-1055: No Giovanni
+            - Pre-1090: No Tremere
+            - Pre-1167: No Gargoyles
+            - Pre-1450: No Daughters of Cacophony
+            - Pre-1900: No Blood Brothers
+            - Pre-1950: No Serpents of the Light
+          example: 1200
+        - in: query
+          name: exclude
+          schema:
+            type: string
+          style: form
+          explode: false
+          description: Comma-separated list of clan/type names to exclude from results (case-insensitive)
+          example: "giovanni,tremere"
+      responses:
+        200:
+          description: Successful response with monster data
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          monsters:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                clan:
+                                  type: string
+                                  description: Name of the clan/type
+                                  example: "Brujah"
+                                page_number:
+                                  type: integer
+                                  description: Page number in the source book
+                                  example: 48
+                                book:
+                                  type: string
+                                  description: Full name of the source book
+                                  example: "Vampire: the Masquerade 20th Anniversary Core"
+                            description: List of available monster clans/types with source information
+                            example: [
+                              {
+                                "name": "Assamite",
+                                "page_number": 48,
+                                "book": "Vampire: The Masquerade 20th Anniversary Core"
+                              },
+                              {
+                                "name": "Baali",
+                                "page_number": 394,
+                                "book": "Vampire: The Masquerade 20th Anniversary Core"
+                              },
+                              {
+                                "name": "Blood Brothers",
+                                "page_number": 396,
+                                "book": "Vampire: The Masquerade 20th Anniversary Core"
+                              },
+                              {
+                                "name": "Brujah",
+                                "page_number": 48,
+                                "book": "Vampire: The Masquerade 20th Anniversary Core"
+                              },
+                              {
+                                "name": "Cappadocian",
+                                "page_number": 418,
+                                "book": "Vampire: The Masquerade 20th Anniversary Core"
+                              },
+                              {
+                                "name": "Clanless",
+                                "page_number": 32,
+                                "book": "Vampire: The Masquerade 20th Anniversary Core"
+                              },
+                              {
+                                "name": "Daughters of Cacophony",
+                                "page_number": 398,
+                                "book": "Vampire: The Masquerade 20th Anniversary Core"
+                              },
+                              {
+                                "name": "Follower of Set",
+                                "page_number": 52,
+                                "book": "Vampire: The Masquerade 20th Anniversary Core"
+                              },
+                              {
+                                "name": "Gangrel",
+                                "page_number": 54,
+                                "book": "Vampire: The Masquerade 20th Anniversary Core"
+                              },
+                              {
+                                "name": "Gargoyles",
+                                "page_number": 400,
+                                "book": "Vampire: The Masquerade 20th Anniversary Core"
+                              },
+                              {
+                                "name": "Giovanni",
+                                "page_number": 56,
+                                "book": "Vampire: The Masquerade 20th Anniversary Core"
+                              },
+                              {
+                                "name": "Harbinger of Skulls",
+                                "page_number": 402,
+                                "book": "Vampire: The Masquerade 20th Anniversary Core"
+                              },
+                              {
+                                "name": "Kiasyd",
+                                "page_number": 404,
+                                "book": "Vampire: The Masquerade 20th Anniversary Core"
+                              },
+                              {
+                                "name": "Lasombra",
+                                "page_number": 58,
+                                "book": "Vampire: The Masquerade 20th Anniversary Core"
+                              },
+                              {
+                                "name": "Malkavian",
+                                "page_number": 60,
+                                "book": "Vampire: The Masquerade 20th Anniversary Core"
+                              },
+                              {
+                                "name": "Nagaraja",
+                                "page_number": 406,
+                                "book": "Vampire: The Masquerade 20th Anniversary Core"
+                              },
+                              {
+                                "name": "Nosferatu",
+                                "page_number": 62,
+                                "book": "Vampire: The Masquerade 20th Anniversary Core"
+                              },
+                              {
+                                "name": "Ravnos",
+                                "page_number": 64,
+                                "book": "Vampire: The Masquerade 20th Anniversary Core"
+                              },
+                              {
+                                "name": "Salubri",
+                                "page_number": 408,
+                                "book": "Vampire: The Masquerade 20th Anniversary Core"
+                              },
+                              {
+                                "name": "Samedi",
+                                "page_number": 410,
+                                "book": "Vampire: The Masquerade 20th Anniversary Core"
+                              },
+                              {
+                                "name": "Serpent of the Light",
+                                "page_number": 432,
+                                "book": "Vampire: The Masquerade 20th Anniversary Core"
+                              },
+                              {
+                                "name": "Toreador",
+                                "page_number": 66,
+                                "book": "Vampire: The Masquerade 20th Anniversary Core"
+                              },
+                              {
+                                "name": "Tremere",
+                                "page_number": 68,
+                                "book": "Vampire: The Masquerade 20th Anniversary Core"
+                              },
+                              {
+                                "name": "True Brujah",
+                                "page_number": 412,
+                                "book": "Vampire: The Masquerade 20th Anniversary Core"
+                              },
+                              {
+                                "name": "Tzimisce",
+                                "page_number": 70,
+                                "book": "Vampire: The Masquerade 20th Anniversary Core"
+                              },
+                              {
+                                "name": "Ventrue",
+                                "page_number": 70,
+                                "book": "Vampire: The Masquerade 20th Anniversary Core"
+                              }
+                            ]
+                          booksUsed:
+                            type: array
+                            items:
+                              type: string
+                            description: Books that were found and used
+                            example: ["vampire 20th anniversary", "dark ages core"]
+                          booksNotFound:
+                            type: array
+                            items:
+                              type: string
+                            description: Requested books that weren't found in database
+                            example: []
+        400:
+          description: 'Bad request on behalf of user.'
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiErrorResponse'
+        404:
+          description: 'Bad request - invalid parameters likely.'
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiErrorResponse'
+
+        500:
+          description: 'Bad request - invalid parameters likely.'
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiErrorResponse'

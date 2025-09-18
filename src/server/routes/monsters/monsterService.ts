@@ -3,6 +3,7 @@ import { Response } from 'express';
 import { ApiResponse } from '../../apiResponse.types';
 import { AuthenticatedRequest } from '../../middleware/auth';
 import { ErrorKeys } from '../../errors/errors.types';
+import { createErrorResponse } from '../../errors';
 
 export const getVampireClans = async (bookIdList: number[], icYear = 2025, userExclusions: string[]): Promise<ApiResponse<unknown>> => {
 
@@ -35,5 +36,47 @@ export const getVampireClans = async (bookIdList: number[], icYear = 2025, userE
         }
       }
     }
-  return await getMonsters('vampire', bookIdList, exclusions);
+  return await getMonsters(['vampire'], bookIdList, exclusions);
 }
+
+// export const getVampireBloodlines = async (bookIdList: number[], icYear = 2025, userExclusions: string[]): Promise<ApiResponse<unknown>> => {
+//   let exclusions = [...userExclusions];
+
+//     const modernBloodlines = ['salubri', 'salubri antitribu', 'city gangrel'];
+//     const darkAgesBloodlines = [
+//       'ananke',
+//       'anda',
+//       'warrior salubri',
+//       'healer salubri',
+//       'watcher salubri'
+//     ];
+
+//     const excludedByEra = icYear > 1600 
+//     ? darkAgesBloodlines
+//     : modernBloodlines;
+//     exclusions = [...exclusions, ...excludedByEra];
+
+//     if (icYear >= 1800 && icYear <= 1900) {
+//         exclusions.push('ahrimanes');
+//     }
+
+//     if (icYear > 1350) {
+//       exclusions.push('lhiannan');
+//       if (icYear > 1400) {
+//         exclusions.push('noiad');
+//         if (icYear < 1650) {
+//           exclusions.push('lamia');
+//           exclusions.push('lamiae');
+//         }
+//       }
+//     }
+
+//   const clansResult = await getMonsters(['vampire']);
+//   if (clansResult.success && clansResult.data) {
+//     const { monsters } = clansResult.data;
+//     const clans = monsters?.map(clan => clan.name);
+//     return await getMonsters(clans, bookIdList, exclusions);
+//   }
+//   return createErrorResponse(ErrorKeys.GENERAL_SERVER_ERROR);
+  
+// }

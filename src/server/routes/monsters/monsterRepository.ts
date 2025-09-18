@@ -7,39 +7,43 @@ import { ApiResponse } from '../../apiResponse.types';
 import { resolveBookIds, createStringArrayPlaceholders } from '../helpers';
 
 export async function getMonsters(
-  monster: string,
+  monsters: string[],
   bookIds?: number[],
   exclusions?: string[]
 ): Promise<ApiResponse<{ monsters: string[] }>> {
   try {
     
-    let conditions = `WHERE LOWER(p.name) = $1`;
-    let variables: (string | number)[] = [monster];
+    const monsterPlaceholders = createStringArrayPlaceholders(monsters);
+    let variables: (string | number)[] = monsters;
+
+    let conditions = monsters.length === 1 
+      ? `WHERE LOWER(p.name) = $1`
+      : `WHERE LOWER(p.name) IN (${monsterPlaceholders})`;
 
     if (!!bookIds && bookIds.length > 0) {
-      const bookIdPlaceholders = createStringArrayPlaceholders(bookIds, 2);
+      const bookIdPlaceholders = createStringArrayPlaceholders(bookIds, variables.length + 1);
       conditions += ` AND m.book_id IN (${bookIdPlaceholders})`;
       variables = [...variables, ...bookIds];
     }
     
     if (!!exclusions && exclusions.length > 0) {
-      const monsterNamePlaceholders = createStringArrayPlaceholders(
+      const exclusionPlaceholders = createStringArrayPlaceholders(
         exclusions,
         variables.length + 1
       );
-      conditions += ` AND LOWER(m.name) NOT IN (${monsterNamePlaceholders})`;
+      conditions += ` AND LOWER(m.name) NOT IN (${exclusionPlaceholders})`;
       variables = [...variables, ...exclusions];
     }
     
     const monsterQuery = `
-      SELECT m.name as clan, m.page_number, b.name as book
+      SELECT m.name, m.page_number, b.name as book
       FROM monsters m 
         JOIN monsters p ON p.id = m.parent_id
         JOIN wod_books b on b.id = m.book_id
       ${conditions}
       ORDER BY m.name ASC
     `;
-    
+
     const monsterResult = await queryDbConnection(monsterQuery, variables);
     
     return createSuccessResponse({

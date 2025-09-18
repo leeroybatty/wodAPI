@@ -29,6 +29,7 @@ export const getMonstersHandler = async (req: AuthenticatedRequest, res: Respons
         serviceResult = await getVampireClans(bookIds, icYear, exclusions);
         break;
       // case 'werewolf':
+      //   serviceResult = await getShifterSpecies(bookIds, icYear, exclusions);
       //   break;
       // case 'mage':
       //   break;
