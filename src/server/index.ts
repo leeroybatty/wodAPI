@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import { PoolConnection } from './sql/connection';
 import { getCharacterStat } from './routes/characters';
-import { getMonstersHandler } from './routes/monsters/getMonstersHandler';
+import { getMonsterTypesHandler } from './routes/monsters/getMonsterTypesHandler';
 import { swaggerConfig } from './swagger';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
@@ -18,7 +18,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
 
 app.get('/api/character/:id/stat/:statName', /* authorizeCharacterAccess, */ getCharacterStat);
 
-app.get('/api/monsters/:monster/class', /* authorizeCharacterAccess, */ getMonstersHandler);
+app.get('/api/monsters/:monster/type', /* authorizeCharacterAccess, */ getMonsterTypesHandler);
 
 app.listen(3000, () => {
   console.log('Server running on http://localhost:3000');

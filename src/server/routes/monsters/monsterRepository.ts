@@ -6,11 +6,17 @@ import { ErrorKeys } from '../../errors/errors.types';
 import { ApiResponse } from '../../apiResponse.types';
 import { resolveBookIds, createStringArrayPlaceholders } from '../helpers';
 
+type Monster = {
+  name: string;
+  book: string;
+  page_number: number;
+}
+
 export async function getMonsters(
   monsters: string[],
   bookIds?: number[],
   exclusions?: string[]
-): Promise<ApiResponse<{ monsters: string[] }>> {
+): Promise<ApiResponse<{ monsters: Monster[] }>> {
   try {
     
     const monsterPlaceholders = createStringArrayPlaceholders(monsters);
@@ -57,3 +63,4 @@ export async function getMonsters(
     );
   }
 }
+

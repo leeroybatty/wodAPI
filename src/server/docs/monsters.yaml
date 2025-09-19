@@ -13,8 +13,18 @@ paths:
           required: true
           schema:
             type: string
-            enum: [vampire, werewolf, mage, changeling, wraith, hunter, demon, mummy]
-          description: The type of monster/supernatural being
+            enum: [vampire, ghoul, revenant, werewolf, mage, changeling, wraith, hunter, demon, mummy]
+          description: |
+            The type of monster/supernatural being!
+            - vampire - clans
+            - ghoul - clans
+            - revenant - families
+            - werewolf - species, e.g. "garou", "corax", not tribes (see api/monsters/{monster}/subtype)
+            - changeling - kiths
+            - mage - crafts
+            - demon - lores
+            - hunter - creeds
+            - wraith - "ghost", "risen", or "spectre" (antagonist character types allowed for NPCs).
           example: vampire
         - in: query
           name: books
@@ -30,17 +40,49 @@ paths:
           name: year
           schema:
             type: integer
-            minimum: 1000
+            minimum: -4000
             maximum: 2030
             default: 2025
           description: |
-            In-character year for historical filtering. Affects which clans are available:
+            In-character year for historical filtering. Pass a negative integer for BCE years. Affects which results are available:
+            - Pre-1999 (6th Great Maelstrom): No Demon Houses, no Mummy Amenti/Wu T'iang, no Hunter Creeds
+            - Pre 1969: No Sidhe (vanished in 1350)
+            - Pre-1950: No Serpents of the Light
+            - Pre-1900: No Blood Brothers
+            - Pre-1914: No New World Order
+            - Pre 1897: No Iteration X, Progenitors, or Void Engineers
+            - Pre-1851: No Syndicate
+            - Pre-1823: No Virtual Adepts/Mercurial Elite
+            - Pre-1806: No Hollow Ones, Society/Sons of Ether
+            - Pre-1750 (Pre African Slave Trade): No Bata'a
+            - Post-1697 (Fall of the last Mayan kingdom): No Camazotz
+            - Pre-1565: No Oprichniki (Ivan the Terrible made them that year); no Rossellini
+            - Post-1530: No Capacocha mummies until post-1999
+            - Post-1500: No Apis (CB specifies they disappeared 500 yers ago)
+            - Pre-1452: No Celestial Chorus, Dreamspeakers
+            - Pre-1450: No Daughters of Cacophony, no Servants of Anushin-Rawan
+            - Pre-1440: No Cult of Ecstasy, Verbena
+            - Post-1350 (Black Death): No Sidhe until 1969
+            - Pre 1315: (Pre Great Famine crisis) No Euthantos or Solificati; no Grimaldi
+            - Pre 1200 (Pre-Inca Period): No Chaksimallki; Ducheski are called Krevcheski, no Obertus
+            - Pre-1167: No Gargoyles
+            - Pre 1128: No Knights Templar
+            - Pre-1100: (Rise of Great Zimbabwe, emperor Toba) No Ngoma, no Kitsune, no Zantosa
             - Pre-1055: No Giovanni
             - Pre-1090: No Tremere
-            - Pre-1167: No Gargoyles
-            - Pre-1450: No Daughters of Cacophony
-            - Pre-1900: No Blood Brothers
-            - Pre-1950: No Serpents of the Light
+            - Pre-1000 (Medieval feudalism in Eastern Europe): No Bratovitch
+            - Pre 800: (Early Dark Ages) No Rafastio or Enrathi as Revenants
+            - Pre-767: No Order of Hermes
+            - Pre-745: No Kairouan Brotherhood (Kairouan was not described as a 'great' city until then)
+            - Pre-500 BCE: (Pre-Greek classical period): No Cabiri
+            - Pre-513 BCE: (Before Persian Empire was at height): No Ahl-i-Batin 
+            - Pre-800 BCE: (Pre Greek city states, pre Chou dynasty): No Hyppolytoi, Wu Lung
+            - Pre-1530 BCE (Pre-Chimu culture): No Intimallki
+            - Pre-1770 BCE: (Pre-contact between Andean and Amazonian cultures) - No Uchumallki
+            - Pre-2300 BCE: (Before Sargon of Akkad unites early Taftani) No Taftani
+            - Pre-3500 BCE: (Pre Egyptian civilization): No mummies!
+            - Pre-5050 BCE: (Pre Chinchorro civilization): No South American mummies
+            - Pre-10K BCE (End of last Ice Age): No Grondr, Tzimisce
           example: 1200
         - in: query
           name: exclude

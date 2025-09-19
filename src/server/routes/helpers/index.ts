@@ -23,6 +23,8 @@ export interface BookIdResult {
 
 export type Monster =  
   'vampire' 
+  | 'ghoul'
+  | 'revenant'
   | 'werewolf' 
   | 'mage' 
   | 'changeling' 
@@ -33,6 +35,8 @@ export type Monster =
 
 export const validMonsters = new Set<Monster>([
   'vampire',
+  'ghoul',
+  'revenant',
   'werewolf',
   'mage',
   'changeling',
