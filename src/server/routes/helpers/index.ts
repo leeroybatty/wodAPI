@@ -21,30 +21,21 @@ export interface BookIdResult {
   missingBooks: string[];
 }
 
-export type Monster =  
-  'vampire' 
-  | 'ghoul'
-  | 'revenant'
-  | 'werewolf' 
-  | 'mage' 
-  | 'changeling' 
-  | 'wraith' 
-  | 'hunter' 
-  | 'demon' 
-  | 'mummy';
+export enum Monster {
+  VAMPIRE = 'vampire',
+  GHOUL = 'ghoul',
+  REVENANT = 'revenant',
+  WEREWOLF = 'werewolf',
+  MAGE = 'mage',
+  CHANGELING = 'changeling',
+  WRAITH = 'wraith',
+  HUNTER = 'hunter',
+  DEMON = 'demon',
+  MUMMY = 'mummy'
+}
 
-export const validMonsters = new Set<Monster>([
-  'vampire',
-  'ghoul',
-  'revenant',
-  'werewolf',
-  'mage',
-  'changeling',
-  'wraith',
-  'hunter',
-  'demon',
-  'mummy'
-]);
+export const validMonsters = new Set(Object.values(Monster));
+export type MonsterType = Monster;
 
 export const bookFallbacks = {
   'vampire': ['vampire: the masquerade 20th anniversary core'],
@@ -92,4 +83,16 @@ export async function resolveBookIds(
 
 export function createStringArrayPlaceholders(entries: number[] | string[], startingIndex = 1): string {
   return entries.map((_, index) => `$${startingIndex + index}`).join(',');
+}
+
+export function reconcileIncludeExclude(include: string[], exclude: string[]): string[] {
+  const includeSet = new Set(include);
+  const excludeSet = new Set(exclude);
+  const excludeArray = Array.from(excludeSet)
+  for (const item of excludeArray) {
+    if (includeSet.has(item)) {
+      excludeSet.delete(item);
+    }
+  }
+  return Array.from(excludeSet);
 }

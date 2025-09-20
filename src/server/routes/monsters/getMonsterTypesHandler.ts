@@ -67,7 +67,7 @@ export const getMonsterTypesHandler = async (req: AuthenticatedRequest, res: Res
         serviceResult = await getAllMummyTypes(bookIds, icYear, exclusions);
         break;
       default:
-        const invalidParameterError = createErrorResponse(ErrorKeys.INVALID_REQUEST)
+        const invalidParameterError = createErrorResponse(ErrorKeys.MONSTER_TYPE_NOT_FOUND)
         return res.status(404).json(invalidParameterError) ;
     }
 

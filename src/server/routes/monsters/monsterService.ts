@@ -2,7 +2,7 @@ import { getMonsters } from './monsterRepository';
 import { Response } from 'express';
 import { ApiResponse } from '../../apiResponse.types';
 import { ErrorKeys } from '../../errors/errors.types';
-import { createErrorResponse, createSuccessResponse } from '../../errors';
+import { createSuccessResponse } from '../../errors';
 export { getAllVampireBloodlines, getAllVampireClans, getAllRevenantFamilies, getAllGhoulClans } from './splats/vampire';
 
 export const getAllShifterSpecies = async (

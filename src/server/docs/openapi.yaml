@@ -1,0 +1,372 @@
+openapi: 3.0.0
+info:
+  title: WOD API
+  version: 1.0.0
+components:
+  schemas:
+    ApiErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: integer
+          description: Error code
+    ApiSuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Request completed successfully
+paths:
+  /api/monsters/{monster}/type:
+    get:
+      summary: Get monster clans/types by source books
+      description: |-
+        Retrieve available monster clans or types filtered by source books and in-character year.
+              Historical filtering automatically excludes clans that didn't exist in the specified year.
+      tags:
+        - Monsters
+      parameters:
+        - in: path
+          name: monster
+          required: true
+          schema:
+            type: string
+            enum:
+              - vampire
+              - ghoul
+              - revenant
+              - werewolf
+              - kinfolk
+              - mage
+              - sorcerer
+              - changeling
+              - kinain
+              - wraith
+              - hunter
+              - demon
+              - thrall
+              - mummy
+          description: |-
+            The type of monster/supernatural being!
+
+            - 'vampire' will yield clans, e.g. "Brujah"
+
+            - 'ghoul' will yield clan vassals, e.g. "Brujah Vassal"
+
+            - 'revenant' will yield families, e.g. "Bratovich"
+
+            - 'werewolf' will yield species, e.g. "Garou"
+
+            - 'changeling' will yield kiths, e.g. "Boggan"
+
+            - 'mage' will yield crafts, e.g. "Order of Hermes"
+
+            - 'demon' will yield lores, e.g. "Defiler"
+
+            - 'hunter' will yield creeds, e.g. "Defender"
+
+            - 'wraith' will yield  "ghost", "risen", or "spectre" (for antagonists!)
+                    
+          example: vampire
+        - in: query
+          name: books
+          schema:
+            type: string
+          style: form
+          explode: false
+          description: >-
+            Comma-separated list of book names. Can also be sent as multiple parameters. Book names are
+            case-insensitive.
+          example: vampire 20th anniversary,dark ages core
+        - in: query
+          name: year
+          schema:
+            type: integer
+            default: 2025
+          description: >-
+            In-character year for historical filtering. Pass a negative integer for BCE years. Affects which results are
+            available:
+
+            - Pre-1999 (6th Great Maelstrom): No Demon Houses, no Mummy Amenti/Wu T'iang, no Hunter Creeds
+
+            - Pre 1969: No Sidhe (vanished in 1350)
+
+            - Pre-1950: No Serpents of the Light
+
+            - Pre-1900: No Blood Brothers
+
+            - Pre-1914: No New World Order
+
+            - Pre 1897: No Iteration X, Progenitors, or Void Engineers
+
+            - Pre-1851: No Syndicate
+
+            - Pre-1823: No Virtual Adepts/Mercurial Elite
+
+            - Pre-1806: No Hollow Ones, Society/Sons of Ether
+
+            - Pre-1750 (Pre African Slave Trade): No Bata'a
+
+            - Post-1697 (Fall of the last Mayan kingdom): No Camazotz
+
+            - Post-1600 (Well after the Dark Ages): No Bonsam, Impundulu, Niktuku, or Ramanga
+
+            - Pre-1565: No Oprichniki (Ivan the Terrible made them that year); no Rossellini
+
+            - Post-1530: No Capacocha mummies until post-1999
+
+            - Post-1500: No Apis (CB specifies they disappeared 500 years ago)
+
+            - Pre-1452: No Celestial Chorus, Dreamspeakers
+
+            - Pre-1450: No Daughters of Cacophony, no Servants of Anushin-Rawan
+
+            - Pre-1440: No Cult of Ecstasy, Verbena
+
+            - Post-1350 (Black Death): No Sidhe until 1969
+
+            - Pre 1315: (Pre Great Famine crisis) No Euthantos or Solificati; no Grimaldi
+
+            - Pre 1200 (Pre-Inca Period): No Chaksimallki; Ducheski are called Krevcheski, no Obertus
+
+            - Pre-1167: No Gargoyles
+
+            - Pre 1128: No Knights Templar
+
+            - Pre-1100: (Rise of Great Zimbabwe, emperor Toba) No Ngoma, no Kitsune, no Zantosa
+
+            - Pre-1055: No Giovanni
+
+            - Pre-1090: No Tremere
+
+            - Pre-1000 (Medieval feudalism in Eastern Europe): No Bratovitch
+
+            - Pre 800: (Early Dark Ages) No Rafastio or Enrathi as Revenants
+
+            - Pre-767: No Order of Hermes
+
+            - Pre-745: No Kairouan Brotherhood (Kairouan was not described as a 'great' city until then)
+
+            - Pre-500 BCE: (Pre-Greek classical period): No Cabiri
+
+            - Pre-513 BCE: (Before Persian Empire was at height): No Ahl-i-Batin 
+
+            - Pre-800 BCE: (Pre Greek city states, pre Chou dynasty): No Hyppolytoi, Wu Lung
+
+            - Pre-1530 BCE (Pre-Chimu culture): No Intimallki
+
+            - Pre-1770 BCE: (Pre-contact between Andean and Amazonian cultures) - No Uchumallki
+
+            - Pre-2300 BCE: (Before Sargon of Akkad unites early Taftani) No Taftani
+
+            - Pre-3500 BCE: (Pre Egyptian civilization): No mummies!
+
+            - Pre-5050 BCE: (Pre Chinchorro civilization): No South American mummies
+
+            - Pre-10K BCE (End of last Ice Age): No Grondr, Tzimisce
+          example: 1200
+        - in: query
+          name: exclude
+          schema:
+            type: string
+          style: form
+          explode: false
+          description: Comma-separated list of clan/type names to exclude from results (case-insensitive)
+          example: giovanni,tremere
+      responses:
+        '200':
+          description: Successful response with monster data
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          monsters:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                  description: Name of the monster type
+                                  example: Brujah
+                                page_number:
+                                  type: integer
+                                  description: Page number in the source book
+                                  example: 48
+                                book:
+                                  type: string
+                                  description: Full name of the source book
+                                  example: 'Vampire: the Masquerade 20th Anniversary Core'
+                            description: List of available monster clans/types with source information
+                            example:
+                              - name: Assamite
+                                page_number: 48
+                                book: 'Vampire: The Masquerade 20th Anniversary Core'
+                              - name: Brujah
+                                page_number: 50
+                                book: 'Vampire: The Masquerade 20th Anniversary Core'
+        '400':
+          description: Invalid request on behalf of user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '404':
+          description: Resource was not found with given parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: General server error.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiErrorResponse'
+/api/stats/{type}/:
+  get:
+    summary: Get stat lists within a stat category
+    description: Retrieve available stats optionally filtered by source books.
+    tags:
+      - Stats
+    parameters:
+      - in: path
+        name: monster
+        required: true
+        schema:
+          type: string
+          enum:
+            - archetypes
+            - attributes
+            - physical
+            - social
+            - mental
+            - talents
+            - skills
+            - knowledges
+            - abilities
+            - backgrounds
+            - statPool
+            - disciplines
+            - virtues
+            - path
+            - spheres
+            - arete
+            - gifts
+            - renown
+        description: The stat category.
+        example: backgrounds
+      - in: query
+        name: books
+        schema:
+          type: string
+        style: form
+        explode: false
+        description: >-
+          Comma-separated list of book names, to limit results to stats that are only found in those specified books,
+          including universally available stats (e.g. "Resources" or "Strength"). Book names are case-insensitive.
+        example: 'Mage the Ascension: 20th Anniversary Core'
+      - in: query
+        name: year
+        schema:
+          type: integer
+          default: 2025
+          description: |
+            The IC year! The year your game is set in will make some alterations to what is sensibly available.
+            - After 1900: 'Archery' and 'Ride' unavailable.
+            - 1900 And Earlier: 'Drive' and 'Technology' unavailable. 
+            - 1600 And Later:
+             - Dark Ages abilities 'Commerce', 'Hearth Wisdom', 'Seneschal', 'Theology', and 'Legerdemain' disappear.
+             - 'Enigmas' unavailable unless you include 'Werewolf: the Apocalypse 20th Anniversary Core' in the books parameter.
+            - Before 1600: 'Firearms' unavailable.
+
+            Please note that the books argument also has an effect on filtering out stats and default behavior.
+            You can override this default behavior with the 'include' parameter.
+      - in: query
+        name: exclude
+        schema:
+          type: string
+        style: form
+        explode: false
+        description: Comma-separated list of stat names to exclude from results (case-insensitive)
+        example: node
+      - in: query
+        name: include
+        schema:
+          type: string
+        style: form
+        explode: false
+        description: Comma-separated list of stat names to include in results (case-insensitive)
+        example: archery
+    responses:
+      '200':
+        description: Successful response with stat data
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        monsters:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                                description: Name of the stat
+                                example: Ananta
+                              page_number:
+                                type: integer
+                                description: Page number in the source book, if it is unique to that book.
+                                example: 211
+                              book:
+                                type: string
+                                description: Full name of the source book
+                                example: 'Werewolf 20th Anniversary: Changing Breeds'
+                          description: >-
+                            List of available stats within that type with source information. Null values are for
+                            universally available stats.
+                          example:
+                            - name: Resources
+                              page_number: null
+                              book: null
+                            - name: Majordomo
+                              page_number: 124
+                              book: 'Vampire 20th Anniversary: Ghouls And Revenants'
+      '400':
+        description: Invalid request on behalf of user.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiErrorResponse'
+      '404':
+        description: Resource was not found with given parameters.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiErrorResponse'
+      '500':
+        description: General server error.
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiErrorResponse'

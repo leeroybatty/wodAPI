@@ -41,5 +41,13 @@ export const CORE_ERROR_MAP: Record<ErrorKeys, ErrorInfo> = {
   [ErrorKeys.ACCESS_DENIED]: {
     message: "You don't have permission.",
     statusCode: 403
+  },
+  [ErrorKeys.MONSTER_TYPE_NOT_FOUND]: {
+    message: "No such monster type found.",
+    statusCode: 404
+  },
+  [ErrorKeys.STAT_TYPE_NOT_FOUND]: {
+    message: "No such stat type found.",
+    statusCode: 404
   }
 }

@@ -4,6 +4,22 @@ import { AuthenticatedRequest } from '../middleware/auth';
 import { handleError, ValidationError, QueryExecutionError } from '../errors';
 import { ApiSuccessResponse } from '../apiResponse.types'
 
+export async function getStatsInCategory(req: AuthenticatedRequest, res: Response) {
+  const { category } = req.params;
+
+   const query = `
+      SELECT s.name, description, 
+      FROM stats s
+      JOIN stats p ON p.id = s.parent_id 
+      LEFT JOIN
+      WHERE characters.id = $1 
+        AND LOWER(stats.name) LIKE LOWER($2)
+      LIMIT 1
+    `;
+
+
+}
+
 export async function getCharacterStat(req: AuthenticatedRequest, res: Response) {
   try {
     const { id, statName } = req.params;

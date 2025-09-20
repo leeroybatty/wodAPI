@@ -6,7 +6,7 @@ import { ErrorKeys } from '../../errors/errors.types';
 import { ApiResponse } from '../../apiResponse.types';
 import { resolveBookIds, createStringArrayPlaceholders } from '../helpers';
 
-type Monster = {
+type MonsterData = {
   name: string;
   book: string;
   page_number: number;
@@ -16,7 +16,7 @@ export async function getMonsters(
   monsters: string[],
   bookIds?: number[],
   exclusions?: string[]
-): Promise<ApiResponse<{ monsters: Monster[] }>> {
+): Promise<ApiResponse<{ monsters: MonsterData[] }>> {
   try {
     
     const monsterPlaceholders = createStringArrayPlaceholders(monsters);
@@ -42,7 +42,7 @@ export async function getMonsters(
     }
     
     const monsterQuery = `
-      SELECT m.name, m.page_number, b.name as book
+      SELECT m.id, m.name, m.page_number, b.name as book
       FROM monsters m 
         JOIN monsters p ON p.id = m.parent_id
         JOIN wod_books b on b.id = m.book_id

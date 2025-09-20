@@ -7,5 +7,7 @@ export enum ErrorKeys {
     AUTHENTICATION_FAILED = "Your request failed to authenticate.",
     RESOURCE_NOT_FOUND = "I did not find what you are requesting.",
     METHOD_NOT_ALLOWED = "You're not allowed to use that HTTP method on this endpoint.",
-    ACCESS_DENIED = "Nah, dog.  Nah."
+    ACCESS_DENIED = "Nah, dog.  Nah.",
+    MONSTER_TYPE_NOT_FOUND = "No such monster type supported.",
+    STAT_TYPE_NOT_FOUND = "No such stat type supported.",
 }
