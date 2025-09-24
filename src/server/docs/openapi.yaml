@@ -259,7 +259,7 @@ paths:
             - knowledges
             - abilities
             - backgrounds
-            - statPool
+            - statpool
             - disciplines
             - virtues
             - path
@@ -267,8 +267,35 @@ paths:
             - arete
             - gifts
             - renown
-        description: The stat category.
+        description: >-
+          The stat category.  "Statpool" refers to stats that have a temporary rating and a permanent rating, e.g.
+          Gnosis, Rage, Vitae, Quintessence and Willpower.
         example: backgrounds
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+            - names
+            - all
+          default: all
+        style: form
+        example: all
+        explode: false
+        description: >-
+          Format for results. "Names" will present just an array of the stat names, and "all" will present an array of
+          objects with all expected fields.
+      - in: query
+        name: faction
+        schema:
+          type: string
+        style: form
+        explode: false
+        example: Sabbat
+        description: >-
+          Filter for a faction. Filling this out wil restrict results to either stats universally available OR available
+          to a sect. So, if you passed "Sabbat" in to find Backgrounds that are Sabbat-specific, then regular
+          Backgrounds like Resources would show up, but also "Rituals" and "Black Hand Membership."
       - in: query
         name: books
         schema:
@@ -286,15 +313,18 @@ paths:
           default: 2025
           description: |
             The IC year! The year your game is set in will make some alterations to what is sensibly available.
-            - After 1900: 'Archery' and 'Ride' unavailable.
-            - 1900 And Earlier: 'Drive' and 'Technology' unavailable. 
-            - 1600 And Later:
-             - Dark Ages abilities 'Commerce', 'Hearth Wisdom', 'Seneschal', 'Theology', and 'Legerdemain' disappear.
-             - 'Enigmas' unavailable unless you include 'Werewolf: the Apocalypse 20th Anniversary Core' in the books parameter.
-            - Before 1600: 'Firearms' unavailable.
+            - 1980+: Computer included
+            - 1914+: Seneschal excluded; WWI collapsed 'great house' culture.
+            - 1950+: Technology included; transistors, etc. become a thing
+            - 1930+: Ride excluded; cars eclipsed use of horses by far
+            - 1910+: Drive included; cars prominent enough to be a core stat
+            - 1890+: Archery excluded; firearms used by majority of people
+            - 1750+: Commerce excluded; world shifts to industrial logistics at this point
+            - 1700+: Legerdemain, Enigmas, Theology, and Hearth Wisdom excluded; Age of Enlightenment underway
+            - 1500+: Firearms included; matchlocks and muskets proliferate armies
 
             Please note that the books argument also has an effect on filtering out stats and default behavior.
-            You can override this default behavior with the 'include' parameter.
+            You can override the above described default behavior with the 'include' parameter.
       - in: query
         name: exclude
         schema:

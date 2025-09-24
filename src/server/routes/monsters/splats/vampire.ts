@@ -11,31 +11,21 @@ const buildHistoricalClanExclusions = (icYear: number = 2025): string[] => {
     exclusions = [...exclusions, ...darkAgesOnlyClans];
   }
 
-  if (icYear < 1950) {
-    exclusions.push('serpent of the light');
-    exclusions.push('serpents of the light');
-    if (icYear < 1900) {
-      exclusions.push('blood brother');
+  switch (true) {
+    case icYear < 1950:
+      exclusions.push('serpent of the light');;
+    case icYear < 1900:
       exclusions.push('blood brothers');
-      if (icYear < 1450) {
-        exclusions.push('daughter of cacophony');
-        exclusions.push('daughters of cacophony');
-        if (icYear < 1167) {
-          exclusions.push('gargoyles');
-          exclusions.push('gargoyle');
-          if (icYear < 1090) {
-            exclusions.push('tremere');
-            if (icYear < 1055) {
-              exclusions.push('giovanni');
-              exclusions.push('giovani');
-              if (icYear < -8000) {
-                exclusions.push('tzimisce');
-              }
-            }
-          }
-        }
-      }
-    }
+    case icYear < 1450:
+      exclusions.push('daughter of cacophony');
+    case icYear < 1167:
+      exclusions.push('gargoyle');
+    case icYear < 1090:
+      exclusions.push('tremere');
+    case icYear < 1055:
+      exclusions.push('giovanni');
+    case icYear < -8000:
+      exclusions.push('tzimisce');
   }
   return exclusions 
 }
@@ -103,28 +93,23 @@ export const getAllRevenantFamilies = async (
   userExclusions: string[]
 ): Promise<ApiResponse<unknown>> => {
   let exclusions = [...userExclusions];
-  if (icYear < 1565) {
-    exclusions.push('oprichniki', 'rosellini');
-    if (icYear < 1450) {
+  switch (true) {
+    case icYear < 1565:
+      exclusions.push('oprichniki', 'rosellini');
+    case icYear < 1450:
       exclusions.push('servants of anushin-rawan');
-      if (icYear < 1315) {
-        exclusions.push('grimaldi');
-        if (icYear < 1200) {
-          exclusions.push('obertus');
-          if (icYear < 1100) {
-            exclusions.push('zantosa');
-            if (icYear < 1000) {
-              exclusions.push('bratovich');
-              if (icYear < 800) {
-                exclusions.push('rafastio', 'enrathi');
-              }
-            }
-          }
-        }
-      }
-    }
+    case icYear < 1315:
+      exclusions.push('grimaldi');
+    case icYear < 1200:
+      exclusions.push('obertus');
+    case icYear < 1100:
+      exclusions.push('zantosa');
+    case icYear < 1000:
+      exclusions.push('bratovich');
+    case icYear < 800:
+      exclusions.push('rafastio', 'enrathi');
   }
-
+  
   // The Krevcheski betray the Tzimisce and become the Ducheski in the late 12th century
   const familyName = icYear > 1200 ? 'Krevcheski' : 'Ducheski'; 
   exclusions.push(familyName);

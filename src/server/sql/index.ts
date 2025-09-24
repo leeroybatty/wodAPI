@@ -274,3 +274,76 @@ export async function removeOneToManyAssociations(
     );
   }
 }
+
+class ReferenceDataCache {
+  private monsters: Map<string, number> | null = null;
+  private monsterParents: Map<number, number> | null = null; // child_id -> parent_id
+  private organizations: Map<string, number> | null = null;
+  private books: Map<string, number> | null = null;
+
+  async getMonsterChain(name: string): Promise<number[]> {
+    await this.loadMonsters();
+    
+    const startId = this.monsters!.get(name.toLowerCase());
+    if (!startId) throw new QueryExecutionError('Monster not found', '', [], ErrorKeys.RESOURCE_NOT_FOUND);
+    
+    const chain: number[] = [];
+    let currentId: number | undefined = startId;
+    
+    while (currentId !== undefined) {
+      chain.push(currentId);
+      currentId = this.monsterParents!.get(currentId);
+    }
+    
+    return chain;
+  }
+
+  private async loadMonsters() {
+    if (!this.monsters || !this.monsterParents) {
+      const result = await queryDbConnection('SELECT id, name, parent_id FROM monsters');
+      this.monsters = new Map(
+        result.rows.map(row => [row.name.toLowerCase(), row.id])
+      );
+      this.monsterParents = new Map(
+        result.rows
+          .filter(row => row.parent_id) // Only include rows that have a parent
+          .map(row => [row.id, row.parent_id])
+      );
+    }
+  }
+
+  async getMonsterId(name: string): Promise<number> {
+    await this.loadMonsters();
+    const id = this.monsters!.get(name.toLowerCase());
+    if (!id) throw new QueryExecutionError('Monster not found', '', [], ErrorKeys.RESOURCE_NOT_FOUND);
+    return id;
+  }
+
+  async getOrganizationId(name: string): Promise<number> {
+    if (!this.organizations) {
+      const result = await queryDbConnection('SELECT id, name FROM organizations');
+      this.organizations = new Map(
+        result.rows.map(row => [row.name.toLowerCase(), row.id])
+      );
+    }
+    
+    const id = this.organizations.get(name.toLowerCase());
+    if (!id) throw new QueryExecutionError('Organization not found', '', [], ErrorKeys.RESOURCE_NOT_FOUND);
+    return id;
+  }
+
+  async getBookId(name: string): Promise<number> {
+    if (!this.books) {
+      const result = await queryDbConnection('SELECT id, name FROM wod_books');
+      this.books = new Map(
+        result.rows.map(row => [row.name.toLowerCase(), row.id])
+      );
+    }
+    
+    const id = this.books.get(name.toLowerCase());
+    if (!id) throw new QueryExecutionError('Book not found', '', [], ErrorKeys.RESOURCE_NOT_FOUND);
+    return id;
+  }
+}
+
+export const referenceCache = new ReferenceDataCache();

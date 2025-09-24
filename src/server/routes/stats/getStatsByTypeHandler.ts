@@ -12,7 +12,7 @@ import { AllStatCategoriesType } from './types';
 
 export const getStatsByTypeHandler = async (req: AuthenticatedRequest, res: Response) => {
   const { type } = req.params;
-  const { books, exclude, include, year } = req.query;
+  const { books, exclude, include, year, monster, faction, format } = req.query;
 
   if (!isValidStatCategory(type as AllStatCategoriesType)) {
     return res.status(404).json(
@@ -34,7 +34,10 @@ export const getStatsByTypeHandler = async (req: AuthenticatedRequest, res: Resp
       year: icYear,
       bookIds,
       include: inclusions,
-      exclude: exclusions
+      exclude: exclusions,
+      monster: monster as string,
+      faction: faction as string,
+      format: format as string
     });
 
     if (serviceResult.success) {

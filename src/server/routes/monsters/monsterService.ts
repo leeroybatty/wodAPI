@@ -11,16 +11,18 @@ export const getAllShifterSpecies = async (
   userExclusions: string[]
 ): Promise<ApiResponse<unknown>> => {
   let exclusions = [...userExclusions];
-  if (icYear > 1500) {
-    exclusions.push('apis');
-    if (icYear > 1697) {
+  switch (true) {
+    case icYear > 1500:
+      exclusions.push('apis');
+    case icYear > 1697:
       exclusions.push('camazotz');
-    }
-  } else if (icYear < 1100) {
-    exclusions.push('kitsune');
-    if (icYear < -10000) {
+    case icYear > 1100:
+      exclusions.push('kitsune');
+    case icYear > -10000:
       exclusions.push('grondr');
-    }
+      break;
+    default:
+      break;
   }
   return await getMonsters(['shifter'], bookIdList, exclusions);
 }
@@ -69,55 +71,57 @@ export const getAllMummyTypes = async (
   const amentiDynasties = ['kher-minu', 'khri-habi', 'mesektet', 'sakhmu', 'sefekhi', 'udja-sen'];
   const wuTian = ['wu feng', 'xian lung'];
   const capacocha = ['pachamallki', 'intimallki', 'uchumallki', 'chaskimallki'];
-  
+
   let exclusions = [...userExclusions];
 
-  // Post-1999: Modern mummies available, ancient ones mostly converted
-  if (icYear >= 1999) {
-    exclusions = [...exclusions, ...ancientMummies];
-  } else {
-    // Pre-1999: Modern mummies don't exist yet
-    exclusions = [...exclusions, ...amentiDynasties, ...wuTian];
-    
-    // Spanish conquest dead zone (1530-1999): Original Capacocha can't resurrect properly
-    if (icYear >= 1530) {
-      exclusions = [...exclusions, ...capacocha];
-    }
+  switch (true) {
+    // Post-1999: Modern mummies available, ancient ones mostly converted
+    case icYear >= 1999:
+      exclusions.push(...ancientMummies);
+      break;
+
+    default:
+      // Pre-1999: Modern mummies don't exist yet
+      exclusions.push(...amentiDynasties, ...wuTian);
+
+      // Spanish conquest dead zone (1530-1999): Original Capacocha can't resurrect properly
+      if (icYear >= 1530) {
+        exclusions.push(...capacocha);
+      }
+      break;
   }
 
-  // Pre-Inca period: Chaskimallki don't exist yet
-  if (icYear < 1200) {
-    exclusions.push('chaskimallki');
-  }
+  switch (true) {
+    // Pre-Chinchorro: No South American mummies at all
+    case icYear < -5050:
+      exclusions.push(...capacocha);
 
-  // Pre-Greek classical period: No Cabiri yet
-  if (icYear < -500) {
-    exclusions.push('cabiri');
-  }
+    // Pre-ancient Egypt: No Egyptian mummies at all
+    case icYear < -3500:
+      exclusions.push(...ancientMummies, 'cabiri');
 
-  // Pre-rainforest contact: Uchumallki don't exist yet  
-  if (icYear < -1770) {
-    exclusions.push('uchumallki');
-  }
+    // Pre-rainforest contact: Uchumallki don't exist yet
+    case icYear < -1770:
+      exclusions.push('uchumallki');
 
-  // Pre-Chimu contact: Only Pachamallki exist
-  if (icYear < -1530) {
-    exclusions.push('intimallki');
-  }
+    // Pre-Chimu contact: Only Pachamallki exist
+    case icYear < -1530:
+      exclusions.push('intimallki');
 
-  // Pre-ancient Egypt: No Egyptian mummies at all
-  if (icYear < -3500) {
-    exclusions = [...exclusions, ...ancientMummies, 'cabiri'];
-  }
+    // Pre-Greek classical period: No Cabiri yet
+    case icYear < -500:
+      exclusions.push('cabiri');
 
-  // Pre-Chinchorro: No South American mummies at all
-  if (icYear < -5050) {
-    exclusions = [...exclusions, ...capacocha];
-  }
+    // Pre-Inca period: Chaskimallki don't exist yet
+    case icYear < 1200:
+      exclusions.push('chaskimallki');
+      break;
 
+    default:
+      break;
+  }
   return await getMonsters(['mummy'], bookIdList, exclusions);
-}
-
+};
 export const getAllHunterCreeds = async (
   bookIdList: number[],
   icYear = 2025,
@@ -132,67 +136,48 @@ export const getAllHunterCreeds = async (
   });
 }
 
-
 export const getAllMageTraditions = async (
   bookIdList: number[],
   icYear = 2025,
-  userExclusions: string[]
+  userExclusions: string[] = []
 ): Promise<ApiResponse<unknown>> => {
   let exclusions = [...userExclusions];
-  if (icYear < 1914) {
-    exclusions.push('new world order');
-    if (icYear < 1897) {
-      exclusions = [...exclusions, ...['iteration x', 'progenitors', 'void engineers']];
-      if (icYear < 1851) {
-        exclusions.push('syndicate');
-        if (icYear < 1823) {
-          exclusions = [...exclusions, ...['virtual adepts', 'mercurial elite']];
-          if (icYear < 1806) {
-            exclusions = [...exclusions, ...['society of ether', 'sons of ether', 'hollow ones']];
-          }
-          if (icYear < 1750) {
-            exclusions.push("bata'a");
-            if (icYear < 1452) {
-              exclusions = [...exclusions, ...[
-                'celestial chorus',
-                "kha'vadi",
-                "dreamspeaker",
-                "dreamspeakers"
-              ]];
-              if (icYear < 1440) {
-                exclusions = [...exclusions, ...['sahajiya', 'cult of ecstasy', 'verbena']];
-                if (icYear < 1315) {
-                  exclusions = [...exclusions, ...[
-                    'chakravanti',
-                    'euthanatos',
-                    'solificati',
-                    'children of knowledge'
-                  ]];
-                  if (icYear < 1128) {
-                    exclusions.push('knights templar');
-                    if (icYear < 1100) {
-                      exclusions.push('ngoma');
-                      if (icYear < 767) {
-                        exclusions.push('order of hermes');
-                        if (icYear < 513) {
-                          exclusions.push('ahl-i-batin');
-                          if (icYear < -800) {
-                            exclusions = [...exclusions, ...['hyppolytoi', 'sisters of hippolyta', 'wu lung']];
-                            if (icYear < -2300) {
-                              exclusions.push('taftani')
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+
+  switch (true) {
+    case icYear < -2300:
+      exclusions.push('taftani');
+    case icYear < -800:
+      exclusions.push('hyppolytoi', 'sisters of hippolyta', 'wu lung');
+    case icYear < 513:
+      exclusions.push('ahl-i-batin');
+    case icYear < 767:
+      exclusions.push('order of hermes');
+    case icYear < 1100:
+      exclusions.push('ngoma');
+    case icYear < 1128:
+      exclusions.push('knights templar');
+    case icYear < 1315:
+      exclusions.push('chakravanti', 'euthanatos', 'solificati', 'children of knowledge');
+    case icYear < 1440:
+      exclusions.push('sahajiya', 'cult of ecstasy', 'verbena');
+    case icYear < 1452:
+      exclusions.push('celestial chorus', "kha'vadi", 'dreamspeaker', 'dreamspeakers');
+    case icYear < 1750:
+      exclusions.push("bata'a");
+    case icYear < 1806:
+      exclusions.push('society of ether', 'sons of ether', 'hollow ones');
+    case icYear < 1823:
+      exclusions.push('virtual adepts', 'mercurial elite');
+    case icYear < 1851:
+      exclusions.push('syndicate');
+    case icYear < 1897:
+      exclusions.push('iteration x', 'progenitors', 'void engineers');
+    case icYear < 1914:
+      exclusions.push('new world order');
+      break;
+    default:
+      break;
   }
+
   return await getMonsters(['mage'], bookIdList, exclusions);
-}
+};

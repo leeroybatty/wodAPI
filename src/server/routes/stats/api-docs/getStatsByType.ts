@@ -19,6 +19,30 @@ export const getStatsByType = {
       },
       {
         in: 'query',
+        name: 'format',
+        schema: {
+          type: 'string',
+          enum: ['names', 'all'],
+          default: "all"
+        },
+        style: 'form',
+        example: "all",
+        explode: false,
+        description: 'Format for results. "Names" will present just an array of the stat names, and "all" will present an array of objects with all expected fields.'
+      },
+      {
+        in: 'query',
+        name: 'faction',
+        schema: {
+          type: 'string',
+        },
+        style: 'form',
+        explode: false,
+        example: "Sabbat",
+        description: 'Filter for a faction. Filling this out wil restrict results to either stats universally available OR available to a sect. So, if you passed "Sabbat" in to find Backgrounds that are Sabbat-specific, then regular Backgrounds like Resources would show up, but also "Rituals" and "Black Hand Membership."'
+      },
+      {
+        in: 'query',
         name: 'books',
         schema: {
           type: 'string'

@@ -1,5 +1,5 @@
-import { QueryExecutionError } from '../../errors';
-import { queryDbConnection } from '../../sql';
+import { QueryExecutionError, createErrorResponse } from '../../errors';
+import { queryDbConnection, referenceCache } from '../../sql';
 import { PoolClient } from 'pg';
 import { ErrorKeys } from '../../errors/errors.types';
 
@@ -48,12 +48,17 @@ export const bookFallbacks = {
   'mummy': ['mummy: the resurrection']
 }
 
-export async function resolveBookIds(
-  bookNames?: string[],
-  client?: PoolClient
-): Promise<BookIdResult> {
+export async function selectBookId(bookName: string): Promise<number> {
+  const query = `SELECT id FROM wod_books WHERE lower(name) = $1`;
+  const result = await queryDbConnection(query, [bookName])
+  if (result.rows[0]) {
+    return result.rows[0].id  
+  }
+  return 0
+}
 
-  if (!bookNames || bookNames?.length === 0) {
+export async function resolveBookIds(bookNames: string[]): Promise<BookIdResult> {
+  if (bookNames.length === 0) {
     return {
       bookIds: [],
       foundBooks: [],
@@ -61,19 +66,20 @@ export async function resolveBookIds(
     };
   }
 
-  let bookList = bookNames.length > 0
-    ? bookNames
-    : []
+  const bookIds: number[] = [];
+  const foundBooks: string[] = [];
+  const missingBooks: string[] = [];
 
-  const placeholders = bookList.map((_, index) => `$${index + 1}`).join(',');
-  const query = `SELECT id, name FROM wod_books WHERE lower(name) IN (${placeholders})`;
-  
-  const result = await queryDbConnection(query, bookList, client);
-  
-  const foundBooks = result.rows.map(row => row.name);
-  const bookIds = result.rows.map(row => parseInt(row.id));
-  const missingBooks = bookList.filter(name => !foundBooks.includes(name));
-  
+  for (const bookName of bookNames) {
+    try {
+      const bookId = await referenceCache.getBookId(bookName);
+      bookIds.push(bookId);
+      foundBooks.push(bookName);
+    } catch (error) {
+      missingBooks.push(bookName);
+    }
+  }
+
   return {
     bookIds,
     foundBooks,
