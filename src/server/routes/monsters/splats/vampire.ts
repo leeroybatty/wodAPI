@@ -4,115 +4,109 @@ import { ApiResponse } from '../../../apiResponse.types';
 import { ErrorKeys } from '../../../errors/errors.types';
 import { createErrorResponse } from '../../../errors';
 
-const buildHistoricalClanExclusions = (icYear: number = 2025): string[] => {
+export const buildHistoricalClanExclusions = (year: number = 2025): string[] => {
   let exclusions: string[] = [];
-  if (icYear > 1600) {
+  if (year > 1600) {
     const darkAgesOnlyClans = ['bonsam', 'impundulu', 'niktuku', 'ramanga'];
     exclusions = [...exclusions, ...darkAgesOnlyClans];
   }
 
-  switch (true) {
-    case icYear < 1950:
-      exclusions.push('serpent of the light');;
-    case icYear < 1900:
+  if (year < 1950) {
+    exclusions.push('serpent of the light');
+    if (year < 1900) {
       exclusions.push('blood brothers');
-    case icYear < 1450:
-      exclusions.push('daughter of cacophony');
-    case icYear < 1167:
-      exclusions.push('gargoyle');
-    case icYear < 1090:
-      exclusions.push('tremere');
-    case icYear < 1055:
-      exclusions.push('giovanni');
-    case icYear < -8000:
-      exclusions.push('tzimisce');
-  }
-  return exclusions 
-}
-
-
-export const getAllVampireClans = async (bookIdList: number[], icYear = 2025, userExclusions: string[]): Promise<ApiResponse<unknown>> => {
-  let historicalExclusions = buildHistoricalClanExclusions(icYear)
-  return await getMonsters(['vampire'], bookIdList, [...userExclusions, ...historicalExclusions]);
-}
-
-export const getAllGhoulClans = async (bookIdList: number[], icYear = 2025, userExclusions: string[]): Promise<ApiResponse<unknown>> => {
-  const historicalExclusions = buildHistoricalClanExclusions(icYear)
-  const excludedVassals = historicalExclusions.map(clan => `${clan} vassal`);
-  return await getMonsters(['ghoul'], bookIdList, [...userExclusions, ...excludedVassals]);
-}
-
-export const getAllVampireBloodlines = async (
-  bookIdList: number[], 
-  icYear: number = 2025,
-  userExclusions: string[]
-): Promise<ApiResponse<unknown>> => {
-  let exclusions = [...userExclusions];
-
-  const modernBloodlines = ['salubri', 'salubri antitribu', 'city gangrel'];
-  const darkAgesBloodlines = [
-    'ananke',
-    'anda',
-    'warrior salubri',
-    'healer salubri',
-    'watcher salubri'
-  ];
-
-  const excludedByEra = icYear > 1600 
-  ? darkAgesBloodlines
-  : modernBloodlines;
-  exclusions = [...exclusions, ...excludedByEra];
-
-  if (icYear >= 1800 && icYear <= 1900) {
-    exclusions.push('ahrimanes');
-  }
-
-  if (icYear > 1350) {
-    exclusions.push('lhiannan');
-    if (icYear > 1400) {
-      exclusions.push('noiad');
-      if (icYear < 1650) {
-        exclusions.push('lamia');
-        exclusions.push('lamiae');
+      if (year < 1450) {
+        exclusions.push('daughter of cacophony');
+        if (year < 1167) {
+          exclusions.push('gargoyle');
+          if (year < 1090) {
+            exclusions.push('tremere');
+            if (year < 1055) {
+              exclusions.push('giovanni');
+              if (year < -8000) {
+                exclusions.push('tzimisce');
+              }
+            }
+          }
+        }
       }
     }
   }
-
-  const clansResult = await getMonsters(['vampire']);
-  if (clansResult.success && clansResult.data) {
-    const { monsters } = clansResult.data;
-    const clans = monsters?.map(clan => clan.name.toLowerCase());
-    return await getMonsters(clans, bookIdList, exclusions);
-  }
-  return createErrorResponse(ErrorKeys.GENERAL_SERVER_ERROR);
+  return exclusions;
 }
 
-export const getAllRevenantFamilies = async (
-  bookIdList: number[], 
-  icYear: number = 2025,
-  userExclusions: string[]
-): Promise<ApiResponse<unknown>> => {
-  let exclusions = [...userExclusions];
-  switch (true) {
-    case icYear < 1565:
-      exclusions.push('oprichniki', 'rosellini');
-    case icYear < 1450:
-      exclusions.push('servants of anushin-rawan');
-    case icYear < 1315:
-      exclusions.push('grimaldi');
-    case icYear < 1200:
-      exclusions.push('obertus');
-    case icYear < 1100:
-      exclusions.push('zantosa');
-    case icYear < 1000:
-      exclusions.push('bratovich');
-    case icYear < 800:
-      exclusions.push('rafastio', 'enrathi');
-  }
-  
-  // The Krevcheski betray the Tzimisce and become the Ducheski in the late 12th century
-  const familyName = icYear > 1200 ? 'Krevcheski' : 'Ducheski'; 
-  exclusions.push(familyName);
+// export const getAllVampireBloodlines = async (
+//   bookIdList: number[], 
+//   year: number = 2025,
+//   userExclusions: string[]
+// ): Promise<ApiResponse<unknown>> => {
+//   let exclusions = [...userExclusions];
 
-  return await getMonsters(['revenant'], bookIdList, exclusions);
+//   const modernBloodlines = ['salubri', 'salubri antitribu', 'city gangrel'];
+//   const darkAgesBloodlines = [
+//     'ananke',
+//     'anda',
+//     'warrior salubri',
+//     'healer salubri',
+//     'watcher salubri'
+//   ];
+
+//   const excludedByEra = year > 1600 
+//   ? darkAgesBloodlines
+//   : modernBloodlines;
+//   exclusions = [...exclusions, ...excludedByEra];
+
+//   if (year >= 1800 && year <= 1900) {
+//     exclusions.push('ahrimanes');
+//   }
+
+//   if (year > 1350) {
+//     exclusions.push('lhiannan');
+//     if (year > 1400) {
+//       exclusions.push('noiad');
+//       if (year < 1650) {
+//         exclusions.push('lamia');
+//         exclusions.push('lamiae');
+//       }
+//     }
+//   }
+
+//   const clansResult = await getMonsters(['vampire'], {});
+//   if (clansResult.success && clansResult.data) {
+//     const { monsters } = clansResult.data;
+//     const clans = monsters?.map(clan => clan.name.toLowerCase());
+//     return await getMonsters(clans, {books: bookIdList, exclude: exclusions});
+//   }
+//   return createErrorResponse(ErrorKeys.GENERAL_SERVER_ERROR);
+// }
+
+export const buildHistoricalFamilyExclusions = (
+  year: number = 2025,
+): string[] => {
+  let exclusions = [];
+   if (year < 1565) {
+    exclusions.push('oprichniki', 'rosellini');
+    if (year < 1450) {
+      exclusions.push('servants of anushin-rawan');
+      if (year < 1315) {
+        exclusions.push('grimaldi');
+        if (year < 1200) {
+          exclusions.push('obertus');
+          if (year < 1100) {
+            exclusions.push('zantosa');
+            if (year < 1000) {
+              exclusions.push('bratovich');
+              if (year < 800) {
+                exclusions.push('rafastio', 'enrathi');
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  // The Krevcheski betray the Tzimisce and become the Ducheski in the late 12th century
+  const familyName = year > 1200 ? 'Krevcheski' : 'Ducheski'; 
+  exclusions.push(familyName);
+  return exclusions;
 }

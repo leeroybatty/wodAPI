@@ -2,6 +2,8 @@ import { QueryExecutionError, createErrorResponse } from '../../errors';
 import { queryDbConnection, referenceCache } from '../../sql';
 import { PoolClient } from 'pg';
 import { ErrorKeys } from '../../errors/errors.types';
+import { AuthenticatedRequest } from '../../middleware/auth';
+import { ValidFormat } from '../types';
 
 export function parseQueryParam (param: unknown): string[] {
   if (Array.isArray(param)) {
@@ -15,76 +17,29 @@ export function parseQueryParam (param: unknown): string[] {
   return [];
 };
 
-export interface BookIdResult {
-  bookIds: number[];
-  foundBooks: string[];
-  missingBooks: string[];
-}
-
-export enum Monster {
-  VAMPIRE = 'vampire',
-  GHOUL = 'ghoul',
-  REVENANT = 'revenant',
-  WEREWOLF = 'werewolf',
-  MAGE = 'mage',
-  CHANGELING = 'changeling',
-  WRAITH = 'wraith',
-  HUNTER = 'hunter',
-  DEMON = 'demon',
-  MUMMY = 'mummy'
-}
-
-export const validMonsters = new Set(Object.values(Monster));
-export type MonsterType = Monster;
-
-export const bookFallbacks = {
-  'vampire': ['vampire: the masquerade 20th anniversary core'],
-  'werewolf': ['werewolf: the apocalypse 20th anniversary core'],
-  'mage': ['mage: the ascension 20th anniversary core'],
-  'changeling': ['changeling: the dreaming 20th anniversary core'],
-  'wraith': ['wraith: the oblivion 20th anniversary core'],
-  'hunter': ['hunter: the reckoning 2nd edition'],
-  'demon': ['demon: the fallen'],
-  'mummy': ['mummy: the resurrection']
-}
-
-export async function selectBookId(bookName: string): Promise<number> {
-  const query = `SELECT id FROM wod_books WHERE lower(name) = $1`;
-  const result = await queryDbConnection(query, [bookName])
-  if (result.rows[0]) {
-    return result.rows[0].id  
+export async function prepareBaseOptions (req: AuthenticatedRequest) {
+  const { books, year, exclude, include, faction, format } = req.query;
+  const bookNames = parseQueryParam(books);
+  const bookIds = await referenceCache.getBookIds(bookNames);
+  const icYear = year ? parseInt(year as string, 10) : 2025;
+  const exclusions = parseQueryParam(exclude);
+  const inclusions = parseQueryParam(include);
+  const factionName = faction ? (faction as string) : undefined;
+  const formatName = format as string || undefined;
+  
+  let fields = "all"
+  if (formatName && formatName.toLowerCase() === "names") {
+    fields = "names"
   }
-  return 0
-}
-
-export async function resolveBookIds(bookNames: string[]): Promise<BookIdResult> {
-  if (bookNames.length === 0) {
-    return {
-      bookIds: [],
-      foundBooks: [],
-      missingBooks: []
-    };
-  }
-
-  const bookIds: number[] = [];
-  const foundBooks: string[] = [];
-  const missingBooks: string[] = [];
-
-  for (const bookName of bookNames) {
-    try {
-      const bookId = await referenceCache.getBookId(bookName);
-      bookIds.push(bookId);
-      foundBooks.push(bookName);
-    } catch (error) {
-      missingBooks.push(bookName);
-    }
-  }
-
+  
   return {
     bookIds,
-    foundBooks,
-    missingBooks
-  };
+    year: icYear,
+    exclude: exclusions,
+    include: inclusions,
+    faction: factionName,
+    format: fields
+  }
 }
 
 export function createStringArrayPlaceholders(entries: number[] | string[], startingIndex = 1): string {

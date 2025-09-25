@@ -332,17 +332,32 @@ class ReferenceDataCache {
     return id;
   }
 
-  async getBookId(name: string): Promise<number> {
+  private async loadBooks() {
     if (!this.books) {
       const result = await queryDbConnection('SELECT id, name FROM wod_books');
       this.books = new Map(
         result.rows.map(row => [row.name.toLowerCase(), row.id])
       );
     }
-    
-    const id = this.books.get(name.toLowerCase());
+  }
+
+  async getBookId(name: string): Promise<number> {
+    await this.loadBooks();
+    const id = this.books!.get(name.toLowerCase());
     if (!id) throw new QueryExecutionError('Book not found', '', [], ErrorKeys.RESOURCE_NOT_FOUND);
     return id;
+  }
+
+  async getBookIds(names: string[]): Promise<number[]> {
+    await this.loadBooks();
+    let bookIds = []
+    for (let name of names) {
+      const id = this.books!.get(name.toLowerCase());
+      if (!!id) {  // Deliberately failing gracefully if book not found.
+        bookIds.push(id)
+      }
+    }
+    return bookIds
   }
 }
 

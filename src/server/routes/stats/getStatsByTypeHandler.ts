@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { resolveBookIds, parseQueryParam } from '../helpers';
+import { parseQueryParam, prepareBaseOptions } from '../helpers';
 import { AuthenticatedRequest } from '../../middleware/auth';
 import { ErrorKeys } from '../../errors/errors.types';
 import { ApiResponse } from '../../apiResponse.types';
@@ -20,25 +20,11 @@ export const getStatsByTypeHandler = async (req: AuthenticatedRequest, res: Resp
     );
   };
 
-  const icYear = year ? parseInt(year as string, 10) : 2025;
-
   const category = type.toLowerCase();
-  
-  const bookNames = parseQueryParam(books);
-  const exclusions = parseQueryParam(exclude);
-  const inclusions = parseQueryParam(include);
+  const options = await prepareBaseOptions(req);
 
   try {
-    const { bookIds } = await resolveBookIds(bookNames);
-    const serviceResult = await getStatsInCategory(category, {
-      year: icYear,
-      bookIds,
-      include: inclusions,
-      exclude: exclusions,
-      monster: monster as string,
-      faction: faction as string,
-      format: format as string
-    });
+    const serviceResult = await getStatsInCategory(category, options);
 
     if (serviceResult.success) {
       return res.status(200).json(serviceResult);

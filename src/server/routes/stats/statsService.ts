@@ -1,26 +1,16 @@
-import { getStatDefinitions, ValidFormat } from './statsRepository';
+import { getStatDefinitions } from './statsRepository';
 import { reconcileIncludeExclude } from '../helpers';
 import { ApiResponse } from '../../apiResponse.types';
 import { referenceCache } from '../../sql';
+import { StatsFilters } from './types';
 
 export const getStatsInCategory = async (
   category: string,
-  options: {
-    year: number,
-    bookIds?: number[],
-    exclude?: string[],
-    include?: string[],
-    monster?: string,
-    faction?: string,
-    format?: string
-  }
+  options: StatsFilters
 ): Promise<ApiResponse<unknown>> => {
   const {year, bookIds, exclude, include, monster, faction, format} = options;
   const monsterName = monster && monster.toLowerCase() || "";
- 
-  let fields = format && ["all", "names"].includes(format.toLowerCase()) 
-    ? format.toLowerCase() as ValidFormat
-    : "all";
+  const icYear = year || 2025;
 
   let categories = [category]
   if (category === 'attributes') {
@@ -32,6 +22,12 @@ export const getStatsInCategory = async (
   let defaultExclusions = exclude ? [...exclude] : [];
   let defaultInclusions = include ? [...include] : [];
   const bookSet = new Set(bookIds);
+
+  if (categories.includes('statpool')) {
+    if (["ananasi", "nuwisha"].includes(monsterName)) {
+      defaultExclusions.push('rage')
+    }
+  }
 
   if (categories.includes('backgrounds')) {
 
@@ -51,13 +47,11 @@ export const getStatsInCategory = async (
       default:
         break;
     }
-
     // Tal'Mahe'Ra members can have dots in Cult, and it's the
     // only stat that belongs to multiple factions.
     if (faction && ["true black hand", "tal'mahe'ra"].includes(faction.toLowerCase())) {
       defaultInclusions.push('cult')
     }
-   
     if (bookIds) {
       const mageCore = await referenceCache.getBookId('mage: the ascension 20th anniversary core');
       const hunterCore = await referenceCache.getBookId('hunter: the reckoning');
@@ -74,61 +68,82 @@ export const getStatsInCategory = async (
   }
 
   if (categories.includes('talents')) {
-    if (year < 1700 ) {
-      defaultInclusions.push('legerdemain');
+    if (icYear > 1700 ) {
+      defaultExclusions.push('legerdemain');
     }
   }
 
   if (categories.includes('skills')) {
-
     if (bookIds) {
-      // Meditation is accredited to Mage 20th, so at risk of being deleted if you want Wraith.
       const wraithCore = await referenceCache.getBookId('wraith: the oblivion 20th anniversary core');
       if (bookSet.has(wraithCore)) {
         defaultInclusions.push('meditation');
       }
     }
-    switch (true) {
-      case year < 1950:
-        defaultExclusions.push('technology');
-      case year < 1930:
-        defaultInclusions.push('ride');
-      case year < 1910:
-        defaultExclusions.push('drive');
-      case year < 1890:
-        defaultInclusions.push('archery');
-      case year < 1750:
-        defaultInclusions.push('commerce');
-      case year < 1500:
-        defaultExclusions.push('firearms');
-        break;
-      default:
-        break;
+
+    if (icYear < 1500) {
+      defaultExclusions.push('firearms', 'drive', 'technology');
+      defaultInclusions.push('archery', 'commerce', 'ride');
+    } else {
+      defaultInclusions.push('firearms');
+      if (icYear < 1750) {
+        defaultInclusions.push('archery', 'commerce', 'ride');
+        defaultExclusions.push('drive', 'technology');
+      } else {
+        defaultExclusions.push('commerce');
+        if (icYear < 1890) {
+          defaultInclusions.push('archery', 'ride');
+          defaultExclusions.push('drive', 'technology');
+        } else {
+          defaultExclusions.push('archery');
+          if (icYear < 1910) {
+            defaultInclusions.push('ride');
+            defaultExclusions.push('drive', 'technology');
+          } else {
+            defaultInclusions.push('drive');
+            if (icYear < 1930) {
+              defaultInclusions.push('ride');
+              defaultExclusions.push('technology');
+            } else {
+              defaultExclusions.push('ride');
+              if (icYear < 1950) {
+                defaultExclusions.push('technology');
+              } else {
+                defaultInclusions.push('technology');
+              }
+            }
+          }
+        }
+      }
     }
   }
 
   if (categories.includes('knowledges')) {
-    switch (true) {
-    case year < 1980:
+    if (icYear < 1700) {
+      defaultInclusions.push('enigmas', 'theology', 'hearth wisdom', 'seneschal');
       defaultExclusions.push('computer');
-    case year < 1914:
-      defaultInclusions.push('seneschal');
-    case year < 1700:
-      defaultInclusions = [...defaultInclusions, ...['enigmas', 'theology', 'hearth wisdom']];
-      break;
-    default:
-      break;
+    } else {
+      defaultExclusions.push('enigmas', 'theology', 'hearth wisdom');
+      if (icYear < 1914) {
+        defaultInclusions.push('seneschal');
+        defaultExclusions.push('computer');
+      } else {
+        defaultExclusions.push('seneschal');
+        if (icYear < 1980) {
+          defaultExclusions.push('computer');
+        } else {
+          defaultInclusions.push('computer');
+        }
+      }
     }
   }
 
   const exclusions = include
     ? reconcileIncludeExclude(include, defaultExclusions)
-    : defaultExclusions
-
+    : defaultExclusions;
   const inclusions = exclude
     ? reconcileIncludeExclude(exclude, defaultInclusions)
-    : defaultInclusions
-
+    : defaultInclusions;
   return await getStatDefinitions(
     categories,
     {
@@ -137,7 +152,7 @@ export const getStatsInCategory = async (
       include: inclusions,
       monster,
       faction,
-      fields
+      format
     }
   );
 }

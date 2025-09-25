@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+import path from 'path';
 import { PoolConnection } from './sql/connection';
 import { getCharacterStat } from './routes/stats';
 import { getMonsterTypesHandler } from './routes/monsters/getMonsterTypesHandler';
@@ -18,11 +19,18 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
 }));
 
 app.get('/api/character/:id/stat/:statName', /* authorizeCharacterAccess, */ getCharacterStat);
-
 app.get('/api/monsters/:monster/type', /* authorizeCharacterAccess, */ getMonsterTypesHandler);
-
 app.get('/api/stats/:type', /* authorizeCharacterAccess, */ getStatsByTypeHandler);
 
+app.use(express.static(path.join(__dirname, '../client')));
+
+app.use((req: Request, res: Response) => {
+  if (req.path.startsWith('/api')) {
+    res.status(404).json({ error: 'API endpoint not found' });
+  } else {
+    res.sendFile(path.join(__dirname, '../client', 'index.html'));
+  }
+});
 
 app.listen(3000, () => {
   console.log('Server running on http://localhost:3000');

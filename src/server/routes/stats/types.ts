@@ -1,5 +1,11 @@
+import { FilterOptions } from '../types';
+
+export interface StatsFilters extends FilterOptions {
+  monster?: string
+}
+
 export enum GeneralStatCategory {
-  ARCHETYPES = 'archetypes',
+  ARCHETYPES = 'archetype',
   ATTRIBUTES = 'attributes',
   PHYSICAL = 'physical',
   SOCIAL = 'social',

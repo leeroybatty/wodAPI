@@ -2,7 +2,7 @@ export enum MonsterTemplates {
   VAMPIRE = 'vampire',
   GHOUL = 'ghoul',
   REVENANT = 'revenant',
-  WEREWOLF = 'werewolf',
+  SHIFTER = 'shifter',
   KINFOLK = 'kinfolk',
   MAGE = 'mage',
   SORCERER = 'sorcerer',
@@ -12,5 +12,6 @@ export enum MonsterTemplates {
   HUNTER = 'hunter',
   DEMON = 'demon',
   THRALL = 'thrall',
-  MUMMY = 'mummy'
+  MUMMY = 'mummy',
+  HUMAN = 'human'
 }
