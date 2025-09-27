@@ -2,10 +2,103 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="app"></div>
-    <script type="module" src="app.js"></script>
+  <div id="app">
+    <form class="sheet">
+      <fieldset id="splat" class="sheet_section">
+        <legend class="sheet_section-heading">Your Character</legend>
+        <div id="character_type" class="sheet_section-column">
+          
+          <div class="sheet_stat-entry" id="sheet_splat">
+            <label class="sheet_stat-name" for="template_dropdown">Splat</label>
+            <select 
+              class="sheet_stat-selection"
+              id="template_dropdown"
+              name="monster"
+            >
+            </select>
+          </div>
+
+          <div class="sheet_stat-entry Hidden" id="organization_field">
+            <label class="sheet_stat-name" for="organization_dropdown">Faction</label>
+            <select
+              class="sheet_stat-selection"
+              id="organization_dropdown"
+              name="organization"
+            >
+            </select>
+          </div>
+
+          <div class="sheet_stat-entry Hidden" id="monster_type_field">
+            <label class="sheet_stat-name" id="monster_type_dropdown_label" for="monster_type_dropdown">Monster Type</label>
+            <select 
+              class="sheet_stat-selection"
+              id = "monster_type_dropdown"
+              name = "type"
+            >
+            </select>
+          </div>
+
+          <div class="sheet_stat-entry Hidden" id="monster_subtype_field">
+            <label class="sheet_stat-name" id="monster_subtype_dropdown_label" for="monster_subtype_dropdown">Monster Type</label>
+            <select 
+              class="sheet_stat-selection"
+              id = "monster_subtype_dropdown"
+              name = "subtype"
+            >
+            </select>
+          </div>
+
+        </div>
+      </fieldset>
+
+      <fieldset id="attributes" class="sheet_section">
+        <legend class="sheet_section-heading">Attributes</legend>
+        <div id="physical_attributes" class="sheet_section-column">
+          <h3 class="sheet_column-heading">Physical</h3>
+          <stat-rating name="strength" display-name="Strength" value="1"></stat-rating>
+          <stat-rating name="dexterity" display-name="Dexterity" value="1"></stat-rating>
+          <stat-rating name="stamina" display-name="Stamina" value="1"></stat-rating>
+        </div>
+
+        <div id="physical_attributes" class="sheet_section-column">
+          <h3 class="sheet_column-heading">Social</h3>
+          <stat-rating name="manipulation" display-name="Manipulation" value="1"></stat-rating>
+          <stat-rating name="charisma" display-name="Charisma" value="1"></stat-rating>
+          <stat-rating name="appearance" display-name="Appearance" value="1"></stat-rating>
+        </div>
+
+        <div id="physical_attributes" class="sheet_section-column">
+          <h3 class="sheet_column-heading">Physical</h3>
+          <stat-rating name="intelligence" display-name="Intelligence" value="1"></stat-rating>
+          <stat-rating name="wits" display-name="Wits" value="1"></stat-rating>
+          <stat-rating name="perception" display-name="Perception" value="1"></stat-rating>
+        </div>
+      </fieldset>
+
+      <fieldset id="abilities" class="sheet_section">
+        <legend class="sheet_section-heading">Abilities</legend>
+        <div id="abilities_talents" class="sheet_section-column">
+          <h3 class="sheet_column-heading">Talents</h3>
+        </div>
+
+        <div id="abilities_skills" class="sheet_section-column">
+          <h3 class="sheet_column-heading">Skills</h3>
+        </div>
+
+        <div id="abilities_knowledges" class="sheet_section-column">
+          <h3 class="sheet_column-heading">Knowledges</h3>
+        </div>
+      </fieldset>
+
+      <section id="abilities" />
+      </section>
+
+    </form>
+  </div>
+  <script type="module" src="app.js"></script>
+  <script type="module" src="/components/statRating.js"></script>
 </body>
 </html>

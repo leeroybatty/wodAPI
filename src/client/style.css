@@ -78,20 +78,21 @@
   --size-font-sm: calc(var(--base-size) / var(--base-scaler));
   --size-font-md: var(--base-size);
   --size-font-lg: calc(var(--base-size) * var(--base-scaler));
+  --font-weight-bold: 600;
 
   --size-border-radius: var(--border-radius, var(--spacing-xs));
 
-  --theme-interface-00: var(--color-interface-00, var(--swatch-black));
-  --theme-interface-10: var(--color-interface-10, var(--swatch-ochre-100));
-  --theme-interface-20: var(--color-interface-20, var(--swatch-ochre-90));
-  --theme-interface-30: var(--color-interface-30, var(--swatch-ochre-80));
-  --theme-interface-40: var(--color-interface-40, var(--swatch-ochre-70));
-  --theme-interface-50: var(--color-interface-50, var(--swatch-ochre-60));
-  --theme-interface-60: var(--color-interface-60, var(--swatch-ochre-50));
-  --theme-interface-70: var(--color-interface-70, var(--swatch-ochre-40));
-  --theme-interface-80: var(--color-interface-80, var(--swatch-ochre-30));
-  --theme-interface-90: var(--color-interface-90, var(--swatch-ochre-20));
-  --theme-interface-100: var(--color-interface-100, var(--swatch-ochre-10));
+  --theme-interface-00: var(--color-interface-00, var(--swatch-white));
+  --theme-interface-10: var(--color-interface-10, var(--swatch-gray-10));
+  --theme-interface-20: var(--color-interface-20, var(--swatch-gray-20));
+  --theme-interface-30: var(--color-interface-30, var(--swatch-gray-30));
+  --theme-interface-40: var(--color-interface-40, var(--swatch-gray-40));
+  --theme-interface-50: var(--color-interface-50, var(--swatch-gray-50));
+  --theme-interface-60: var(--color-interface-60, var(--swatch-gray-60));
+  --theme-interface-70: var(--color-interface-70, var(--swatch-gray-70));
+  --theme-interface-80: var(--color-interface-80, var(--swatch-gray-80));
+  --theme-interface-90: var(--color-interface-90, var(--swatch-gray-90));
+  --theme-interface-100: var(--color-interface-100, var(--swatch-gray-100));
 
   --theme-primary-00: var(--color-primary-00, var(--swatch-white));
   --theme-primary-10: var(--color-primary-10, var(--swatch-ochre-100));
@@ -141,7 +142,7 @@
   --theme-success-90: var(--color-success-90, var(--swatch-lime-20));
   --theme-success-100: var(--color-success-100, var(--swatch-lime-10));
 
-  --col-text: var(--color-text, var(--theme-interface-110));
+  --col-text: var(--color-text, var(--theme-interface-100));
   --col-text-secondary: var(--color-text-secondary, var(--theme-interface-60));
 
   --col-text: var(--color-text, var(--theme-interface-100));
@@ -172,13 +173,17 @@
   --col-disabled: var(--color-disabled, var(--theme-interface-30));
   --col-error: var(--color-error, var(--theme-tertiary-60));
   --col-success: var(--color-success, var(--theme-success-60));
+  --col-interactive-graphic: var(--theme-secondary-50);
 }
+
 
 * {
   margin: 0;
   padding: 0;
   color: var(--col-text);
   box-sizing: border-box;
+  background: var(--col-background);
+  color:  var(--col-text);
 }
 
 p {
@@ -215,4 +220,114 @@ h1, h2, h3, h4, h5, h6 {
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: var(--col-interactive-01-hover)
+}
+
+.VisuallyHidden {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  whiteSpace: nowrap;
+  width: 1px;
+}
+
+.sheet {
+  max-width: 1280px;
+}
+
+.sheet_section {
+  border: none;
+  border-top: 5px solid var(--theme-interface-30);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 0 var(--spacing-lg);
+}
+
+.sheet_section-heading {
+  text-align: center;
+  padding: var(--spacing-md);
+  font-size: var(--size-font-lg);
+}
+
+.sheet_section-column {
+  border:  none;
+  display: flex;
+  flex-direction: column;
+}
+
+.sheet_column-heading {
+  text-align: center;
+  margin-block-end:  var(--spacing-md);
+}
+.sheet_stat-ramp {
+  display:  flex;
+  flex-direction: row;
+  gap:  var(--spacing-xs);
+  height: var(--spacing-md);
+}
+
+.sheet_stat-entry {
+  border:  none;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap:  var(--spacing-lg);
+  margin-block-end: var(--spacing-xs);
+}
+
+.sheet_stat-name {
+  display: inline;
+  text-transform: capitalize;
+  font-weight:  var(--font-weight-bold);
+}
+
+.sheet_stat-dot-control.Ceilinged {
+  border-color: var(--col-disabled);
+}
+
+.sheet_stat-dot {
+  position: relative;
+  display: inline-block;
+}
+
+.sheet_stat-selection {
+  padding:  var(--spacing-sm);
+  width:  100%;
+  border-radius: var(--size-border-radius);
+}
+
+.sheet_stat-dot-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: pointer;
+  background: transparent;
+  color:  transparent;
+  z-index: 1;
+  user-select: none;
+}
+
+.sheet_stat-dot-control {
+  appearance: none;
+  width: var(--spacing-md);
+  height:var(--spacing-md);
+  border: 2px solid var(--col-interactive-graphic);
+  border-radius: 100%;
+  background: transparent;
+  position: relative;
+  z-index: 0;
+}
+
+.sheet_stat-dot-control.Filled {
+  background: var(--col-interactive-graphic);
+}
+
+
+.Hidden {
+  display: none !important;
 }

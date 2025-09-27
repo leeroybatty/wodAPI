@@ -5,6 +5,7 @@ export enum MonsterTemplates {
   SHIFTER = 'shifter',
   KINFOLK = 'kinfolk',
   MAGE = 'mage',
+  COMPANION = 'companion',
   SORCERER = 'sorcerer',
   CHANGELING = 'changeling',
   KINAIN = 'kinain',
@@ -13,5 +14,6 @@ export enum MonsterTemplates {
   DEMON = 'demon',
   THRALL = 'thrall',
   MUMMY = 'mummy',
-  HUMAN = 'human'
+  HUMAN = 'human',
+  POSSESSED = 'possessed'
 }

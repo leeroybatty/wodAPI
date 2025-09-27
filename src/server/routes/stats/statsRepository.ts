@@ -48,15 +48,17 @@ export async function getStatDefinitions(
     }
 
     let joins = `JOIN stats p ON p.id = s.parent_id
-    LEFT JOIN wod_books b on b.id = s.book_id`;
+    LEFT JOIN wod_books b on b.id = s.book_id
+    LEFT JOIN bridge_monsters_stats bms ON bms.stat_id = s.id`
 
     let isAccessibleToMonster ='';
-    if (monster) {
-      joins += ` LEFT JOIN bridge_monsters_stats bcs ON bcs.stat_id = s.id`
+    if (monster) { 
       const monsterIdList = await referenceCache.getMonsterChain(monster);
       const monsterPlaceholders = createStringArrayPlaceholders(monsterIdList, variables.length + 1);
-      isAccessibleToMonster = `(bcs.monster_id IS NULL OR bcs.monster_id IN (${monsterPlaceholders}))`;
+      isAccessibleToMonster = `(bms.monster_id IS NULL OR bms.monster_id IN (${monsterPlaceholders}))`;
       variables = [...variables, ...monsterIdList];
+    } else {
+      isAccessibleToMonster = 'bms.monster_id IS NULL';
     }
 
     let isAccessibleToFaction = '';
@@ -64,6 +66,8 @@ export async function getStatDefinitions(
       const orgId = await referenceCache.getOrganizationId(faction);
       isAccessibleToFaction = `(s.org_lock_id IS NULL OR s.org_lock_id = $${variables.length + 1})`;
       variables.push(orgId);
+    } else {
+      isAccessibleToFaction = 's.org_lock_id IS NULL';
     }
 
     let isNotExcluded = '';
@@ -78,6 +82,7 @@ export async function getStatDefinitions(
       : `s.id,
         s.name, 
         s.description,
+        bms.monster_id,
         CASE 
           WHEN s.book_id IS NOT NULL THEN 
             json_build_object(
@@ -88,26 +93,20 @@ export async function getStatDefinitions(
           ELSE NULL
         END as reference`
 
-    let meetsFilteredConditions = isInCategory
-    if (isFoundInTheseBooks) {
-      meetsFilteredConditions += ` AND ${isFoundInTheseBooks}`;
-    }
-    if (isAccessibleToMonster) {
-      meetsFilteredConditions += ` AND ${isAccessibleToMonster}`;
-    }
-    if (isAccessibleToFaction) {
-      meetsFilteredConditions += ` AND ${isAccessibleToFaction}`;
-    }
+    const optionalCondition = (condition?: string) => condition || 'TRUE';
 
     const statsQuery = `
       SELECT ${columns}
-      FROM stats s 
-        ${joins}
-      WHERE ${isInCategory} 
-      AND (${meetsFilteredConditions} ${isIncluded ? ` OR ${isIncluded}` : ''})
-      ${isNotExcluded ? `AND ${isNotExcluded}` : ''}
+      FROM stats s ${joins}
+      WHERE ${isInCategory}
+        AND (${optionalCondition(isAccessibleToMonster)}
+            AND ${optionalCondition(isAccessibleToFaction)}
+            AND ${optionalCondition(isFoundInTheseBooks)}
+          ${isIncluded ? ` OR ${isIncluded}` : ''}
+        )
+        ${isNotExcluded ? ` AND ${isNotExcluded}` : ''}
       ORDER BY s.name ASC
-    `;
+    `;    
 
     const statsResult = await queryDbConnection(statsQuery, variables);
 
@@ -118,7 +117,7 @@ export async function getStatDefinitions(
     }
     
     return createSuccessResponse({
-      stats: statsResult.rows,
+      stats: statsResult.rows
     });
     
   } catch (error) {

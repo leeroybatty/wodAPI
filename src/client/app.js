@@ -1,49 +1,192 @@
-const stagelist = {
-  'monster': {
-    getChoices: "/api/monsters/vampire/type"
+const monsterTypeLabelMap = {
+  'vampire': 'Clan',
+  'ghoul': 'Clan',
+  'revenant': 'Family',
+  'kinfolk': 'Beast',
+  'mage': 'Tradition',
+  'possessed': 'Type',
+  'shifter': 'Beast'
+};
+
+const state = {
+  year: 1376,
+  books: [
+  'vampire: the masquerade 20th anniversary core',
+  'vampire: dark ages 20th anniversary core'
+  ],
+  exclude: {
+    vampire: ['baali']
   },
-  'clan': {
-    getChoices: "/api/monsters/vampire/type",
-  },
-  'nature': {
-    getChoices: "/api/stats/archetype",
-  },
-  'demeanor': {
-    getChoices: "/api/stats/archetype",
+  monsterTypes: [],
+  monsterMap: new Map(),
+  sheet: {
+    attributes: {
+      physical: [],
+      mental: [],
+      social: []
+    },
+    abilities: {
+      talents: [],
+      skills: [],
+      knowledges: []
+    }
   }
 };
 
-const splats = [
-  {
-    corebook: 'Vampire: The Masquerade 20th Anniversary Core',
-    name: 'Vampire'
-  },
-  {
-    corebook: 'Mage: The Ascension 20th Anniversary Core',
-    name: 'Mage'
+const buildOptions = function (elementId, options) {
+  const dropdownSelect = document.getElementById(elementId);
+  const dropdownContainer = document.getElementById(elementId.replace('dropdown','field'))
+  if (options.length > 0) {
+    dropdownSelect.innerHTML = '';
+    const unselected = document.createElement('option');
+    unselected.value = null;
+    unselected.text = "Select...";
+    unselected.selected = true;
+    unselected.disabled = true;
+    dropdownSelect.appendChild(unselected);
+    for (let option of options) {
+      const newOption = document.createElement('option');
+      newOption.value = option.id;
+      newOption.text = option.name;
+      dropdownSelect.appendChild(newOption)
+    }
+    dropdownContainer.classList.remove('Hidden');
+  } else {
+    dropdownContainer.classList.add('Hidden');
   }
-];
-
-let state = {
-  stage: 'clan',
-  choices: []
 }
 
-async function getStageChoices() {
-  const stageData = stagelist[state.stage];
-  const {getChoices} = stageData;
-  const params = stageData.filters || "";
-  try {
-    const response = await fetch(`${getChoices}?format=names${params}`);
-    if (!response.ok) {
-      throw new Error(`Response status: ${response.status}`);
-    }
-      const result = await response.json();
-      console.dir(result);
+const updateMonsterMap = function (newEntries) {
+  const newMonsterMap = new Map(
+    newEntries.map(row => [row.id, row.name.toLowerCase()])
+  );
+  state.monsterMap = new Map([...state.monsterMap, ...newMonsterMap]);
+}
 
+const loadTemplates = async function () {
+  try {
+    const templates = await fetch(`/api/monsters?books=${state.books}`);
+    if (!templates.ok) {
+      throw new Error(`Response status: ${templates.status}`);
+    }
+    const templatesResult = await templates.json();
+    const { data } = templatesResult;
+    state.monsterTypes = data.monsters;
+    updateMonsterMap(data.monsters);
+    buildOptions('template_dropdown', state.monsterTypes);
   } catch (error) {
     console.error(error.message);
   }
 }
 
-getStageChoices();
+const loadOrganizations = async function () {
+  const template = state.monsterMap.get(state.monster)
+  const organizationsSection = document.getElementById('sheet_organization');
+  try {
+    const organizations = await fetch(`/api/organizations/${state.monster}?books=${state.books}`);
+    if (!organizations.ok) {
+      throw new Error(`Response status: ${organizations.status}`);
+    }
+    const organizationsResult = await organizations.json();
+    const { data } = organizationsResult;
+    state.organizations = data.organizations;
+    buildOptions('organization_dropdown', state.organizations);
+  } catch (error) {
+    console.error(error.message);
+  } 
+}
+
+const getMonsters = async function (monster) {
+  try {
+    const monsterName = state.monsterMap.get(monster)
+    const options = await fetch(`/api/monsters/${monsterName}/type?faction=${state.organization}&books=${state.books}&exclude=${state.exclude[monsterName]}`);
+    if (!options.ok) {
+      throw new Error(`Response status: ${options.status}`);
+    }
+    const optionsResult = await options.json();
+    const { data } = optionsResult;
+    return data.monsters
+  } catch (error) {
+    console.error(error.message);
+  }
+}
+
+const loadMonsterTypes = async function () {
+  const selection = await getMonsters(state.monster);
+  const monsterTypeDropdown = document.getElementById('monster_type_dropdown');
+  if (selection.length > 0) {
+    updateMonsterMap(selection);
+    buildOptions('monster_type_dropdown', selection);
+  }
+}
+
+const loadMonsterSubtypes = async function () {
+  const selection = await getMonsters(state.monsterType);
+  const monsterSubtypeDropdown = document.getElementById('monster_subtype_dropdown');
+  if (selection.length > 0) {
+    updateMonsterMap(selection);
+    buildOptions('monster_subtype_dropdown', selection);
+  }
+}
+
+const getStatSet = async function (category, params = '') {
+  try {
+    const statCategory = await fetch(`/api/stats/${category}?year=${state.year}${params ? `&${params}` : ''}`);
+    if (!statCategory.ok) {
+      throw new Error(`Response status: ${statCategory.status}`);
+    }
+    const statCategoryResult = await statCategory.json();
+    const { data } = statCategoryResult;
+    return data.stats
+  } catch (error) {
+    console.error(error.message);
+  }
+}
+
+const render = () => {
+  const abilities = document.getElementById('abilities');
+  for(let category in state.sheet.abilities) {
+    const elementId = `abilities_${category}`;
+    const column = document.getElementById(elementId)
+    const statsArray = state.sheet.abilities[category];
+    for(let stat of statsArray) {
+      const statElement = document.createElement('stat-rating');
+      statElement.setAttribute('name', stat.name);
+      statElement.setAttribute('ceiling', 3);
+      column.appendChild(statElement);
+    }  
+  }
+}
+
+const setup = async function () {
+  loadTemplates();
+  state.sheet.abilities.talents = await getStatSet('talents', 'exclude=Hobby Talent');
+  state.sheet.abilities.skills = await getStatSet('skills', 'exclude=Professional Skill');
+  state.sheet.abilities.knowledges = await getStatSet('knowledges', 'exclude=Expert Knowledge');
+  render();
+}
+
+setup();
+
+document.addEventListener('DOMContentLoaded', async function() {
+    const templateDropdown = document.getElementById('template_dropdown');
+    templateDropdown.addEventListener('change', async function() {
+      state.monster = parseInt(templateDropdown.value);
+      loadOrganizations();
+      const monsterTypeLabel = document.getElementById('monster_type_dropdown_label');
+      monsterTypeLabel.innerHTML = monsterTypeLabelMap[state.monsterMap.get(state.monster)];
+    });
+
+    const organizationDropdown = document.getElementById('organization_dropdown');
+    organizationDropdown.addEventListener('change', async () => {
+      state.organization = organizationDropdown.value;
+      loadMonsterTypes()
+    })
+
+    const monsterTypeDropdown = document.getElementById('monster_type_dropdown');
+    monsterTypeDropdown.addEventListener('change', async () => {
+      state.monsterType = parseInt(monsterTypeDropdown.value);
+      const monsterTypeName = state.monsterMap.get(monsterTypeDropdown.value);
+      loadMonsterSubtypes();
+    })
+});

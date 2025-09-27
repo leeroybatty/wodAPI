@@ -1,8 +1,8 @@
-import { getMonsters } from './monsterRepository';
+import { getMonsters, getMonsterAncestors } from './monsterRepository';
 import { Response } from 'express';
 import { ApiResponse } from '../../apiResponse.types';
 import { ErrorKeys } from '../../errors/errors.types';
-import { createSuccessResponse } from '../../errors';
+import { createSuccessResponse, createErrorResponse } from '../../errors';
 import { buildHistoricalClanExclusions, buildHistoricalFamilyExclusions } from './splats/vampire';
 import { buildHistoricalCraftExclusions } from './splats/mage';
 import { buildHistoricalFeraExclusions } from './splats/shifter';
@@ -12,15 +12,19 @@ import { ValidFormat, FilterOptions } from '../types';
 import { referenceCache } from '../../sql';
 import { MonsterTemplates } from './types'
 
-export const getAllMonsterTypes = async (
-  type: MonsterTemplates,
-  options: FilterOptions
-): Promise<ApiResponse<unknown>> => {
-
+export const getAllTopLevelMonsters = async(
+  options: FilterOptions): Promise<ApiResponse<unknown>> => {
   const {year, bookIds, exclude, include, faction, format} = options;
-  
-  let monster = type;
-  
+  let defaultExclusions: string[] = [];
+  const exclusions = include
+    ? reconcileIncludeExclude(include, defaultExclusions)
+    : defaultExclusions;
+  return await getMonsterAncestors({...options, exclude: exclusions});   
+}
+
+const buildHistoricalMonsterExclusions = (
+  type: MonsterTemplates,
+  year: number): string[] => {
   let defaultExclusions: string[] = [];
   switch (true) {
     case type === MonsterTemplates.VAMPIRE:
@@ -43,11 +47,6 @@ export const getAllMonsterTypes = async (
       const feraExclusions = buildHistoricalFeraExclusions(year);
       defaultExclusions = feraExclusions.map(fera => `${fera} kinfolk`); 
       break;
-    case [MonsterTemplates.DEMON, MonsterTemplates.HUNTER].includes(type):
-      if (year && year < 1999) {
-        monster = MonsterTemplates.HUMAN // You can't actually play these before 1999!
-      }
-      break;
     case type === MonsterTemplates.CHANGELING:
       if (year && year > 1350 && year < 1969) {
         defaultExclusions.push('arcadian sidhe', 'autumn sidhe', 'sidhe');
@@ -55,21 +54,39 @@ export const getAllMonsterTypes = async (
       break;
     default:
       break;
-      // Wraith, Demon, and Hunter exclusions omitteds
+  }
+  return defaultExclusions
+};
+
+export const getAllMonsterTypes = async (
+  identifier: number | MonsterTemplates,
+  options: FilterOptions
+): Promise<ApiResponse<unknown>> => {
+  const {year, include} = options;
+  let icYear = year || 2025;
+  let type: string;
+  if (typeof identifier === 'number') {
+    type = await referenceCache.getMonsterName(identifier);
+  } else {
+    type = identifier
+  }
+  const {exclude} = options;
+  const validMonsters = Object.values(MonsterTemplates)
+  if (!validMonsters.includes(type as MonsterTemplates)) {
+    return createErrorResponse(ErrorKeys.MONSTER_TYPE_NOT_FOUND);
+  }
+  let exclusions = buildHistoricalMonsterExclusions(type as MonsterTemplates, icYear);
+  if (include && include.length > 0 ) {
+    exclusions = reconcileIncludeExclude(include, exclusions);
+  }
+  if (exclude && exclude.length > 0) {
+    exclusions = [...exclusions, ...exclude]
   }
 
-  const exclusions = include
-    ? reconcileIncludeExclude(include, defaultExclusions)
-    : defaultExclusions;
-
   return await getMonsters(
-    [monster],
-    {
-      bookIds,
-      exclude: exclusions,
-      include,
-      faction,
-      format
+    [type],
+    {...options,
+      exclude: exclusions
     }
   );
 }

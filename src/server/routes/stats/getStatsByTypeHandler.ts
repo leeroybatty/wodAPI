@@ -8,7 +8,7 @@ import {
   getStatsInCategory
 } from './statsService';
 import { isValidStatCategory } from './helpers';
-import { AllStatCategoriesType } from './types';
+import { AllStatCategoriesType, StatsFilters } from './types';
 
 export const getStatsByTypeHandler = async (req: AuthenticatedRequest, res: Response) => {
   const { type } = req.params;
@@ -19,12 +19,13 @@ export const getStatsByTypeHandler = async (req: AuthenticatedRequest, res: Resp
       createErrorResponse(ErrorKeys.STAT_TYPE_NOT_FOUND)
     );
   };
-
+ 
   const category = type.toLowerCase();
-  const options = await prepareBaseOptions(req);
-
+  let options: StatsFilters = await prepareBaseOptions(req);
+  const monsterType = parseQueryParam(monster).pop();
+ 
   try {
-    const serviceResult = await getStatsInCategory(category, options);
+    const serviceResult = await getStatsInCategory(category, {...options, monster: monsterType});
 
     if (serviceResult.success) {
       return res.status(200).json(serviceResult);

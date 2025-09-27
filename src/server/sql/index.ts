@@ -278,7 +278,9 @@ export async function removeOneToManyAssociations(
 class ReferenceDataCache {
   private monsters: Map<string, number> | null = null;
   private monsterParents: Map<number, number> | null = null; // child_id -> parent_id
+  private monsterIds: Map<number, string> | null = null;
   private organizations: Map<string, number> | null = null;
+  private organizationIds: Map<number, string> | null = null;
   private books: Map<string, number> | null = null;
 
   async getMonsterChain(name: string): Promise<number[]> {
@@ -309,6 +311,9 @@ class ReferenceDataCache {
           .filter(row => row.parent_id) // Only include rows that have a parent
           .map(row => [row.id, row.parent_id])
       );
+      this.monsterIds = new Map(
+        result.rows.map(row => [row.id, row.name.toLowerCase()])
+      );
     }
   }
 
@@ -319,17 +324,37 @@ class ReferenceDataCache {
     return id;
   }
 
-  async getOrganizationId(name: string): Promise<number> {
+  async getMonsterName(id: number): Promise<string> {
+    await this.loadMonsters();
+    const name = this.monsterIds!.get(id)
+    if (!name) throw new QueryExecutionError('Monster not found by ID', '', [], ErrorKeys.RESOURCE_NOT_FOUND);
+    return name;
+  }
+
+  async loadOrganizations() {
     if (!this.organizations) {
       const result = await queryDbConnection('SELECT id, name FROM organizations');
       this.organizations = new Map(
         result.rows.map(row => [row.name.toLowerCase(), row.id])
       );
+      this.organizationIds = new Map(
+        result.rows.map(row => [row.id, row.name.toLowerCase()])
+      )
     }
-    
-    const id = this.organizations.get(name.toLowerCase());
+  }
+
+  async getOrganizationId(name: string): Promise<number> {
+    await this.loadOrganizations(); 
+    const id = this.organizations!.get(name.toLowerCase());
     if (!id) throw new QueryExecutionError('Organization not found', '', [], ErrorKeys.RESOURCE_NOT_FOUND);
     return id;
+  }
+
+  async getOrganizationName(id: number): Promise<string> {
+    await this.loadOrganizations();
+    const name = this.organizationIds!.get(id);
+    if (!name) throw new QueryExecutionError('Organization not found', '', [], ErrorKeys.RESOURCE_NOT_FOUND);
+    return name;
   }
 
   private async loadBooks() {

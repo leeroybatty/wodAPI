@@ -59,3 +59,24 @@ export const buildHistoricalCraftExclusions = (
   }
   return exclusions;
 };
+
+export const buildMageFactionExclusions = function(year: number = 2025) {
+  let defaultExclusions = [];
+  if (year > 1897) {
+    defaultExclusions.push("order of reason");
+  }
+
+  if (year < 1999) {
+    defaultExclusions.push("disparates");
+    if (year < 1851) {
+      defaultExclusions.push("technocracy");
+      if (year < 1466) {
+        defaultExclusions.push("traditions");
+        if (year < 1325) {
+          defaultExclusions.push("order of reason");
+        }
+      }
+    }
+  }
+  return defaultExclusions;
+}

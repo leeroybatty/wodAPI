@@ -3,7 +3,9 @@ import path from 'path';
 import { PoolConnection } from './sql/connection';
 import { getCharacterStat } from './routes/stats';
 import { getMonsterTypesHandler } from './routes/monsters/getMonsterTypesHandler';
+import { getMonstersHandler } from './routes/monsters/getMonstersHandler';
 import { getStatsByTypeHandler } from './routes/stats/getStatsByTypeHandler';
+import { getMonsterOrganizationsHandler } from './routes/organizations/getMonsterOrganizationsHandler';
 import { swaggerConfig } from './swagger';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
@@ -18,9 +20,13 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   customSiteTitle: 'TTRPG API Documentation'
 }));
 
-app.get('/api/character/:id/stat/:statName', /* authorizeCharacterAccess, */ getCharacterStat);
+app.get('/api/organizations/:monster', getMonsterOrganizationsHandler);
+app.get('/api/monsters', /* authorizeCharacterAccess, */ getMonstersHandler);
 app.get('/api/monsters/:monster/type', /* authorizeCharacterAccess, */ getMonsterTypesHandler);
 app.get('/api/stats/:type', /* authorizeCharacterAccess, */ getStatsByTypeHandler);
+
+app.get('/api/character/:id/stat/:statName', /* authorizeCharacterAccess, */ getCharacterStat);
+
 
 app.use(express.static(path.join(__dirname, '../client')));
 

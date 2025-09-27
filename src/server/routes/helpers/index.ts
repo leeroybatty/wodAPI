@@ -24,22 +24,32 @@ export async function prepareBaseOptions (req: AuthenticatedRequest) {
   const icYear = year ? parseInt(year as string, 10) : 2025;
   const exclusions = parseQueryParam(exclude);
   const inclusions = parseQueryParam(include);
-  const factionName = faction ? (faction as string) : undefined;
+  const factions = parseQueryParam(faction);
+  let factionArg = factions.pop() || "";
   const formatName = format as string || undefined;
-  
+
+  const isFactionNumeric = factionArg && !isNaN(Number(factionArg));
+
+  if (factionArg && isFactionNumeric) {
+     factionArg = await referenceCache.getOrganizationName(parseInt(factionArg));
+  }
+
   let fields = "all"
   if (formatName && formatName.toLowerCase() === "names") {
     fields = "names"
   }
-  
-  return {
+
+  const options = {
     bookIds,
     year: icYear,
     exclude: exclusions,
     include: inclusions,
-    faction: factionName,
+    faction: factionArg,
     format: fields
   }
+  console.log(`Handler:`)
+  console.log(options)
+  return options;
 }
 
 export function createStringArrayPlaceholders(entries: number[] | string[], startingIndex = 1): string {
