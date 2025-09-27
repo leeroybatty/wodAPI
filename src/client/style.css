@@ -278,6 +278,7 @@ h1, h2, h3, h4, h5, h6 {
   justify-content: space-between;
   gap:  var(--spacing-lg);
   margin-block-end: var(--spacing-xs);
+  transition: opacity 0.3s ease, visibility 0.3s ease, height 0.3s ease;
 }
 
 .sheet_stat-name {
@@ -305,7 +306,6 @@ h1, h2, h3, h4, h5, h6 {
   position: absolute;
   top: 0;
   left: 0;
-  cursor: pointer;
   background: transparent;
   color:  transparent;
   z-index: 1;
@@ -329,5 +329,9 @@ h1, h2, h3, h4, h5, h6 {
 
 
 .Hidden {
-  display: none !important;
+  height: 0px;
+  overflow: hidden;
+  visibility: none !important;
+  opacity:  0;
+  transition: opacity 0.3s ease, visibility 0.3s ease, height 0.3s ease;
 }

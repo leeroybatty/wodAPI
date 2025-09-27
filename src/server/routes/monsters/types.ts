@@ -15,5 +15,15 @@ export enum MonsterTemplates {
   THRALL = 'thrall',
   MUMMY = 'mummy',
   HUMAN = 'human',
-  POSSESSED = 'possessed'
+  POSSESSED = 'possessed',
+  ASSAMITE = 'assamite',
+  CAPPADOCIAN = 'cappadocian',
+  FOLLOWER_OF_SET = 'follower of set',
+  GANGREL = 'gangrel',
+  GARGOYLE = 'gargoyle',
+  LASOMBRA = 'lasombra',
+  MALKAVIAN = 'malkavian',
+  SALUBRI = 'salubri',
+  TZIMISCE = 'tzimisce',
+  VENTRUE = 'ventrue'
 }

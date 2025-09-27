@@ -3,14 +3,19 @@ import { Response } from 'express';
 import { ApiResponse } from '../../apiResponse.types';
 import { ErrorKeys } from '../../errors/errors.types';
 import { createSuccessResponse, createErrorResponse } from '../../errors';
-import { buildHistoricalClanExclusions, buildHistoricalFamilyExclusions } from './splats/vampire';
+import { 
+  buildHistoricalClanExclusions,
+  buildHistoricalFamilyExclusions,
+  buildHistoricalBloodlineExclusions,
+  isBloodline
+} from './splats/vampire';
 import { buildHistoricalCraftExclusions } from './splats/mage';
 import { buildHistoricalFeraExclusions } from './splats/shifter';
 import { buildHistoricalMummyExclusions } from './splats/mummy';
 import { reconcileIncludeExclude } from '../helpers';
 import { ValidFormat, FilterOptions } from '../types';
 import { referenceCache } from '../../sql';
-import { MonsterTemplates } from './types'
+import { MonsterTemplates } from './types';
 
 export const getAllTopLevelMonsters = async(
   options: FilterOptions): Promise<ApiResponse<unknown>> => {
@@ -51,6 +56,9 @@ const buildHistoricalMonsterExclusions = (
       if (year && year > 1350 && year < 1969) {
         defaultExclusions.push('arcadian sidhe', 'autumn sidhe', 'sidhe');
       }
+      break;
+    case isBloodline(type):
+      defaultExclusions = buildHistoricalBloodlineExclusions(year);
       break;
     default:
       break;

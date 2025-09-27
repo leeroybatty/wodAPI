@@ -1,18 +1,21 @@
 const monsterTypeLabelMap = {
-  'vampire': 'Clan',
-  'ghoul': 'Clan',
-  'revenant': 'Family',
-  'kinfolk': 'Beast',
-  'mage': 'Tradition',
-  'possessed': 'Type',
-  'shifter': 'Beast'
+  'vampire': ['Clan', 'Bloodline'],
+  'ghoul': ['Clan'],
+  'revenant': ['Family'],
+  'kinfolk': ['Beast', 'Tribe'],
+  'mage': ['Tradition'],
+  'possessed': ['Type'],
+  'shifter': ['Beast', 'Tribe'],
+  'bastet': ['Beast', 'Tribe'],
+  'ratkin': ['Beast', 'Aspect']
 };
 
 const state = {
-  year: 1376,
+  year: 2025,
   books: [
   'vampire: the masquerade 20th anniversary core',
-  'vampire: dark ages 20th anniversary core'
+  'vampire: dark ages 20th anniversary core',
+  'lore of the bloodlines'
   ],
   exclude: {
     vampire: ['baali']
@@ -54,6 +57,24 @@ const buildOptions = function (elementId, options) {
   } else {
     dropdownContainer.classList.add('Hidden');
   }
+}
+
+const updateCeilings = function (monster) {
+  const monsterName = state.monsterMap.get(monster);
+  const appearance = document.getElementById('stat-appearance');
+  const newAppearance = document.createElement('stat-rating');
+  newAppearance.setAttribute('name','appearance');
+  const checkedAppearance = document.querySelector('input[name="appearance"]:checked');
+  let oldRating = 0;
+  if (checkedAppearance) {
+    oldRating = checkedAppearance.value
+  }
+  const newAppearanceRating = monsterName === 'nosferatu' ? 0 : Math.max(1, oldRating);
+  const newCeiling = monsterName === 'nosferatu' ? 0 : 5;
+  newAppearance.setAttribute('ceiling', newCeiling);
+  newAppearance.setAttribute('value', newAppearanceRating );
+  appearance.replaceWith(newAppearance);
+  state.attributes.social.appearance = newAppearanceRating;
 }
 
 const updateMonsterMap = function (newEntries) {
@@ -101,7 +122,11 @@ const getMonsters = async function (monster) {
     const monsterName = state.monsterMap.get(monster)
     const options = await fetch(`/api/monsters/${monsterName}/type?faction=${state.organization}&books=${state.books}&exclude=${state.exclude[monsterName]}`);
     if (!options.ok) {
-      throw new Error(`Response status: ${options.status}`);
+      if (options.status !== 404) {
+        throw new Error(`Response status: ${options.status}`);
+      }
+      console.log("returning blank")
+      return [];
     }
     const optionsResult = await options.json();
     const { data } = optionsResult;
@@ -173,20 +198,26 @@ document.addEventListener('DOMContentLoaded', async function() {
     templateDropdown.addEventListener('change', async function() {
       state.monster = parseInt(templateDropdown.value);
       loadOrganizations();
+      buildOptions('monster_type_dropdown', []);
       const monsterTypeLabel = document.getElementById('monster_type_dropdown_label');
-      monsterTypeLabel.innerHTML = monsterTypeLabelMap[state.monsterMap.get(state.monster)];
+      const monsterSubtypeLabel = document.getElementById('monster_subtype_dropdown_label');
+      const labelNames = monsterTypeLabelMap[state.monsterMap.get(state.monster)];
+      monsterTypeLabel.innerHTML = labelNames[0];
+      monsterSubtypeLabel.innerHTML = labelNames[1] || "Type";
     });
 
     const organizationDropdown = document.getElementById('organization_dropdown');
     organizationDropdown.addEventListener('change', async () => {
       state.organization = organizationDropdown.value;
-      loadMonsterTypes()
+      loadMonsterTypes();
+      buildOptions('monster_subtype_dropdown',[]);
     })
 
     const monsterTypeDropdown = document.getElementById('monster_type_dropdown');
     monsterTypeDropdown.addEventListener('change', async () => {
       state.monsterType = parseInt(monsterTypeDropdown.value);
-      const monsterTypeName = state.monsterMap.get(monsterTypeDropdown.value);
+      buildOptions('monster_subtype_dropdown', []);
       loadMonsterSubtypes();
+      updateCeilings(state.monsterType);
     })
 });
