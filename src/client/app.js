@@ -36,11 +36,43 @@ const state = {
   }
 };
 
+const updateMonsterMap = function (newEntries) {
+  const newMonsterMap = new Map(
+    newEntries.map(row => [row.id, row.name.toLowerCase()])
+  );
+  state.monsterMap = new Map([...state.monsterMap, ...newMonsterMap]);
+}
+
+window.state = state;
+window.monsterTypeLabelMap = monsterTypeLabelMap;
+window.updateMonsterMap = updateMonsterMap;
+
 const buildOptions = function (elementId, options) {
+
+  const addOption = function(option) {
+    const newOption = document.createElement('option');
+    newOption.value = option.id;
+    newOption.text = option.name;
+    dropdownSelect.appendChild(newOption)
+  }
+
   const dropdownSelect = document.getElementById(elementId);
   const dropdownContainer = document.getElementById(elementId.replace('dropdown','field'))
-  if (options.length > 0) {
-    dropdownSelect.innerHTML = '';
+  dropdownSelect.innerHTML = '';
+  dropdownContainer.classList.remove('Disabled');
+  dropdownContainer.classList.remove('Hidden');
+  
+  if (options.length === 1) {
+    dropdownContainer.classList.add('Disabled');
+    addOption(options[0]);
+  }
+
+  if (options.length === 0) {
+    dropdownContainer.classList.add('Hidden');
+  }
+
+  if (options.length > 1) {
+    console.log("many options")
     const unselected = document.createElement('option');
     unselected.value = null;
     unselected.text = "Select...";
@@ -48,19 +80,21 @@ const buildOptions = function (elementId, options) {
     unselected.disabled = true;
     dropdownSelect.appendChild(unselected);
     for (let option of options) {
-      const newOption = document.createElement('option');
-      newOption.value = option.id;
-      newOption.text = option.name;
-      dropdownSelect.appendChild(newOption)
+      addOption(option)
     }
-    dropdownContainer.classList.remove('Hidden');
-  } else {
-    dropdownContainer.classList.add('Hidden');
   }
 }
 
+
+
 const updateCeilings = function (monster) {
   const monsterName = state.monsterMap.get(monster);
+  const isSupernaturallyUgly = [
+    'nosferatu',
+    'harbinger of skulls',
+    'samedi'
+    ].includes(monsterName)
+
   const appearance = document.getElementById('stat-appearance');
   const newAppearance = document.createElement('stat-rating');
   newAppearance.setAttribute('name','appearance');
@@ -69,40 +103,24 @@ const updateCeilings = function (monster) {
   if (checkedAppearance) {
     oldRating = checkedAppearance.value
   }
-  const newAppearanceRating = monsterName === 'nosferatu' ? 0 : Math.max(1, oldRating);
-  const newCeiling = monsterName === 'nosferatu' ? 0 : 5;
+  const newAppearanceRating = isSupernaturallyUgly ? 0 : Math.max(1, oldRating);
+  const newCeiling = isSupernaturallyUgly ? 0 : 5;
   newAppearance.setAttribute('ceiling', newCeiling);
   newAppearance.setAttribute('value', newAppearanceRating );
   appearance.replaceWith(newAppearance);
   state.attributes.social.appearance = newAppearanceRating;
 }
 
-const updateMonsterMap = function (newEntries) {
-  const newMonsterMap = new Map(
-    newEntries.map(row => [row.id, row.name.toLowerCase()])
-  );
-  state.monsterMap = new Map([...state.monsterMap, ...newMonsterMap]);
-}
-
 const loadTemplates = async function () {
-  try {
-    const templates = await fetch(`/api/monsters?books=${state.books}`);
-    if (!templates.ok) {
-      throw new Error(`Response status: ${templates.status}`);
-    }
-    const templatesResult = await templates.json();
-    const { data } = templatesResult;
-    state.monsterTypes = data.monsters;
-    updateMonsterMap(data.monsters);
-    buildOptions('template_dropdown', state.monsterTypes);
-  } catch (error) {
-    console.error(error.message);
-  }
+  const templateDropdown = document.querySelector('dropdown-select[name="template"]');
+  const response = await fetch(`/api/monsters?books=${state.books}`);
+  const result = await response.json();
+  state.monsterTypes = result.data.monsters;
+  updateMonsterMap(state.monsterTypes);
+  templateDropdown.loadOptions(() => result.data.monsters);
 }
 
 const loadOrganizations = async function () {
-  const template = state.monsterMap.get(state.monster)
-  const organizationsSection = document.getElementById('sheet_organization');
   try {
     const organizations = await fetch(`/api/organizations/${state.monster}?books=${state.books}`);
     if (!organizations.ok) {
@@ -111,13 +129,13 @@ const loadOrganizations = async function () {
     const organizationsResult = await organizations.json();
     const { data } = organizationsResult;
     state.organizations = data.organizations;
-    buildOptions('organization_dropdown', state.organizations);
+    return state.organizations;
   } catch (error) {
     console.error(error.message);
   } 
 }
 
-const getMonsters = async function (monster) {
+const loadMonsters = async function (monster) {
   try {
     const monsterName = state.monsterMap.get(monster)
     const options = await fetch(`/api/monsters/${monsterName}/type?faction=${state.organization}&books=${state.books}&exclude=${state.exclude[monsterName]}`);
@@ -125,34 +143,17 @@ const getMonsters = async function (monster) {
       if (options.status !== 404) {
         throw new Error(`Response status: ${options.status}`);
       }
-      console.log("returning blank")
       return [];
     }
     const optionsResult = await options.json();
     const { data } = optionsResult;
+    updateMonsterMap(data.monsters);
     return data.monsters
   } catch (error) {
     console.error(error.message);
   }
 }
 
-const loadMonsterTypes = async function () {
-  const selection = await getMonsters(state.monster);
-  const monsterTypeDropdown = document.getElementById('monster_type_dropdown');
-  if (selection.length > 0) {
-    updateMonsterMap(selection);
-    buildOptions('monster_type_dropdown', selection);
-  }
-}
-
-const loadMonsterSubtypes = async function () {
-  const selection = await getMonsters(state.monsterType);
-  const monsterSubtypeDropdown = document.getElementById('monster_subtype_dropdown');
-  if (selection.length > 0) {
-    updateMonsterMap(selection);
-    buildOptions('monster_subtype_dropdown', selection);
-  }
-}
 
 const getStatSet = async function (category, params = '') {
   try {
@@ -194,30 +195,29 @@ const setup = async function () {
 setup();
 
 document.addEventListener('DOMContentLoaded', async function() {
-    const templateDropdown = document.getElementById('template_dropdown');
-    templateDropdown.addEventListener('change', async function() {
-      state.monster = parseInt(templateDropdown.value);
-      loadOrganizations();
-      buildOptions('monster_type_dropdown', []);
-      const monsterTypeLabel = document.getElementById('monster_type_dropdown_label');
-      const monsterSubtypeLabel = document.getElementById('monster_subtype_dropdown_label');
-      const labelNames = monsterTypeLabelMap[state.monsterMap.get(state.monster)];
-      monsterTypeLabel.innerHTML = labelNames[0];
-      monsterSubtypeLabel.innerHTML = labelNames[1] || "Type";
-    });
-
-    const organizationDropdown = document.getElementById('organization_dropdown');
-    organizationDropdown.addEventListener('change', async () => {
-      state.organization = organizationDropdown.value;
-      loadMonsterTypes();
-      buildOptions('monster_subtype_dropdown',[]);
-    })
-
-    const monsterTypeDropdown = document.getElementById('monster_type_dropdown');
-    monsterTypeDropdown.addEventListener('change', async () => {
-      state.monsterType = parseInt(monsterTypeDropdown.value);
-      buildOptions('monster_subtype_dropdown', []);
-      loadMonsterSubtypes();
-      updateCeilings(state.monsterType);
-    })
+  await loadTemplates();
+    document.addEventListener('dropdown-changed', async (e) => {
+    const { name, value, element } = e.detail;
+    
+    switch (name) {
+      case 'template':
+        state.monster = parseInt(value);
+        const orgDropdown = document.querySelector('dropdown-select[name="organization"]');
+        await orgDropdown.loadOptions(() => loadOrganizations());
+        break;
+        
+      case 'organization':
+        state.organization = parseInt(value);
+        const typeDropdown = document.querySelector('dropdown-select[name="monster_type"]');
+        await typeDropdown.loadOptions(() => loadMonsters(state.monster));
+        break;
+        
+      case 'monster_type':
+        state.monsterType = value;
+        const subtypeDropdown = document.querySelector('dropdown-select[name="monster_subtype"]');
+        await subtypeDropdown.loadOptions(() => loadMonsters(state.monsterType));
+        updateCeilings(state.monsterType);
+        break;
+    }
+  });
 });

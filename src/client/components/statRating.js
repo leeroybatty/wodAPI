@@ -4,9 +4,9 @@ class StatRating extends HTMLElement {
     const displayName = this.getAttribute('display-name') || name;
     let ceiling = 5;
     if (this.getAttribute('ceiling') !== null) {
-      ceiling = parseInt(this.getAttribute('ceiling'))
+      ceiling = parseInt(this.getAttribute('ceiling'));
     }
-    const max = parseInt(this.getAttribute('max')) || Math.max(5,ceiling);
+    const max = parseInt(this.getAttribute('max')) || Math.max(5, ceiling);
     const value = parseInt(this.getAttribute('value')) || 0;
     const headingId = `${name}_heading`;
     const chargen = this.getAttribute('chargen') || false;
@@ -19,12 +19,11 @@ class StatRating extends HTMLElement {
           ${Array.from({length: ceiling}, (_, i) => {
             const dotValue = i + 1;
             const isChecked = dotValue === value ? 'checked' : '';
-            const isCeilinged = dotValue > ceiling
             const isFilled = dotValue <= value;
             return `
               <div class="sheet_stat-dot">
                 <input
-                  class="sheet_stat-dot-control${isFilled ? ' Filled' : ''}${isCeilinged ? ' Ceilinged' : ''}"
+                  class="sheet_stat-dot-control${isFilled ? ' Filled' : ''}"
                   id="${name}_${dotValue}"
                   type="radio"
                   name="${name}"
@@ -41,9 +40,8 @@ class StatRating extends HTMLElement {
             `;
           }).join('')}
           ${Array.from({length: max - ceiling}, (_, i) => {
-            const dotValue = ceiling + 1;
+            const dotValue = ceiling + i + 1; // ✅ Fixed: was ceiling + 1
             const isChecked = dotValue === value ? 'checked' : '';
-            const isCeilinged = dotValue > ceiling
             const isFilled = dotValue <= value;
             return `
               <div class="sheet_stat-dot">
@@ -93,14 +91,20 @@ class StatRating extends HTMLElement {
       const allRadios = this.querySelectorAll(`input[name="${name}"]`);
       allRadios.forEach(radio => {
         const radioValue = parseInt(radio.value);
-        const label = this.querySelector(`label[for="${radio.id}"]`);
-        
         if (radioValue <= selectedValue) {
           radio.classList.add('Filled');
         } else {
           radio.classList.remove('Filled');
         }
-      });  
+      });
+      this.dispatchEvent(new CustomEvent('stat-rating-changed', {
+        detail: { 
+          name: this.getAttribute('name'), 
+          value: selectedValue,
+          element: this 
+        },
+        bubbles: true
+      }));
     }
   }
 }

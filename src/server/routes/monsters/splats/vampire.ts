@@ -16,16 +16,19 @@ export const buildHistoricalClanExclusions = (year: number = 2025): string[] => 
     exclusions.push('serpent of the light');
     if (year < 1900) {
       exclusions.push('blood brothers');
-      if (year < 1450) {
-        exclusions.push('daughter of cacophony');
-        if (year < 1167) {
-          exclusions.push('gargoyle');
-          if (year < 1090) {
-            exclusions.push('tremere');
-            if (year < 1055) {
-              exclusions.push('giovanni');
-              if (year < -8000) {
-                exclusions.push('tzimisce');
+      if (year < 1775) {
+        exclusions.push('samedi');
+        if (year < 1450) {
+          exclusions.push('daughter of cacophony');
+          if (year < 1167) {
+            exclusions.push('gargoyle');
+            if (year < 1090) {
+              exclusions.push('tremere');
+              if (year < 1055) {
+                exclusions.push('giovanni');
+                if (year < -8000) {
+                  exclusions.push('tzimisce');
+                }
               }
             }
           }
