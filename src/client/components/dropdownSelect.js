@@ -16,7 +16,6 @@ class DropdownSelect extends HTMLElement {
     if (dependsOn) {
       document.addEventListener('dropdown-changed', (e) => {
         if (e.detail.name === dependsOn) {
-          console.log(e.detail)
           this.handleDependencyChange(e.detail);
         }
       });
@@ -44,11 +43,11 @@ class DropdownSelect extends HTMLElement {
   render() {
     const name = this.getAttribute('name') || '';
     const label = this.getAttribute('label') || '';
-    const hidden = this.hasAttribute('hidden');
+    const hidden = this.hasAttribute('empty');
     const disabled = this.hasAttribute('disabled');
     
     this.innerHTML = `
-      <div class="sheet_stat-entry ${hidden ? 'Hidden' : ''} ${disabled ? 'Disabled' : ''}" id="${name}_field">
+      <div class="sheet_trait-entry ${hidden ? 'Hidden' : ''} ${disabled ? 'Disabled' : ''}" id="${name}_field">
         <label class="sheet_stat-name" id="${name}_dropdown_label" for="${name}_dropdown">${label}</label>
         <select 
           class="sheet_stat-selection"
@@ -73,19 +72,31 @@ class DropdownSelect extends HTMLElement {
   }
 
   updateLabelFromParent(parentDetail) {
-    if (parentDetail.name === 'template' && window.state?.monsterMap) {
-      const monsterName = window.state.monsterMap.get(parentDetail.value);
-      const labelMap = window.monsterTypeLabelMap?.[monsterName];
-      
-      if (labelMap) {
-        const myName = this.getAttribute('name');
-        if (myName === 'monster_type' && labelMap[0]) {
-          this.updateLabel(labelMap[0]);
-        } else if (myName === 'monster_subtype' && labelMap[1]) {
-          this.updateLabel(labelMap[1]);
+
+    if (parentDetail.name === 'template') {
+      if (window.state?.monsterMap) {
+        const monsterName = window.state.monsterMap.get(parentDetail.value);
+        const labelMap = window.monsterTypeLabelMap?.[monsterName];       
+        if (labelMap) {
+          const myName = this.getAttribute('name');
+          console.log(myName)
+          switch (true) {
+            case myName === 'monster_type' && !!labelMap[0]:
+              this.updateLabel(labelMap[0]);
+              break;
+            case myName === 'monster_subtype' && !!labelMap[1]:
+              this.updateLabel(labelMap[1]);
+              break;
+            case myName === 'powers' && !!labelMap[2]:
+              this.updateLabel(labelMap[2]);
+              break;
+            default:
+              break;
+          }
         }
       }
     }
+
   }
 
   updateLabel(newLabel = null) {
@@ -99,7 +110,7 @@ class DropdownSelect extends HTMLElement {
   setOptions(options) {
     this.options = options;
     const select = this.querySelector('select');
-    const container = this.querySelector('.sheet_stat-entry');
+    const container = this.querySelector('.sheet_trait-entry');
     
     select.innerHTML = '';
     
@@ -109,20 +120,13 @@ class DropdownSelect extends HTMLElement {
       container.classList.add('Hidden');
       return;
     }
-    
-    if (options.length === 1) {
-      container.classList.add('Disabled');
-      this.addOption(options[0]);
-      return;
-    }
-    
+
     const placeholder = document.createElement('option');
-    placeholder.value = '';
-    placeholder.text = 'Select...';
+    placeholder.value = 'pending';
+    placeholder.text = 'None';
     placeholder.selected = true;
-    placeholder.disabled = true;
+    placeholder.disabled = !!this.getAttribute('required');
     select.appendChild(placeholder);
-    
     options.forEach(option => this.addOption(option));
   }
 
@@ -135,21 +139,31 @@ class DropdownSelect extends HTMLElement {
   }
 
   show() {
-    this.removeAttribute('hidden');
-    this.querySelector('.sheet_stat-entry').classList.remove('Hidden');
+    this.removeAttribute('empty');
+    this.querySelector('.sheet_trait-entry').classList.remove('Hidden');
+  }
+
+  enable() {
+    // this.removeAttribute('disabled');
+    this.querySelector('.sheet_trait-entry').classList.remove('Disabled');
   }
 
   hide() {
-    this.setAttribute('hidden', '');
-    this.querySelector('.sheet_stat-entry').classList.add('Hidden');
+    this.setAttribute('empty', true);
+    this.querySelector('.sheet_trait-entry').classList.add('Hidden');
   }
 
-  get value() {
+  disable() {
+    // this.setAttribute('disabled');
+    this.querySelector('.sheet_trait-entry').classList.add('Disabled');
+  }
+
+  getValue() {
     const selectValue = this.querySelector('select').value;
     return selectValue ? (parseInt(selectValue) || selectValue) : null;
   }
 
-  set value(val) {
+  setValue(val) {
     this.querySelector('select').value = val;
   }
 

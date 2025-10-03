@@ -5,13 +5,22 @@ import { ErrorKeys } from '../../../errors/errors.types';
 import { createErrorResponse } from '../../../errors';
 import { MonsterTemplates } from '../types';
 
-export const buildHistoricalClanExclusions = (year: number = 2025): string[] => {
+export const buildHistoricalClanExclusions = (
+  year: number = 2025,
+  faction: string = 'camarilla'
+): string[] => {
   let exclusions: string[] = [];
+
+  if (faction && faction === 'camarilla') {
+    if (year > 1999) {
+      exclusions.push('gangrel')
+    }
+  }
+
   if (year > 1600) {
     const darkAgesOnlyClans = ['bonsam', 'impundulu', 'niktuku', 'ramanga'];
     exclusions = [...exclusions, ...darkAgesOnlyClans];
   }
-
   if (year < 1950) {
     exclusions.push('serpent of the light');
     if (year < 1900) {
@@ -54,7 +63,6 @@ export const buildHistoricalBloodlineExclusions = (
   const excludedByEra = year > 1600 
   ? darkAgesBloodlines
   : modernBloodlines;
-
   exclusions = [...exclusions, ...excludedByEra];
   
   if (year >= 1800 && year <= 1900) {
@@ -76,7 +84,13 @@ export const buildHistoricalFamilyExclusions = (
   year: number = 2025,
 ): string[] => {
   let exclusions = [];
-   if (year < 1565) {
+
+  if (year > 1566) {
+    exclusions.push('basarab');
+    if (year > 1399) {
+      exclusions.push('danislav');
+    }
+  } else { // it's 1565 or earlier!
     exclusions.push('oprichniki', 'rosellini');
     if (year < 1450) {
       exclusions.push('servants of anushin-rawan');

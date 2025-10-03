@@ -27,16 +27,39 @@ export const getAllTopLevelMonsters = async(
   return await getMonsterAncestors({...options, exclude: exclusions});   
 }
 
+const buildHistoricalMonsterInclusions = (
+  type: MonsterTemplates,
+  year: number,
+  faction?: string): string[] => {
+  let defaultInclusions: string[] = [];
+  switch (true) {
+    case [MonsterTemplates.VAMPIRE, MonsterTemplates.GHOUL].includes(type):
+      if (faction) {
+        if (faction === 'camarilla' && year > 1999) {
+          defaultInclusions.push('assamite');
+        }
+        if (faction === 'tal\'mahe\'ra') {
+          defaultInclusions.push('harbinger of skulls');
+        }
+      }
+      break;
+    default:
+      break;
+  }
+  return defaultInclusions;
+}
+
 const buildHistoricalMonsterExclusions = (
   type: MonsterTemplates,
-  year: number): string[] => {
+  year: number,
+  faction?: string): string[] => {
   let defaultExclusions: string[] = [];
   switch (true) {
     case type === MonsterTemplates.VAMPIRE:
-      defaultExclusions = buildHistoricalClanExclusions(year);
+      defaultExclusions = buildHistoricalClanExclusions(year, faction);
       break;
     case type === MonsterTemplates.GHOUL:
-      const clanExclusions = buildHistoricalClanExclusions(year);
+      const clanExclusions = buildHistoricalClanExclusions(year, faction);
       defaultExclusions = clanExclusions.map(clan => `${clan} vassal`); 
       break;
     case type === MonsterTemplates.REVENANT:
@@ -67,10 +90,11 @@ const buildHistoricalMonsterExclusions = (
 };
 
 export const getAllMonsterTypes = async (
-  identifier: number | MonsterTemplates,
+  identifier: number | MonsterTemplates | string,
   options: FilterOptions
 ): Promise<ApiResponse<unknown>> => {
-  const {year, include} = options;
+
+  const {year, include, faction, exclude} = options;
   let icYear = year || 2025;
   let type: string;
   if (typeof identifier === 'number') {
@@ -78,23 +102,30 @@ export const getAllMonsterTypes = async (
   } else {
     type = identifier
   }
-  const {exclude} = options;
+
   const validMonsters = Object.values(MonsterTemplates)
   if (!validMonsters.includes(type as MonsterTemplates)) {
     return createErrorResponse(ErrorKeys.MONSTER_TYPE_NOT_FOUND);
   }
-  let exclusions = buildHistoricalMonsterExclusions(type as MonsterTemplates, icYear);
-  if (include && include.length > 0 ) {
-    exclusions = reconcileIncludeExclude(include, exclusions);
-  }
-  if (exclude && exclude.length > 0) {
-    exclusions = [...exclusions, ...exclude]
-  }
+  let exclusions = reconcileIncludeExclude(include,
+    buildHistoricalMonsterExclusions(
+    type as MonsterTemplates,
+    icYear,
+    faction
+  ))
+
+  let inclusions = reconcileIncludeExclude(exclude,
+    buildHistoricalMonsterInclusions(
+    type as MonsterTemplates,
+    icYear,
+    faction
+  ))
 
   return await getMonsters(
     [type],
     {...options,
-      exclude: exclusions
+      exclude: exclusions,
+      include: inclusions
     }
   );
 }

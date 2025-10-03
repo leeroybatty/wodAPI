@@ -1,5 +1,5 @@
   import { Response } from 'express';
-  import { prepareBaseOptions, parseQueryParam } from '../helpers';
+  import { prepareBaseOptions, parseQueryParam,  getMonsterFromParams } from '../helpers';
   import { MonsterTemplates } from './types';
   import { AuthenticatedRequest } from '../../middleware/auth';
   import { ErrorKeys } from '../../errors/errors.types';
@@ -10,16 +10,8 @@
   } from './monsterService';
 
   export const getMonsterTypesHandler = async (req: AuthenticatedRequest, res: Response) => {
-  const { monster } = req.params;
-  const isNumericId = !isNaN(Number(monster)) && monster.trim() !== '';
-  if (!isNumericId) {
-    const validMonsters = Object.values(MonsterTemplates);
-    if (!validMonsters.includes(monster.toLowerCase() as MonsterTemplates)) {
-      const invalidParameterError = createErrorResponse(ErrorKeys.MONSTER_TYPE_NOT_FOUND);
-      return res.status(404).json(invalidParameterError);
-    }
-  }
-  const monsterParam = isNumericId ? Number(monster) : monster.toLowerCase() as MonsterTemplates;
+  const monsterParam = await getMonsterFromParams(req, true) as MonsterTemplates;
+
   try {
     const options = await prepareBaseOptions(req);
     const serviceResult = await getAllMonsterTypes(monsterParam, options);

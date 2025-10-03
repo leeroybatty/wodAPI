@@ -1,16 +1,85 @@
-import { getStatDefinitions } from './statsRepository';
+import { getStatDefinitions, getAffinityPowers } from './statsRepository';
 import { reconcileIncludeExclude } from '../helpers';
 import { ApiResponse } from '../../apiResponse.types';
 import { referenceCache } from '../../sql';
 import { StatsFilters } from './types';
+import { FilterOptions } from '../types';
+
+export const getMonsterPowers = async (
+  monster: string,
+  options: FilterOptions
+): Promise<ApiResponse<unknown>> => {
+  const {bookIds, exclude, include, faction, format} = options;
+  return await getAffinityPowers(monster, options);
+}
+
+export const getVampireMoralityPaths = async (
+  options: StatsFilters
+): Promise<ApiResponse<unknown>> => {
+  const {year, include, exclude} = options;
+  const icYear = year || 2025;
+  let defaultExclusions = exclude ? [...exclude] : [];
+  
+  // whether or not you're including DA:V or just VTM core is
+  // responsible for the lion's share of path exclusions here.
+  
+  if (icYear < 1750 ) {
+    // These are more modern interpretations/variants of old roads
+    // I'm 'phasing in' these ones at this arbitrary point.
+    defaultExclusions.push(
+      'path of metamorphosis',
+      'path of lilith',
+      'path of the feral heart',
+      'path of typhon'
+    );
+  }
+
+  if (icYear < 1666 ) {
+    // these were invented specifically in 1666
+    defaultExclusions.push(
+      'path of death and the soul',
+      'path of honorable accord',
+      'path of caine',
+      'path of cathari',
+    );
+    if (icYear < 1530) {
+      // the first follower of PATIV was from 1530
+      defaultExclusions.push('path of power and the inner voice');
+      if (icYear < 500) {
+        // originates from the Children of Judas who were ~500 AD
+        defaultExclusions.push('path of ecstasy');
+        if (icYear < -30) {
+          // Originates from Roman Egypt which was ~30 BCE
+          defaultExclusions.push('path of the warrior');
+        }
+      }
+    }
+  }
+
+  const exclusions = include
+    ? reconcileIncludeExclude(include, defaultExclusions)
+    : defaultExclusions;
+
+  return await getStatDefinitions(['path'], {
+    ...options,
+    exclude: exclusions
+  })
+}
 
 export const getStatsInCategory = async (
   category: string,
   options: StatsFilters
 ): Promise<ApiResponse<unknown>> => {
   const {year, bookIds, exclude, include, monster, faction, format} = options;
-  const monsterName = monster && monster.toLowerCase() || "";
   const icYear = year || 2025;
+  let monsterName = monster || "";
+  if (monster && !isNaN(Number(monster))) {
+    monsterName = await referenceCache.getMonsterName(parseInt(monster));
+  }
+
+  if (category === 'path') {
+    return getVampireMoralityPaths(options)
+  }
 
   let categories = [category]
   if (category === 'attributes') {
@@ -36,6 +105,28 @@ export const getStatsInCategory = async (
     const noResources = /^red\s+talons?$/i;
 
     switch (true) {
+      case faction && faction === 'technocracy':
+        defaultExclusions = [...defaultExclusions, ...[
+          'avatar',
+          'arcane',
+          'chantry',
+          'dream',
+          'familiar',
+          'sanctum',
+        ]];
+        break;
+      case faction && faction === 'traditions':
+        defaultExclusions = [...defaultExclusions, ...[
+          'genius',
+          'cloaking',
+          'construct',
+          'hypercram',
+          'companion',
+          'requisitions',
+          'laboratory',
+          'secret weapons'
+        ]];
+        break;
       case noPurebreed.test(monsterName):
         defaultExclusions.push('pure breed');
       case noAncestors.test(monsterName):
@@ -150,7 +241,7 @@ export const getStatsInCategory = async (
       bookIds,
       exclude: exclusions,
       include: inclusions,
-      monster,
+      monster: monsterName,
       faction,
       format
     }

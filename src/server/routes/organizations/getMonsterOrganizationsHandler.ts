@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { prepareBaseOptions } from '../helpers';
+import { prepareBaseOptions, getMonsterFromParams } from '../helpers';
 import { AuthenticatedRequest } from '../../middleware/auth';
 import { ErrorKeys } from '../../errors/errors.types';
 import { ApiResponse } from '../../apiResponse.types';
@@ -10,21 +10,10 @@ import {
 import { MonsterTemplates } from '../monsters/types';
 
 export const getMonsterOrganizationsHandler = async (req: AuthenticatedRequest, res: Response) => {
-  const { monster } = req.params;
   const { books, exclude, include, year, faction, format } = req.query;
   const options = await prepareBaseOptions(req);
 
-  const isNumericId = !isNaN(Number(monster)) && monster.trim() !== '';
-  
-  if (!isNumericId) {
-    const validMonsters = Object.values(MonsterTemplates);
-    if (!validMonsters.includes(monster.toLowerCase() as MonsterTemplates)) {
-      const invalidParameterError = createErrorResponse(ErrorKeys.MONSTER_TYPE_NOT_FOUND);
-      return res.status(404).json(invalidParameterError);
-    }
-  }
-
-  const monsterParam = isNumericId ? Number(monster) : monster.toLowerCase() as MonsterTemplates;
+  const monsterParam = await getMonsterFromParams(req, true) as MonsterTemplates;
 
   try {
     const serviceResult = await getMonsterOrganizations(monsterParam, options);

@@ -1,223 +1,420 @@
+const vampireLabels =  ['Clan', 'Bloodline', 'Disciplines'];
+const shifterLabels = ['Beast', 'Tribe', 'Gifts'];
+
 const monsterTypeLabelMap = {
-  'vampire': ['Clan', 'Bloodline'],
-  'ghoul': ['Clan'],
-  'revenant': ['Family'],
-  'kinfolk': ['Beast', 'Tribe'],
-  'mage': ['Tradition'],
-  'possessed': ['Type'],
-  'shifter': ['Beast', 'Tribe'],
-  'bastet': ['Beast', 'Tribe'],
-  'ratkin': ['Beast', 'Aspect']
+  'vampire': vampireLabels,
+  'ghoul': vampireLabels,
+  'revenant': ['Family', 'Bloodine', 'Disciplines'],
+  'shifter': shifterLabels,
+  'bastet': shifterLabels,
+  'ratkin': shifterLabels,
+  'kinfolk': shifterLabels,
+  'mage': ['Tradition', '', 'Spheres'],
+  'possessed': ['Type', 'N/A', 'Powers'],
 };
 
-const state = {
-  year: 2025,
-  books: [
-  'vampire: the masquerade 20th anniversary core',
-  'vampire: dark ages 20th anniversary core',
-  'lore of the bloodlines'
-  ],
-  exclude: {
-    vampire: ['baali']
-  },
-  monsterTypes: [],
-  monsterMap: new Map(),
-  sheet: {
-    attributes: {
-      physical: [],
-      mental: [],
-      social: []
-    },
-    abilities: {
-      talents: [],
-      skills: [],
-      knowledges: []
-    }
-  }
-};
+const chargenner = window.SheetBuilder;
 
-const updateMonsterMap = function (newEntries) {
-  const newMonsterMap = new Map(
-    newEntries.map(row => [row.id, row.name.toLowerCase()])
-  );
-  state.monsterMap = new Map([...state.monsterMap, ...newMonsterMap]);
-}
-
-window.state = state;
+window.state = chargenner.state;
 window.monsterTypeLabelMap = monsterTypeLabelMap;
-window.updateMonsterMap = updateMonsterMap;
+window.updateMonsterMap = (entries) => chargenner.updateMonsterMap(entries);
 
-const buildOptions = function (elementId, options) {
-
-  const addOption = function(option) {
-    const newOption = document.createElement('option');
-    newOption.value = option.id;
-    newOption.text = option.name;
-    dropdownSelect.appendChild(newOption)
-  }
-
-  const dropdownSelect = document.getElementById(elementId);
-  const dropdownContainer = document.getElementById(elementId.replace('dropdown','field'))
-  dropdownSelect.innerHTML = '';
-  dropdownContainer.classList.remove('Disabled');
-  dropdownContainer.classList.remove('Hidden');
-  
-  if (options.length === 1) {
-    dropdownContainer.classList.add('Disabled');
-    addOption(options[0]);
-  }
-
-  if (options.length === 0) {
-    dropdownContainer.classList.add('Hidden');
-  }
-
-  if (options.length > 1) {
-    console.log("many options")
-    const unselected = document.createElement('option');
-    unselected.value = null;
-    unselected.text = "Select...";
-    unselected.selected = true;
-    unselected.disabled = true;
-    dropdownSelect.appendChild(unselected);
-    for (let option of options) {
-      addOption(option)
-    }
-  }
-}
-
-
-
-const updateCeilings = function (monster) {
-  const monsterName = state.monsterMap.get(monster);
+const updateCeilings = function (monsterId) {
+  const monsterName = chargenner.getMonsterName(monsterId);
   const isSupernaturallyUgly = [
     'nosferatu',
     'harbinger of skulls',
     'samedi'
-    ].includes(monsterName)
+  ].includes(monsterName);
 
-  const appearance = document.getElementById('stat-appearance');
-  const newAppearance = document.createElement('stat-rating');
-  newAppearance.setAttribute('name','appearance');
-  const checkedAppearance = document.querySelector('input[name="appearance"]:checked');
-  let oldRating = 0;
-  if (checkedAppearance) {
-    oldRating = checkedAppearance.value
-  }
-  const newAppearanceRating = isSupernaturallyUgly ? 0 : Math.max(1, oldRating);
+  const appearance = document.querySelector('stat-rating[name="appearance"]');
+  const currentValue = appearance.getValue();
+
+  const newAppearanceRating = isSupernaturallyUgly ? 0 : Math.max(1, currentValue);
   const newCeiling = isSupernaturallyUgly ? 0 : 5;
-  newAppearance.setAttribute('ceiling', newCeiling);
-  newAppearance.setAttribute('value', newAppearanceRating );
-  appearance.replaceWith(newAppearance);
-  state.attributes.social.appearance = newAppearanceRating;
-}
+  const newFloor = isSupernaturallyUgly ? -2 : -3;
+
+  appearance.setAttribute('ceiling', newCeiling);
+  appearance.setAttribute('value', newAppearanceRating);
+  appearance.connectedCallback();
+
+  const socialColumn = document.querySelector('stat-column[name="social"]');
+  socialColumn.floor = newFloor;
+  socialColumn.calculateTotal();
+};
 
 const loadTemplates = async function () {
   const templateDropdown = document.querySelector('dropdown-select[name="template"]');
-  const response = await fetch(`/api/monsters?books=${state.books}`);
+  const books = chargenner.get('books');
+  const response = await fetch(`/api/monsters?books=${books}`);
   const result = await response.json();
-  state.monsterTypes = result.data.monsters;
-  updateMonsterMap(state.monsterTypes);
+  
+  chargenner.set('monsterTypes', result.data.monsters);
+  chargenner.updateMonsterMap(result.data.monsters);
+  
   templateDropdown.loadOptions(() => result.data.monsters);
-}
+};
 
 const loadOrganizations = async function () {
   try {
-    const organizations = await fetch(`/api/organizations/${state.monster}?books=${state.books}`);
+    const monsterId = chargenner.get('monster');
+    let monsterName = chargenner.getMonsterName(monsterId);
+    
+    if (['revenant', 'ghoul'].includes(monsterName)) {
+      monsterName = 'vampire';
+    }
+    
+    const books = chargenner.get('books');
+    const year = chargenner.get('year');
+    const organizations = await fetch(`/api/organizations/${monsterName}?books=${books}&year=${year}`);
+    
     if (!organizations.ok) {
       throw new Error(`Response status: ${organizations.status}`);
     }
+    
     const organizationsResult = await organizations.json();
     const { data } = organizationsResult;
-    state.organizations = data.organizations;
-    return state.organizations;
+    
+    chargenner.set('organizations', data.organizations);
+    return data.organizations;
   } catch (error) {
     console.error(error.message);
-  } 
-}
+  }
+};
 
-const loadMonsters = async function (monster) {
+
+const loadMonsters = async function (monsterId) {
   try {
-    const monsterName = state.monsterMap.get(monster)
-    const options = await fetch(`/api/monsters/${monsterName}/type?faction=${state.organization}&books=${state.books}&exclude=${state.exclude[monsterName]}`);
+    const monsterName = chargenner.getMonsterName(monsterId);
+    const organization = chargenner.get('organization');
+    const books = chargenner.get('books');
+    const exclude = chargenner.get('exclude');
+    const year = chargenner.get('year');
+    
+    const options = await fetch(
+      `/api/monsters/${monsterName}/type?faction=${organization}&books=${books}&exclude=${exclude[monsterName]}&year=${year}`
+    );
+    
     if (!options.ok) {
       if (options.status !== 404) {
         throw new Error(`Response status: ${options.status}`);
       }
       return [];
     }
+    
     const optionsResult = await options.json();
     const { data } = optionsResult;
-    updateMonsterMap(data.monsters);
-    return data.monsters
+    
+    chargenner.updateMonsterMap(data.monsters);
+    return data.monsters;
   } catch (error) {
     console.error(error.message);
   }
-}
+};
 
+const loadArchetypes = async function () {
+  try {
+    const books = chargenner.get('books');
+    const archetypes = await fetch(`/api/stats/archetype?books=${books}`);
+    
+    if (!archetypes.ok) {
+      throw new Error(`Response status: ${archetypes.status}`);
+    }
+    
+    const result = await archetypes.json();
+    const { data } = result;
+    
+    chargenner.set('archetypes', data.stats);
+    return data.stats;
+  } catch (error) {
+    console.error(error.message);
+  }
+};
+
+const loadBackgrounds = async function (monsterId = undefined) {
+  let parameters = '';
+  try {
+    const books = chargenner.get('books');
+    const organization = chargenner.get('organization');
+    
+    if (!!monsterId) {
+      parameters += `&monster=${monsterId}&books=${books}`;
+    }
+    if (!!organization) {
+      parameters += `&faction=${organization}`;
+    }
+    
+    const backgrounds = await fetch(`/api/stats/backgrounds?${parameters}`);
+    
+    if (!backgrounds.ok) {
+      throw new Error(`Response status: ${backgrounds.status}`);
+    }
+    
+    const result = await backgrounds.json();
+    const { data } = result;
+    
+    chargenner.update({
+      backgrounds: data.stats,
+      backgroundsMap: new Map(
+        data.stats.map(row => [parseInt(row.id), row.name.toLowerCase()])
+      )
+    });
+    
+    const backgroundsColumn = document.querySelector('stat-column[name="backgrounds"]');
+    backgroundsColumn.build(data.stats, true, true);
+    backgroundsColumn.render();
+    return data.stats;
+  } catch (error) {
+    console.error(error.message);
+  }
+};
 
 const getStatSet = async function (category, params = '') {
   try {
-    const statCategory = await fetch(`/api/stats/${category}?year=${state.year}${params ? `&${params}` : ''}`);
+    const year = chargenner.get('year');
+    const statCategory = await fetch(
+      `/api/stats/${category}?year=${year}${params ? `&${params}` : ''}`
+    );
+    
     if (!statCategory.ok) {
       throw new Error(`Response status: ${statCategory.status}`);
     }
+    
     const statCategoryResult = await statCategory.json();
     const { data } = statCategoryResult;
-    return data.stats
+    return data.stats;
   } catch (error) {
     console.error(error.message);
   }
-}
+};
 
 const render = () => {
   const abilities = document.getElementById('abilities');
-  for(let category in state.sheet.abilities) {
+  const sheet = chargenner.get('sheet');
+  
+  for (let category in sheet.abilities) {
     const elementId = `abilities_${category}`;
-    const column = document.getElementById(elementId)
-    const statsArray = state.sheet.abilities[category];
-    for(let stat of statsArray) {
+    const column = document.getElementById(elementId);
+    const statsArray = sheet.abilities[category];
+    
+    for (let stat of statsArray) {
       const statElement = document.createElement('stat-rating');
       statElement.setAttribute('name', stat.name);
       statElement.setAttribute('ceiling', 3);
       column.appendChild(statElement);
-    }  
+    }
   }
-}
+
+  const archetypes = chargenner.get('archetypes');
+  const natureDropdown = document.querySelector('dropdown-select[name="nature"]');
+  const demeanorDropdown = document.querySelector('dropdown-select[name="demeanor"]');
+  natureDropdown.setOptions(archetypes);
+  demeanorDropdown.setOptions(archetypes);
+};
 
 const setup = async function () {
-  loadTemplates();
-  state.sheet.abilities.talents = await getStatSet('talents', 'exclude=Hobby Talent');
-  state.sheet.abilities.skills = await getStatSet('skills', 'exclude=Professional Skill');
-  state.sheet.abilities.knowledges = await getStatSet('knowledges', 'exclude=Expert Knowledge');
+  await loadTemplates();
+  await loadArchetypes();
+  
+  const backgroundsDropdown = document.querySelector('dropdown-select[name="backgrounds"]');
+  await backgroundsDropdown.loadOptions(() => loadBackgrounds());
+  
+  const sheet = chargenner.get('sheet');
+  sheet.abilities.talents = await getStatSet('talents', 'exclude=Hobby Talent');
+  sheet.abilities.skills = await getStatSet('skills', 'exclude=Professional Skill');
+  sheet.abilities.knowledges = await getStatSet('knowledges', 'exclude=Expert Knowledge');
+  
   render();
-}
+};
 
 setup();
 
-document.addEventListener('DOMContentLoaded', async function() {
-  await loadTemplates();
-    document.addEventListener('dropdown-changed', async (e) => {
-    const { name, value, element } = e.detail;
+
+/*
+* VAMPIRE STUFF
+*/
+const loadMoralityPaths = async function () {
+  try {
+    const monsterTypeId = chargenner.get('monsterType');
+    const monsterName = chargenner.getMonsterName(monsterTypeId);
+    const books = chargenner.get('books');
+    const year = chargenner.get('year');
     
-    switch (name) {
-      case 'template':
-        state.monster = parseInt(value);
-        const orgDropdown = document.querySelector('dropdown-select[name="organization"]');
-        await orgDropdown.loadOptions(() => loadOrganizations());
-        break;
-        
-      case 'organization':
-        state.organization = parseInt(value);
-        const typeDropdown = document.querySelector('dropdown-select[name="monster_type"]');
-        await typeDropdown.loadOptions(() => loadMonsters(state.monster));
-        break;
-        
-      case 'monster_type':
-        state.monsterType = value;
-        const subtypeDropdown = document.querySelector('dropdown-select[name="monster_subtype"]');
-        await subtypeDropdown.loadOptions(() => loadMonsters(state.monsterType));
-        updateCeilings(state.monsterType);
-        break;
+    const options = await fetch(`/api/stats/path?books=${books}&year=${year}&monster=${monsterName}`);
+    
+    if (!options.ok) {
+      if (options.status !== 404) {
+        throw new Error(`Response status: ${options.status}`);
+      }
+      return [];
     }
-  });
+    
+    const optionsResult = await options.json();
+    const { data } = optionsResult;
+    return data.stats;
+  } catch (error) {
+    console.error(error.message);
+  }
+};
+
+const loadDisciplines = async function () {
+  const monsterTypeId = chargenner.get('monsterType');
+  if (!monsterTypeId) return;
+  
+  try {
+    const disciplines = await fetch(`/api/stats/powers/${monsterTypeId}`);
+    
+    if (!disciplines.ok) {
+      throw new Error(`Response status: ${disciplines.status}`);
+    }
+    
+    const result = await disciplines.json();
+    const { data } = result;
+    const disciplinesColumn = document.querySelector('stat-column[name="disciplines"]');
+    disciplinesColumn.build(data.stats, false);
+  } catch (error) {
+    console.error(error.message);
+  }
+};
+
+const updateGeneration = () => {
+  const year = chargenner.get('year');
+  const generationBase = year < 1250 ? 12 : 13;
+  const generationRating = document.querySelector(`stat-rating[name="generation"]`);
+  const generation = generationBase - generationRating.getValue();
+  const generationSpan = document.getElementById('vampire-generation');
+  generationSpan.innerHTML = generation;
+  let bloodpoolTotal = year < 1250 ? 11 : 10;
+  if (generation === 7) {
+    bloodpoolTotal = 20;
+  } else {
+    bloodpoolTotal += generationRating.getValue();
+  }
+  const bloodpoolRating = document.querySelector(`spendable-pool[name="bloodpool"]`);
+  bloodpoolRating.setValue(bloodpoolTotal);
+  bloodpoolRating.setAttribute('rating', bloodpoolTotal);
+  bloodpoolRating.setMax(bloodpoolTotal);
+};
+
+const handleVampireStatDerivations = (e) => {
+  const { name, value } = e.detail;
+  if (name === 'generation') {
+    updateGeneration();
+  }
+  if (name === 'courage') {
+    const willpower = document.querySelector(`spendable-pool[name="willpower"]`);
+    willpower.setValue(value);
+    willpower.setAttribute('rating', value);
+    willpower.render();
+  }
+  const pathVirtues = ['conscience', 'conviction', 'self-control', 'instinct'];
+  if (pathVirtues.includes(name)) {
+    let pathTotal = 0;
+    for (let virtue of pathVirtues) {
+      const stat = document.querySelector(`stat-rating[name="${virtue}"]`);
+      pathTotal += stat.getValue();
+    }
+    const pathRating = document.querySelector(`stat-rating[name="path"]`);
+    pathRating.setValue(pathTotal);
+  }
+}
+
+document.addEventListener('category-stat-rating-removed', (e) => {
+  const { category, name, id } = e.detail;
+  const dropdownToAppend = document.querySelector(`dropdown-select[name="${category}"]`);
+  dropdownToAppend.addOption({ id, name });
 });
+
+const ghoulRevenantSheetSelectors = [
+  'stat-column[name="disciplines"]',
+  'stat-column[name="virtues"]',
+];
+
+const vampireSheetSelectors = [
+    'spendable-pool[name="bloodpool"]',
+    'div[id="path-of-enlightenment"]',
+    'div[id="generation-indicator"]'
+  ];
+
+const removeVampireSpecificStuff = function () {
+  for (let selector of [...vampireSheetSelectors, ...ghoulRevenantSheetSelectors]) {
+     document.querySelector(selector).classList.add('Hidden');
+  }
+  document.removeEventListener('stat-rating-changed', handleVampireStatDerivations);
+}
+
+const removeSplatSpecificStuff = function() {
+  removeVampireSpecificStuff();
+}
+
+const addGhoulRevenantVampireStuff = function() {
+  for (let selector of [...vampireSheetSelectors, ...ghoulRevenantSheetSelectors]) {
+    document.querySelector(selector).classList.remove('Hidden');
+  }
+  document.addEventListener('stat-rating-changed', handleVampireStatDerivations);
+}
+
+const addVampireStuff = function () {
+  updateGeneration();
+}
+
+const setMonsterType = async function() {
+  console.log("Set monster type")
+  const backgroundsDropdown = document.querySelector('dropdown-select[name="backgrounds"]');
+  const subtypeDropdown = document.querySelector('dropdown-select[name="monster_subtype"]');
+  await subtypeDropdown.loadOptions(() => loadMonsters(chargenner.get('monsterType')));
+  await backgroundsDropdown.loadOptions(() => loadBackgrounds(chargenner.get('monsterType')));
+  await loadDisciplines();
+  const moralityDropdown = document.querySelector('dropdown-select[name="morality"]');
+  await moralityDropdown.loadOptions(() => loadMoralityPaths());
+  updateCeilings(chargenner.get('monsterType'));
+}
+
+document.addEventListener('dropdown-changed', async (e) => {
+  const { name, value } = e.detail;
+  const backgroundsDropdown = document.querySelector('dropdown-select[name="backgrounds"]');
+  
+  switch (name) {
+    case 'template':
+      removeSplatSpecificStuff();
+      chargenner.set('monster', parseInt(value));
+      const orgDropdown = document.querySelector('dropdown-select[name="organization"]');
+      await orgDropdown.loadOptions(() => loadOrganizations());
+      await backgroundsDropdown.loadOptions(() => loadBackgrounds(chargenner.get('monster')));
+      const template = chargenner.getMonsterName(parseInt(value));
+      switch (true) {
+        case template === 'vampire':
+          addVampireStuff();
+        case template === 'ghoul' || template === 'revenant':
+          addGhoulRevenantVampireStuff();
+          break;
+        default:
+          break;
+      }
+      break;
+
+    case 'organization':
+      chargenner.set('organization', parseInt(value));
+      const typeDropdown = document.querySelector('dropdown-select[name="monster_type"]');
+      await typeDropdown.loadOptions(() => loadMonsters(chargenner.get('monster')));
+      await loadBackgrounds();
+      break;
+
+    case 'monster_type':
+      chargenner.set('monsterType', value);
+      setMonsterType();
+      break;
+
+    case 'monster_subtype':
+      if (value === 'pending') {
+        const monster = document.querySelector('dropdown-select[name="monster_type"]').getValue();
+        chargenner.set('monsterType',  monster)
+        setMonsterType();
+        return;
+      }
+      chargenner.set('monsterType', value);
+      updateCeilings(chargenner.get('monsterType'));
+      await loadDisciplines();
+      break;
+  }
+})

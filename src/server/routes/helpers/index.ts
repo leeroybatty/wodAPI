@@ -4,6 +4,7 @@ import { PoolClient } from 'pg';
 import { ErrorKeys } from '../../errors/errors.types';
 import { AuthenticatedRequest } from '../../middleware/auth';
 import { ValidFormat } from '../types';
+import { MonsterTemplates } from '../monsters/types';
 
 export function parseQueryParam (param: unknown): string[] {
   if (Array.isArray(param)) {
@@ -16,6 +17,27 @@ export function parseQueryParam (param: unknown): string[] {
   }
   return [];
 };
+
+export async function getMonsterFromParams (req: AuthenticatedRequest, strict: boolean = false): Promise<string> {
+  const { monster } = req.params;
+  
+  if (monster == null || monster.trim() === "") {
+    throw createErrorResponse(ErrorKeys.MONSTER_TYPE_NOT_FOUND);
+  }
+
+  const isNumericId = !isNaN(Number(monster)) && monster.trim() !== '';
+  if (!isNumericId) {
+    const validMonsters = Object.values(MonsterTemplates);
+    if (strict && !validMonsters.includes(monster.toLowerCase() as MonsterTemplates)) {
+      const invalidParameterError = createErrorResponse(ErrorKeys.MONSTER_TYPE_NOT_FOUND);
+      throw invalidParameterError;
+    }
+  }
+  if (isNumericId) {
+    return await referenceCache.getMonsterName(Number(monster));
+  }
+  return monster.toLowerCase() as MonsterTemplates;
+}
 
 export async function prepareBaseOptions (req: AuthenticatedRequest) {
   const { books, year, exclude, include, faction, format } = req.query;
@@ -47,8 +69,6 @@ export async function prepareBaseOptions (req: AuthenticatedRequest) {
     faction: factionArg,
     format: fields
   }
-  console.log(`Handler:`)
-  console.log(options)
   return options;
 }
 
@@ -56,14 +76,10 @@ export function createStringArrayPlaceholders(entries: number[] | string[], star
   return entries.map((_, index) => `$${startingIndex + index}`).join(',');
 }
 
-export function reconcileIncludeExclude(include: string[], exclude: string[]): string[] {
+export function reconcileIncludeExclude(
+  include: readonly string[] = [],
+  exclude: readonly string[] = [],
+): string[] {
   const includeSet = new Set(include);
-  const excludeSet = new Set(exclude);
-  const excludeArray = Array.from(excludeSet)
-  for (const item of excludeArray) {
-    if (includeSet.has(item)) {
-      excludeSet.delete(item);
-    }
-  }
-  return Array.from(excludeSet);
+  return [...new Set(exclude)].filter(item => !includeSet.has(item));
 }

@@ -34,10 +34,13 @@ export async function getMonsterAncestors(
       variables = [...variables, ...bookIds];
     }
 
+
     let isAccessibleToFaction = '';
     if (faction) {
       const orgId = await referenceCache.getOrganizationId(faction);
-      isAccessibleToFaction = `(m.org_lock_id IS NULL OR m.org_lock_id = $${variables.length + 1})`;
+      isAccessibleToFaction = faction === 'independent' 
+        ? `m.org_lock_id = $${variables.length + 1}`
+        : `(m.org_lock_id IS NULL OR m.org_lock_id = $${variables.length + 1})`;
       variables.push(orgId);
     }
 
@@ -150,7 +153,9 @@ export async function getMonsters(
     let isAccessibleToFaction = '';
     if (faction) {
       const orgId = await referenceCache.getOrganizationId(faction);
-      isAccessibleToFaction = `(m.org_lock_id IS NULL OR m.org_lock_id = $${variables.length + 1})`;
+      isAccessibleToFaction = faction === 'independent' 
+        ? `m.org_lock_id = $${variables.length + 1}`
+        : `(m.org_lock_id IS NULL OR m.org_lock_id = $${variables.length + 1})`;
       variables.push(orgId);
     }
 

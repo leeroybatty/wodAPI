@@ -1,32 +1,21 @@
 import { Response } from 'express';
-import { parseQueryParam, prepareBaseOptions } from '../helpers';
+import { parseQueryParam, prepareBaseOptions, getMonsterFromParams } from '../helpers';
 import { AuthenticatedRequest } from '../../middleware/auth';
 import { ErrorKeys } from '../../errors/errors.types';
 import { ApiResponse } from '../../apiResponse.types';
 import { handleError, createErrorResponse, createSuccessResponse } from '../../errors';
 import { 
-  getStatsInCategory
+  getMonsterPowers
 } from './statsService';
 import { isValidStatCategory } from './helpers';
 import { AllStatCategoriesType, StatsFilters } from './types';
 
-export const getStatsByTypeHandler = async (req: AuthenticatedRequest, res: Response) => {
-  const { type } = req.params;
-  const { monster } = req.query;
-
-  if (!isValidStatCategory(type as AllStatCategoriesType)) {
-    return res.status(404).json(
-      createErrorResponse(ErrorKeys.STAT_TYPE_NOT_FOUND)
-    );
-  };
- 
-  const category = type.toLowerCase();
+export const getPowersByMonsterHandler = async (req: AuthenticatedRequest, res: Response) => {
+  const monsterParam = await getMonsterFromParams(req, true);
   let options: StatsFilters = await prepareBaseOptions(req);
-  let monsterParam = parseQueryParam(monster).pop();
-
+  
   try {
-    const serviceResult = await getStatsInCategory(category, {...options, monster: monsterParam});
-
+    const serviceResult = await getMonsterPowers(monsterParam, {...options});
     if (serviceResult.success) {
       return res.status(200).json(serviceResult);
     }

@@ -19,9 +19,6 @@ export async function getOrganizations(
   options: FilterOptions
 ): Promise<ApiResponse<{ organizations: OrganizationData[] }>> {
   try {
-
-    console.log(options)
-
     const { bookIds, exclude, include, faction, format } = options;
     let variables: (string | number)[] = [];
 

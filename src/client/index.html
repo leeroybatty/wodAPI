@@ -3,90 +3,167 @@
 <html>
 <head>
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Girassol&family=Goudy+Bookletter+1911&display=swap" rel="stylesheet">
 </head>
 <body>
   <div id="app">
     <form class="sheet">
-      <fieldset id="splat" class="sheet_section">
-        <legend class="sheet_section-heading">Your Character</legend>
-        <div id="character_type" class="sheet_section-column">
+      <stat-section name="character" display-name="Your Character">
+        <div>
+          <div class="form_field">
+            <label class="form_label" for ="character_name">Name</label>
+            <input class="form_control" id="character_name" type="text" name="character_name"/>
+          </div>
           <dropdown-select 
             name="template" 
-            label="Splat">
+            label="Splat"
+            required="true"
+          >
           </dropdown-select>
 
           <dropdown-select 
             name="organization" 
             label="Faction"
-            hidden>
+            empty="true"
+            required="true"
+          >
+          </dropdown-select>
+        </div>
+
+        <div>
+          <dropdown-select
+            name="nature"
+            label="Nature"
+            required="true"
+          >
           </dropdown-select>
 
+          <dropdown-select
+            name="demeanor"
+            label="Demeanor"
+            required="true"
+          >
+          </dropdown-select>
+
+          <div class="form_field">
+            <label class="form_label" for ="character_concept">Concept</label>
+            <input class="form_control" id="character_concept" type="text" name="character_concept"/>
+          </div>
+        </div>
+
+        <div>
           <dropdown-select 
             name="monster_type" 
             label="Monster Type"
             depends-on="template"
-            hidden>
+            empty="true"
+            required="true"
+            >
           </dropdown-select>
-
           <dropdown-select 
             name="monster_subtype" 
             label="Monster Subtype"
             depends-on="template"
-            hidden>
+            empty="true"
+            removable="true"
+            >
           </dropdown-select>
+          <div class="sheet_trait-entry Hidden" id="generation-indicator">
+            <span class="sheet_stat-name">Generation</span>
+            <span id="vampire-generation">13</span>
+          </div>
         </div>
-      </fieldset>
+      </stat-section>
 
-      <fieldset id="attributes" class="sheet_section">
-        <legend class="sheet_section-heading">Attributes</legend>
-
+      <stat-section name="attributes">
         <stat-column name="physical" floor=-3>
-          <stat-rating name="strength" display-name="Strength" value="1"></stat-rating>
-          <stat-rating name="dexterity" display-name="Dexterity" value="1"></stat-rating>
-          <stat-rating name="stamina" display-name="Stamina" value="1"></stat-rating>
+          <stat-rating name="strength" display-name="Strength" min="1" value="1"></stat-rating>
+          <stat-rating name="dexterity" display-name="Dexterity" min="1" value="1"></stat-rating>
+          <stat-rating name="stamina" display-name="Stamina" min="1"  value="1"></stat-rating>
         </stat-column>
 
         <stat-column name="social" floor=-3>
-          <stat-rating name="manipulation" display-name="Manipulation" value="1"></stat-rating>
-          <stat-rating name="charisma" display-name="Charisma" value="1"></stat-rating>
-          <stat-rating name="appearance" display-name="Appearance" value="1"></stat-rating>
+          <stat-rating name="manipulation" display-name="Manipulation" min="1" value="1"></stat-rating>
+          <stat-rating name="charisma" display-name="Charisma"min="1" value="1"></stat-rating>
+          <stat-rating name="appearance" display-name="Appearance" min="1" value="1"></stat-rating>
         </stat-column>
 
         <stat-column name="mental" floor=-3>
-          <stat-rating name="intelligence" display-name="Intelligence" value="1"></stat-rating>
-          <stat-rating name="wits" display-name="Wits" value="1"></stat-rating>
-          <stat-rating name="perception" display-name="Perception" value="1"></stat-rating>
+          <stat-rating name="intelligence" display-name="Intelligence" min="1" value="1"></stat-rating>
+          <stat-rating name="wits" display-name="Wits" min="1" value="1"></stat-rating>
+          <stat-rating name="perception" display-name="Perception" min="1" value="1"></stat-rating>
         </stat-column>
-      </fieldset>
+      </stat-section>
 
-      <fieldset id="abilities" class="sheet_section">
-        <legend class="sheet_section-heading">Abilities</legend>
-        <div id="abilities_talents" class="sheet_section-column">
-          <h3 class="sheet_column-heading">Talents</h3>
+      <stat-section name="abilities">
+        <stat-column name="talents" id="abilities_talents">
+        </stat-column>
+
+        <stat-column name="skills" id="abilities_skills">
+        </stat-column>
+
+        <stat-column name="knowledges" id="abilities_knowledges">
+        </stat-column>
+      </stat-section>
+
+      <stat-section name="advantages">
+        <stat-column name="disciplines" class="Hidden" max=3>
+        </stat-column>
+
+        <stat-column name="backgrounds" max=5>
+          <dropdown-select
+            slot="dropdown"
+            name="backgrounds" 
+            label="Background"
+            depends-on="monster_type"
+          />
+        </stat-column>
+
+        <stat-column class="Hidden" name="virtues" floor=-3 max=7>
+          <stat-rating name="conscience" display-name="Conscience" min="1" value="1"></stat-rating>
+          <stat-rating name="self-control" display-name="Self-Control" min="1" value="1"></stat-rating>
+          <stat-rating
+            name="conviction"
+            display-name="Conviction"
+            min="1"
+            value="0"
+            empty="true"
+          ></stat-rating>
+          <stat-rating
+            name="instinct"
+            display-name="Instinct"
+            min="1"
+            value="0"
+            empty="true"
+          ></stat-rating>
+          <stat-rating name="courage" display-name="Courage" min="1" value="1"></stat-rating>
+        </stat-column>
+      </stat-section>
+
+      <stat-section name="Miscellaneous">
+        <div class="sheet_column Hidden" id="path-of-enlightenment">
+          <stat-rating max=10 name="path" min=1 value=2 disabled=true ceiling=10></stat-rating>
+            <dropdown-select name="morality" label="Morality">
+            </dropdown-select>
         </div>
-
-        <div id="abilities_skills" class="sheet_section-column">
-          <h3 class="sheet_column-heading">Skills</h3>
+        <div class="sheet_column">
+          <spendable-pool name="willpower" rating=1></spendable-pool>
         </div>
-
-        <div id="abilities_knowledges" class="sheet_section-column">
-          <h3 class="sheet_column-heading">Knowledges</h3>
+        <div class="sheet_column">
+          <spendable-pool name="bloodpool" class="Hidden" rating=0></spendable-pool>
         </div>
-      </fieldset>
-
-      <fieldset id="advantages" class="sheet_section">
-        <legend class="sheet_section-heading">Advantages</legend>
-
-        <div id="advantages_backgrounds" class="sheet_section-column">
-          <h3 class="sheet_column-heading">Backgrounds</h3>
-        </div>
-      </fieldset>
+      </stat-section>
 
     </form>
   </div>
+  <script src="sheetBuilder.js"></script>
   <script type="module" src="app.js"></script>
   <script type="module" src="/components/statRating.js"></script>
   <script type="module" src="/components/dropdownSelect.js"></script>
   <script type="module" src="/components/statColumn.js"></script>
+  <script type="module" src="/components/statSection.js"></script>
+  <script type="module" src="/components/spendablePool.js"></script>
 </body>
 </html>

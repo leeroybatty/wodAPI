@@ -5,6 +5,7 @@ import { getCharacterStat } from './routes/stats';
 import { getMonsterTypesHandler } from './routes/monsters/getMonsterTypesHandler';
 import { getMonstersHandler } from './routes/monsters/getMonstersHandler';
 import { getStatsByTypeHandler } from './routes/stats/getStatsByTypeHandler';
+import { getPowersByMonsterHandler } from './routes/stats/getPowersByMonsterHandler';
 import { getMonsterOrganizationsHandler } from './routes/organizations/getMonsterOrganizationsHandler';
 import { swaggerConfig } from './swagger';
 import swaggerJsdoc from 'swagger-jsdoc';
@@ -24,6 +25,7 @@ app.get('/api/organizations/:monster', getMonsterOrganizationsHandler);
 app.get('/api/monsters', /* authorizeCharacterAccess, */ getMonstersHandler);
 app.get('/api/monsters/:monster/type', /* authorizeCharacterAccess, */ getMonsterTypesHandler);
 app.get('/api/stats/:type', /* authorizeCharacterAccess, */ getStatsByTypeHandler);
+app.get('/api/stats/powers/:monster', /* authorizeCharacterAccess, */ getPowersByMonsterHandler);
 
 app.get('/api/character/:id/stat/:statName', /* authorizeCharacterAccess, */ getCharacterStat);
 
