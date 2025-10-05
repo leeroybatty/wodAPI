@@ -1,4 +1,4 @@
-import { getStatDefinitions, getAffinityPowers } from './statsRepository';
+import { getStatDefinitions, getAffinityPowers, getVirtuesByPath } from './statsRepository';
 import { reconcileIncludeExclude } from '../helpers';
 import { ApiResponse } from '../../apiResponse.types';
 import { referenceCache } from '../../sql';
@@ -15,10 +15,10 @@ export const getMonsterPowers = async (
 
 export const getPathVirtues = async (
   path: string,
+  options: FilterOptions
 ): Promise<ApiResponse<unknown>> => {
   return await getVirtuesByPath(path, options);
 }
-
 
 export const getVampireMoralityPaths = async (
   options: StatsFilters

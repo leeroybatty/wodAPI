@@ -282,6 +282,8 @@ class ReferenceDataCache {
   private organizations: Map<string, number> | null = null;
   private organizationIds: Map<number, string> | null = null;
   private books: Map<string, number> | null = null;
+  private stats: Map<string, number> | null = null;
+  private statIds: Map<number, string> | null = null;
 
   async getMonsterChain(name: string): Promise<number[]> {
     await this.loadMonsters();
@@ -296,7 +298,6 @@ class ReferenceDataCache {
       chain.push(currentId);
       currentId = this.monsterParents!.get(currentId);
     }
-    
     return chain;
   }
 
@@ -312,6 +313,18 @@ class ReferenceDataCache {
           .map(row => [row.id, row.parent_id])
       );
       this.monsterIds = new Map(
+        result.rows.map(row => [row.id, row.name.toLowerCase()])
+      );
+    }
+  }
+
+  private async loadStats() {
+    if (!this.stats || !this.statIds) {
+      const result = await queryDbConnection('SELECT id, name FROM stats');
+      this.stats = new Map(
+        result.rows.map(row => [row.name.toLowerCase(), row.id])
+      );
+      this.statIds = new Map(
         result.rows.map(row => [row.id, row.name.toLowerCase()])
       );
     }
@@ -371,6 +384,20 @@ class ReferenceDataCache {
     const id = this.books!.get(name.toLowerCase());
     if (!id) throw new QueryExecutionError('Book not found', '', [], ErrorKeys.RESOURCE_NOT_FOUND);
     return id;
+  }
+
+  async getStatId(name: string): Promise<number> {
+    await this.loadStats();
+    const id = this.stats!.get(name.toLowerCase());
+    if (!id) throw new QueryExecutionError('Stat not found', '', [], ErrorKeys.RESOURCE_NOT_FOUND);
+    return id;
+  }
+
+  async getStatName(id: number): Promise<string> {
+    await this.loadStats();
+    const name = this.statIds!.get(id);
+    if (!name) throw new QueryExecutionError('Stat not found', '', [], ErrorKeys.RESOURCE_NOT_FOUND);
+    return name;
   }
 
   async getBookIds(names: string[]): Promise<number[]> {

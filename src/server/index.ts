@@ -5,6 +5,7 @@ import { getCharacterStat } from './routes/stats';
 import { getMonsterTypesHandler } from './routes/monsters/getMonsterTypesHandler';
 import { getMonstersHandler } from './routes/monsters/getMonstersHandler';
 import { getStatsByTypeHandler } from './routes/stats/getStatsByTypeHandler';
+import { getPathVirtuesHandler } from './routes/stats/getPathVirtuesHandler';
 import { getPowersByMonsterHandler } from './routes/stats/getPowersByMonsterHandler';
 import { getMonsterOrganizationsHandler } from './routes/organizations/getMonsterOrganizationsHandler';
 import { swaggerConfig } from './swagger';
@@ -21,13 +22,13 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   customSiteTitle: 'TTRPG API Documentation'
 }));
 
-app.get('/api/organizations/:monster', getMonsterOrganizationsHandler);
-app.get('/api/monsters', /* authorizeCharacterAccess, */ getMonstersHandler);
-app.get('/api/monsters/:monster/type', /* authorizeCharacterAccess, */ getMonsterTypesHandler);
-app.get('/api/stats/:type', /* authorizeCharacterAccess, */ getStatsByTypeHandler);
-app.get('/api/stats/powers/:monster', /* authorizeCharacterAccess, */ getPowersByMonsterHandler);
-
-app.get('/api/character/:id/stat/:statName', /* authorizeCharacterAccess, */ getCharacterStat);
+app.get('/api/organizations/:monster', /* authorizeGeneralAccess, */ getMonsterOrganizationsHandler);
+app.get('/api/monsters', /* authorizeGeneralAccess, */ getMonstersHandler);
+app.get('/api/monsters/:monster/type', /* authorizeGeneralAccess, */ getMonsterTypesHandler);
+app.get('/api/stats/:type', /* authorizeGeneralAccess, */ getStatsByTypeHandler);
+app.get('/api/stats/powers/:monster', /* authorizeGeneralAccess, */ getPowersByMonsterHandler);
+app.get('/api/stats/virtues/:path', /* authorizeGeneralAccess, */ getPathVirtuesHandler)
+app.get('/api/character/:id/stat/:statName', /* authorizeGeneralAccess, */ getCharacterStat);
 
 
 app.use(express.static(path.join(__dirname, '../client')));
