@@ -10,7 +10,6 @@ import {
 import { MonsterTemplates } from '../monsters/types';
 
 export const getMonsterOrganizationsHandler = async (req: AuthenticatedRequest, res: Response) => {
-  const { books, exclude, include, year, faction, format } = req.query;
   const options = await prepareBaseOptions(req);
 
   const monsterParam = await getMonsterFromParams(req, true) as MonsterTemplates;

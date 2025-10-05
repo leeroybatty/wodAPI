@@ -4,19 +4,19 @@ class StatSection extends HTMLElement {
     this.attachShadow({ mode: 'open' });
   }
 
-  connectedCallback() {
-    this.render();
-    this.addEventListener('stat-rating-changed', (e) => {
-      this.calculateTotal();
-    });
+  static get observedAttributes() {
+    return ['empty', 'name', 'displayName'];
   }
 
-  calculateTotal() {
+  attributeChangedCallback(oldValue, newValue) {
+    if (oldValue !== newValue) {
+      this.render();
+    }
   }
 
   render() {
     const name = this.getAttribute('name') || 'category';
-    const displayName = this.getAttribute('display-name') || name;
+    const displayName = this.getAttribute('heading') || name;
     
     this.shadowRoot.innerHTML = `
       <style>
@@ -38,7 +38,6 @@ class StatSection extends HTMLElement {
           text-transform: capitalize;
         }
       </style>
-
       <fieldset id="${name}-section" class="sheet_section">
         <legend class="sheet_section-heading">${displayName}</legend>
         <slot></slot>

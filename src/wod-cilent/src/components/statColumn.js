@@ -2,7 +2,7 @@ class StatColumn extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
-    this.total = 0;
+    this.total = parseInt(this.getAttribute('total')) ||  0;
     this.floor = parseInt(this.getAttribute('floor')) || 0;
     this.max = parseInt(this.getAttribute('max')) || undefined;
     this.availableStats = [];
@@ -63,8 +63,6 @@ class StatColumn extends HTMLElement {
   }
 
   build(stats, hidden = false, removable = false) {
-    console.log(stats)
-    console.log(`Hidden? ${hidden}`)
     this.availableStats = stats;
     const existingStats = this.querySelectorAll('stat-rating');
     existingStats.forEach(stat => stat.remove());
@@ -82,7 +80,6 @@ class StatColumn extends HTMLElement {
   }
 
   calculateTotal(e) {
-    console.log("Calculating total with floor " + this.floor)
     const statRatings = this.querySelectorAll('stat-rating');
     let total = this.floor;
     statRatings.forEach(rating => { 
@@ -98,6 +95,16 @@ class StatColumn extends HTMLElement {
           dropdown.disable();
         }
       }
+    }
+  }
+
+   static get observedAttributes() {
+    return ['total', 'name', 'displayName'];
+  }
+
+  attributeChangedCallback(oldValue, newValue) {
+    if (oldValue !== newValue) {
+      this.render();
     }
   }
 

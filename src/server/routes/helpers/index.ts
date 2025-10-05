@@ -19,8 +19,7 @@ export function parseQueryParam (param: unknown): string[] {
 };
 
 export async function getMonsterFromParams (req: AuthenticatedRequest, strict: boolean = false): Promise<string> {
-  const { monster } = req.params;
-  
+  const { monster } = req.params; 
   if (monster == null || monster.trim() === "") {
     throw createErrorResponse(ErrorKeys.MONSTER_TYPE_NOT_FOUND);
   }

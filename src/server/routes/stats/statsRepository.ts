@@ -129,7 +129,6 @@ export async function getStatDefinitions(
   }
 }
 
-
 export async function getAffinityPowers(
   monster: string,
   options: FilterOptions
@@ -137,6 +136,8 @@ export async function getAffinityPowers(
   try {
     const { bookIds, exclude, include, faction, format } = options;
     let variables: (string | number)[] = [];
+    console.log("Get affinity powers");
+    console.log(options);
 
     let isIncluded = '';
     if (include && include.length > 0) {
@@ -198,14 +199,70 @@ export async function getAffinityPowers(
     const statsQuery = `
       SELECT ${columns}
       FROM stats s ${joins}
-      WHERE ${isAccessibleToMonster} AND ${isPower}
-        AND (${optionalCondition(isAccessibleToFaction)}
-            AND ${optionalCondition(isFoundInTheseBooks)}
-          ${isIncluded ? ` OR ${isIncluded}` : ''}
+      WHERE ${isPower}
+        AND (${isAccessibleToMonster} ${isIncluded ? ` OR ${isIncluded}` : ''})
+        AND (
+          ${optionalCondition(isAccessibleToFaction)}
+          AND ${optionalCondition(isFoundInTheseBooks)}
         )
         ${isNotExcluded ? ` AND ${isNotExcluded}` : ''}
       ORDER BY s.id, s.name ASC
     `;    
+
+    const statsResult = await queryDbConnection(statsQuery, variables);
+
+    if (format === "names") {
+      return createSuccessResponse({
+        stats: statsResult.rows.map((stat) => stat.name)
+      });
+    }
+
+    console.log(statsQuery)
+    console.log(variables)
+    
+    return createSuccessResponse({
+      stats: statsResult.rows
+    });
+    
+  } catch (error) {
+    console.error('Query error:', error);
+    return createErrorResponse(
+      ErrorKeys.GENERAL_SERVER_ERROR,
+      error instanceof Error ? error.message : 'Unknown error occurred'
+    );
+  }
+}
+
+export async function getVirtuesByPath(
+  path: string,
+  options: FilterOptions
+): Promise<ApiResponse<{ stats: StatsData[] }>> {
+  try {
+    const { format } = options;
+
+    const columns = format === "names"
+      ? "DISTINCT s.id, s.name"
+      : `DISTINCT ON (s.id) s.id,
+        s.name, 
+        s.description,
+        CASE 
+          WHEN s.book_id IS NOT NULL THEN 
+            json_build_object(
+              'book_id', s.book_id,
+              'book_name', b.name,
+              'page_number', s.page_number
+            )
+          ELSE NULL
+        END as reference`
+
+    const statsQuery = `
+      SELECT ${columns}
+      FROM bridge_paths_virtues bpv
+      JOIN stats s ON bpv.stat_id = s.id
+      JOIN  stats path on path.id = bpv.path_id
+      WHERE LOWER(path.name) = '$1'`;
+
+    const variables = [path]
 
     const statsResult = await queryDbConnection(statsQuery, variables);
 

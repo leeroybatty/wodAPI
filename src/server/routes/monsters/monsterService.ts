@@ -7,6 +7,7 @@ import {
   buildHistoricalClanExclusions,
   buildHistoricalFamilyExclusions,
   buildHistoricalBloodlineExclusions,
+  buildHistoricalTalMaheRaClanInclusions,
   isBloodline
 } from './splats/vampire';
 import { buildHistoricalCraftExclusions } from './splats/mage';
@@ -36,10 +37,11 @@ const buildHistoricalMonsterInclusions = (
     case [MonsterTemplates.VAMPIRE, MonsterTemplates.GHOUL].includes(type):
       if (faction) {
         if (faction === 'camarilla' && year > 1999) {
+          // Schismatics join after Ur-Shulgi ruins Christmas:
           defaultInclusions.push('assamite');
         }
-        if (faction === 'tal\'mahe\'ra') {
-          defaultInclusions.push('harbinger of skulls');
+        if (faction === "tal'mahe'ra") {
+          defaultInclusions = buildHistoricalTalMaheRaClanInclusions(year);
         }
       }
       break;

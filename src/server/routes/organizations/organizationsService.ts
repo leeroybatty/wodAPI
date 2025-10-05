@@ -59,7 +59,7 @@ export const getMonsterOrganizations = async (
   identifier: number | MonsterTemplates,
   options: FilterOptions
 ): Promise<ApiResponse<unknown>> => {
-  const {year, include, bookIds} = options;
+  const {year, include, exclude, bookIds} = options;
   let icYear = year || 2025;
   let type: MonsterTemplates
   if (typeof identifier === 'number') {
@@ -129,9 +129,14 @@ export const getMonsterOrganizations = async (
   }
 
   let defaultExclusions = buildHistoricalOrganizationExclusions(type as MonsterTemplates, icYear);
+  if (exclude) {
+    defaultExclusions = [...defaultExclusions, ...exclude];
+  }
   const exclusions = include
     ? reconcileIncludeExclude(include, defaultExclusions)
     : defaultExclusions;
+
+
 
   if (monsters.length === 0) {
     monsters.push(type);

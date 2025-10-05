@@ -1,7 +1,7 @@
 class StatRating extends HTMLElement {
   connectedCallback() {
     this.addEventListener('change', this.handleRatingChange.bind(this));
-    if (this.getAttribute('removable') === 'true') {
+    if (this.hasAttribute('removable')) {
       this.addEventListener('change', this.handleRemoval.bind(this));
     }
     this.render();
@@ -18,7 +18,8 @@ class StatRating extends HTMLElement {
     const min = parseInt(this.getAttribute('min')) || 0;
     const max = parseInt(this.getAttribute('max')) || Math.max(5, ceiling);
     const headingId = `${name}_heading`;
-    const empty = this.getAttribute('empty') === 'true';
+    const empty = this.hasAttribute('empty') && this.getAttribute('empty') !== 'false';
+
     const chargen = this.getAttribute('chargen') || false;
     
     const zeroRating = `
@@ -136,22 +137,24 @@ class StatRating extends HTMLElement {
   }
 
   handleRemoval(event) {
-    if (event.target.type === 'radio');
-    const selectedValue = parseInt(event.target.value);
-    if (selectedValue === 0) {
-      this.hide();
-      this.setValue(0);
-      this.dispatchEvent(new CustomEvent('stat-rating-removed', {
-        detail: { 
-          name: this.getAttribute('name'),
-          id: this.getAttribute('id').split('-').pop(),
-          value: selectedValue,
-          element: this 
-        },
-        bubbles: true
-      }));
+    if (event.target.type === 'radio') {
+      const selectedValue = parseInt(event.target.value);
+      if (selectedValue === 0) {
+        this.hide();
+        this.setValue(0);
+        this.dispatchEvent(new CustomEvent('stat-rating-removed', {
+          detail: { 
+            name: this.getAttribute('name'),
+            id: this.getAttribute('data-id'),
+            value: selectedValue,
+            element: this,
+            category: this.getAttribute('category'),
+            subcategory: this.getAttribute('subcategory')
+          },
+          bubbles: true
+        }));
+      }
     }
-   
   }
 
   handleRatingChange(event) {
@@ -178,6 +181,34 @@ class StatRating extends HTMLElement {
       }));
     }
   }
+
+  static get observedAttributes() {
+    return ['value', 'ceiling', 'name', 'display-name', 'min', 'max'];
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (name === 'ceiling' || name === 'value') {
+       this.enforceConstraints();
+      }
+      this.render();
+    }
+  }
+
+  enforceConstraints() {
+    const ceiling = parseInt(this.getAttribute('ceiling')) || 5;
+    const min = parseInt(this.getAttribute('min')) || 0;
+    const currentValue = parseInt(this.getAttribute('value')) || 0;
+    
+    if (currentValue > ceiling) {
+      this.setAttribute('value', ceiling.toString());
+    }
+
+    if (min > ceiling) {
+      this.setAttribute('min', ceiling.toString());
+    }
+    
+   }
 }
 
 customElements.define('stat-rating', StatRating);

@@ -96,6 +96,8 @@ export async function getOrganizations(
     
     return createSuccessResponse({
       organizations: organizationResult.rows,
+      organizationQuery,
+      variables
     });
     
   } catch (error) {

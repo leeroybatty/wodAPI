@@ -1,12 +1,13 @@
 class SheetBuilder {
   constructor() {
     const state = {
-      year: 2025,
+      year: 200,
       books: [],
       exclude: {},
       monsterTypes: [],
       backgroundsMap: new Map(),
       monsterMap: new Map(),
+      organizationMap: new Map(),
       sheet: {
         abilities: {
           talents: [],
@@ -65,10 +66,27 @@ class SheetBuilder {
     this.notify('monsterMap', this.state.monsterMap);
   }
 
+   updateOrganizationMap(newEntries) {
+    const newMap = new Map(
+      newEntries.map(row => [row.id, row.name.toLowerCase()])
+    );
+    this.state.organizationMap = new Map([...this.state.organizationMap, ...newMap]);
+    this.notify('organizationMap', this.state.organizationMap);
+  }
+
   getMonsterName(id) {
     return this.state.monsterMap.get(id);
+  }
+
+  getOrgName(id) {
+    return this.state.organizationMap.get(id);
   }
 
 }
 
 window.SheetBuilder = new SheetBuilder();
+
+if (typeof window !== 'undefined') {
+  (window as any).state = sheetBuilder.state;
+  (window as any).updateMonsterMap = (entries: any) => stateManager.updateMonsterMap(entries);
+}

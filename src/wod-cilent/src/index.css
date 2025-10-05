@@ -57,7 +57,7 @@
   --swatch-white: #fff;
   --swatch-black: #050505;
 
-  --base-size: 1rem;
+  --base-size: 1.12rem;
   --base-scaler: 1.5;
   --base-line-height-body: 1.5;
   --base-line-height-header: 1.3;
@@ -245,7 +245,7 @@ h1, h2, h3, h4, h5, h6 {
 .sheet_stat-ramp {
   display:  flex;
   flex-direction: row;
-  gap:  var(--spacing-3xs);
+  gap: var(--spacing-3xs);
   flex-wrap: wrap;
 }
 
@@ -407,8 +407,22 @@ h1, h2, h3, h4, h5, h6 {
   border: 2px dashed var(--col-disabled);
 }
 
+.Bold {
+  font-size: inherit;
+  color:  inherit;
+  font-weight: 600;
+}
+
 .navbar {
-  width: 100%;
-  background-color: red;
-  text-transform: uppercase;
+  width:  100%;
+  background-color: var(--theme-interface-90);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  color:  var(--col-text-inverse);
+}
+
+.sheet_helpertext {
+  transition:  all 0.3s ease;
+  color:  var(--col-text-secondary);
+  text-align: center;
 }

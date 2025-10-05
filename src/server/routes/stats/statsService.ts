@@ -13,6 +13,13 @@ export const getMonsterPowers = async (
   return await getAffinityPowers(monster, options);
 }
 
+export const getPathVirtues = async (
+  path: string,
+): Promise<ApiResponse<unknown>> => {
+  return await getVirtuesByPath(path, options);
+}
+
+
 export const getVampireMoralityPaths = async (
   options: StatsFilters
 ): Promise<ApiResponse<unknown>> => {
@@ -172,38 +179,22 @@ export const getStatsInCategory = async (
       }
     }
 
-    if (icYear < 1500) {
-      defaultExclusions.push('firearms', 'drive', 'technology');
-      defaultInclusions.push('archery', 'commerce', 'ride');
-    } else {
-      defaultInclusions.push('firearms');
-      if (icYear < 1750) {
-        defaultInclusions.push('archery', 'commerce', 'ride');
-        defaultExclusions.push('drive', 'technology');
-      } else {
-        defaultExclusions.push('commerce');
-        if (icYear < 1890) {
-          defaultInclusions.push('archery', 'ride');
-          defaultExclusions.push('drive', 'technology');
-        } else {
-          defaultExclusions.push('archery');
-          if (icYear < 1910) {
-            defaultInclusions.push('ride');
-            defaultExclusions.push('drive', 'technology');
-          } else {
-            defaultInclusions.push('drive');
-            if (icYear < 1930) {
-              defaultInclusions.push('ride');
-              defaultExclusions.push('technology');
-            } else {
-              defaultExclusions.push('ride');
-              if (icYear < 1950) {
-                defaultExclusions.push('technology');
-              } else {
-                defaultInclusions.push('technology');
-              }
-            }
-          }
+    if (icYear < 1950) {
+      defaultExclusions.push('technology');
+      if (icYear < 1930) {
+        defaultExclusions.push('drive');
+        if (icYear < 1500) {
+          defaultExclusions.push('firearms');
+        }
+      }
+    }
+
+    if (icYear > 1500) {
+      defaultExclusions.push('commerce');
+      if (icYear > 1900 ) {
+        defaultExclusions.push('archery')
+        if (icYear > 1930) {
+          defaultExclusions.push('ride');
         }
       }
     }

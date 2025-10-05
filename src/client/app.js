@@ -19,8 +19,8 @@ window.state = chargenner.state;
 window.monsterTypeLabelMap = monsterTypeLabelMap;
 window.updateMonsterMap = (entries) => chargenner.updateMonsterMap(entries);
 
-const updateCeilings = function (monsterId) {
-  const monsterName = chargenner.getMonsterName(monsterId);
+const checkForSupernaturallyUgly = function () {
+  const monsterName = chargenner.getMonsterName(chargenner.get('monsterType'));
   const isSupernaturallyUgly = [
     'nosferatu',
     'harbinger of skulls',
@@ -74,8 +74,8 @@ const loadOrganizations = async function () {
     
     const organizationsResult = await organizations.json();
     const { data } = organizationsResult;
-    
     chargenner.set('organizations', data.organizations);
+    chargenner.updateOrganizationMap(data.organizations);
     return data.organizations;
   } catch (error) {
     console.error(error.message);
@@ -341,33 +341,55 @@ const removeVampireSpecificStuff = function () {
      document.querySelector(selector).classList.add('Hidden');
   }
   document.removeEventListener('stat-rating-changed', handleVampireStatDerivations);
+  checkForSupernaturallyUgly();
 }
 
 const removeSplatSpecificStuff = function() {
+  document.querySelector('dropdown-select[name="monster_subtype"]')
+    .removeAttribute('required')
+
+    console.log("Requirement removed.")
   removeVampireSpecificStuff();
 }
 
-const addGhoulRevenantVampireStuff = function() {
+const addGhoulRevenantStuff = async function() {
   for (let selector of [...vampireSheetSelectors, ...ghoulRevenantSheetSelectors]) {
     document.querySelector(selector).classList.remove('Hidden');
   }
   document.addEventListener('stat-rating-changed', handleVampireStatDerivations);
 }
 
-const addVampireStuff = function () {
+const addVampireStuff = async function () {
   updateGeneration();
+  const moralityDropdown = document.querySelector('dropdown-select[name="morality"]');
+  await moralityDropdown.loadOptions(() => loadMoralityPaths());
+}
+
+const checkForBloodlineRestrictions = function () {
+  const orgName = chargenner.getOrgName(chargenner.get('organization'));
+  const monsterName = chargenner.getMonsterName(chargenner.get('monsterType'));
+  if (orgName === 'tal\'mahe\'ra' && monsterName === 'ventrue') {
+    document.querySelector('dropdown-select[name="monster_subtype"]')
+    .setAttribute('required', 'true');
+  }
 }
 
 const setMonsterType = async function() {
-  console.log("Set monster type")
   const backgroundsDropdown = document.querySelector('dropdown-select[name="backgrounds"]');
   const subtypeDropdown = document.querySelector('dropdown-select[name="monster_subtype"]');
   await subtypeDropdown.loadOptions(() => loadMonsters(chargenner.get('monsterType')));
   await backgroundsDropdown.loadOptions(() => loadBackgrounds(chargenner.get('monsterType')));
-  await loadDisciplines();
-  const moralityDropdown = document.querySelector('dropdown-select[name="morality"]');
-  await moralityDropdown.loadOptions(() => loadMoralityPaths());
-  updateCeilings(chargenner.get('monsterType'));
+  const template = chargenner.get('template');
+  switch (true) {
+    case template === 'vampire':
+      checkForSupernaturallyUgly();
+      checkForBloodlineRestrictions();
+    case ['ghoul','revenant'].includes('template'):
+      await loadDisciplines();
+      break;
+    default:
+      break;
+  }
 }
 
 document.addEventListener('dropdown-changed', async (e) => {
@@ -376,17 +398,18 @@ document.addEventListener('dropdown-changed', async (e) => {
   
   switch (name) {
     case 'template':
-      removeSplatSpecificStuff();
       chargenner.set('monster', parseInt(value));
+      removeSplatSpecificStuff();
       const orgDropdown = document.querySelector('dropdown-select[name="organization"]');
       await orgDropdown.loadOptions(() => loadOrganizations());
       await backgroundsDropdown.loadOptions(() => loadBackgrounds(chargenner.get('monster')));
-      const template = chargenner.getMonsterName(parseInt(value));
+      const template = chargenner.getMonsterName(parseInt(value)).toLowerCase();
+      chargenner.set('template', template);
       switch (true) {
         case template === 'vampire':
           addVampireStuff();
         case template === 'ghoul' || template === 'revenant':
-          addGhoulRevenantVampireStuff();
+          addGhoulRevenantStuff();
           break;
         default:
           break;
@@ -401,7 +424,7 @@ document.addEventListener('dropdown-changed', async (e) => {
       break;
 
     case 'monster_type':
-      chargenner.set('monsterType', value);
+      chargenner.set('monsterType', parseInt(value));
       setMonsterType();
       break;
 
@@ -413,8 +436,6 @@ document.addEventListener('dropdown-changed', async (e) => {
         return;
       }
       chargenner.set('monsterType', value);
-      updateCeilings(chargenner.get('monsterType'));
-      await loadDisciplines();
       break;
   }
 })

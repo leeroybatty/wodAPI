@@ -153,7 +153,8 @@ export async function getMonsters(
     let isAccessibleToFaction = '';
     if (faction) {
       const orgId = await referenceCache.getOrganizationId(faction);
-      isAccessibleToFaction = faction === 'independent' 
+      const exactMatches = ['independent', 'tal\'mahe\'ra'];
+      isAccessibleToFaction = exactMatches.includes(faction)
         ? `m.org_lock_id = $${variables.length + 1}`
         : `(m.org_lock_id IS NULL OR m.org_lock_id = $${variables.length + 1})`;
       variables.push(orgId);

@@ -23,11 +23,15 @@ class DropdownSelect extends HTMLElement {
 
     select.addEventListener('change', (e) => {
       const value = parseInt(e.target.value) || e.target.value;
+      const selectedOption = e.target.options[e.target.selectedIndex];
+      const text = selectedOption ? selectedOption.text : '';
+
       this.dispatchEvent(new CustomEvent('dropdown-changed', {
         detail: { 
-          name: this.getAttribute('name'), 
-          value: value,
-          element: this 
+          trait: this.getAttribute('name'), 
+          name: text,
+          id: value,
+          element: this
         },
         bubbles: true
       }));

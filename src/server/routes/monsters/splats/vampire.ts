@@ -11,9 +11,12 @@ export const buildHistoricalClanExclusions = (
 ): string[] => {
   let exclusions: string[] = [];
 
-  if (faction && faction === 'camarilla') {
-    if (year > 1999) {
+  if (faction) {
+    if (faction === 'camarilla' && year > 1999) {
       exclusions.push('gangrel')
+    }
+    if (faction === 'autarkis') {
+      exclusions.push('blood brothers');
     }
   }
 
@@ -35,8 +38,11 @@ export const buildHistoricalClanExclusions = (
               exclusions.push('tremere');
               if (year < 1055) {
                 exclusions.push('giovanni');
-                if (year < -8000) {
-                  exclusions.push('tzimisce');
+                if (year < 1000) {
+                  exclusions.push('maeghar');
+                  if (year < -8000) {
+                    exclusions.push('tzimisce');
+                  }
                 }
               }
             }
@@ -46,6 +52,32 @@ export const buildHistoricalClanExclusions = (
     }
   }
   return exclusions;
+}
+
+export const buildHistoricalTalMaheRaClanInclusions = (
+  year: number = 2025
+): string[] => {
+  // see page 49 of A Guide To The Tal'Mahe'Ra.
+  let inclusions: string[] = ['ventrue']; // to unlock Danava.
+  if (year > -800 ) {  // 'Classical antiquity'
+    inclusions.push('true brujah');
+    if (year > 250 ) { // 'Late antiquity'
+      inclusions.push('gangrel', 'malkavian', 'nosferatu',  'toreador',  'ventrue');
+      if (year > 500 ) { // "the middle ages"
+        inclusions.push('assamite', 'lasombra', 'salubri');
+        if (year > 1400) { // the rennaisance
+          inclusions.push('daughter of cacophony');
+          if (year > 1687) { // age of reason
+            inclusions.push('ravnos')
+            if (year > 1970) { // the information age
+              inclusions.push('baali', 'harbinger of skulls', 'cappadocian');
+            }
+          }
+        }
+      }
+    }
+  }
+  return inclusions;
 }
 
 export const buildHistoricalBloodlineExclusions = (
@@ -68,15 +100,17 @@ export const buildHistoricalBloodlineExclusions = (
   if (year >= 1800 && year <= 1900) {
     exclusions.push('ahrimanes');
   }
+
   if (year > 1350) {
     exclusions.push('lhiannan');
     if (year > 1400) {
       exclusions.push('noiad');
-      if (year < 1650) {
+      if (year > 1718) {
         exclusions.push('lamia');
       }
     }
   }
+  
   return exclusions
 };
 
