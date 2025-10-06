@@ -51,6 +51,10 @@ type CharacterContextType = {
     defaultValue?: number,
     ceiling?: number
   ) => void;
+  clearStatSet: (
+    category: keyof CharacterContextType['sheet'],
+    subcategory?: string,
+  ) => void;
   sheet: Sheet;
   stageList: Record<string, boolean>
 };
@@ -105,6 +109,7 @@ const baseSheet = {
     advantages: {
       backgrounds: {},
       powers: {},
+      magics: {},
       virtues: {
         courage: { value: 1 },
         path: { name: 'humanity' }
@@ -133,6 +138,7 @@ export function CharacterProvider({ children }: { children: ReactNode }) {
     statName: string,
     updates: Partial<Stat>
   ) => {
+    console.log("Update Stat called on" + statName + ".");
     setSheet(prev => ({
       ...prev,
       [category]: {
@@ -149,6 +155,27 @@ export function CharacterProvider({ children }: { children: ReactNode }) {
         }
       }
     }));
+  }, []);
+
+  const clearStatSet = useCallback((
+    category: keyof Sheet,
+    subcategory?: string,
+  ) => {
+    console.log("Clear Stat Set called.")
+    if (!subcategory) {
+       setSheet(prev => ({
+        ...prev,
+        [category]: {}
+      }))
+    } else {
+      setSheet(prev => ({
+        ...prev,
+        [category]: {
+          ...prev[category],
+          [subcategory]: {}
+        }
+      }))
+    }
   }, []);
 
   const updateValidity = useCallback((updates) => {
@@ -214,7 +241,8 @@ export function CharacterProvider({ children }: { children: ReactNode }) {
       sheet,
       setStatColumn,
       stageList,
-      updateValidity
+      updateValidity,
+      clearStatSet
     }),
     [
       monsterId,
@@ -230,7 +258,8 @@ export function CharacterProvider({ children }: { children: ReactNode }) {
       sheet,
       setStatColumn,
       stageList,
-      updateValidity
+      updateValidity,
+      clearStatSet
     ]
   );
 

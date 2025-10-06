@@ -98,8 +98,8 @@ class StatColumn extends HTMLElement {
     }
   }
 
-   static get observedAttributes() {
-    return ['total', 'name', 'displayName'];
+  static get observedAttributes() {
+    return ['total', 'name', 'displayName', 'max'];
   }
 
   attributeChangedCallback(oldValue, newValue) {
@@ -111,13 +111,15 @@ class StatColumn extends HTMLElement {
   render() {
     const name = this.getAttribute('name') || 'category';
     const displayName = this.getAttribute('display-name') || name;
+    const total = this.getAttribute('total') || 0;
+    const max = this.getAttribute('max') || 0;
     
     this.shadowRoot.innerHTML = `
       <style>
         .sheet_section-column {
           border: none;
           display: flex;
-          padding: 0 var(--spacing-md);
+          padding: var(--spacing-md);
           flex-direction: column;
           max-width: 300px;
         }
@@ -148,9 +150,9 @@ class StatColumn extends HTMLElement {
           <h3 class="sheet_column-title">${displayName}</h3>
             <p 
               class="sheet_column-total"
-              aria-label="Sum of ${name}s: ${this.total}${this.max ? `out of ${this.max}` : ''}"
+              aria-label="Sum of ${name}s: ${total}${max ? `out of ${max}` : ''}"
             >
-             (${this.total}${this.max ? ` out of ${this.max}` : ''})
+             (${total}${max ? ` out of ${max}` : ''})
            </p>
         </div>
         <div class="sheet_column-ratings" id="${name}-column-ratings">

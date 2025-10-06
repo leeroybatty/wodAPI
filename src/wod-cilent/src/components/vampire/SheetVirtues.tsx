@@ -1,12 +1,10 @@
-import './statRating.js';
-import './statColumn.js';
-import './statSection.js';
-import SheetBackgrounds from './SheetBackgrounds';
-import SheetDisciplines from './SheetDisciplines';
-import { useCharacterSheet } from '../hooks/CharacterContext';
-import { useGame } from '../hooks/GameContext';
+import '../statRating.js';
+import '../statColumn.js';
+import '../statSection.js';
+import { useCharacterSheet } from '../../hooks/CharacterContext';
+import { useGame } from '../../hooks/GameContext';
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { getStatSet, getPathVirtues } from '../services/api';
+import { getStatSet, getPathVirtues } from '../../services/api';
 
 type StatDefinition = {
   id: number;
@@ -15,7 +13,7 @@ type StatDefinition = {
 
 function SheetVirtues() {
   const { year, books } = useGame();
-  const { templateName, monsterName, sheet, updateValidity, updateStat, stageList, organizationId } = useCharacterSheet();
+  const { templateName, monsterName, sheet, updateValidity, updateStat, organizationId } = useCharacterSheet();
   const { virtues } = sheet.advantages;
   const pathsDropdownRef = useRef<DropdownSelectElement>(null);
 

@@ -21,6 +21,7 @@ function CharacterSheet() {
       const subcategory = element.getAttribute('subcategory');
       updateStat(category, subcategory, name, { value });
       console.log(`I set ${category} ${subcategory} ${name} to ${value}.`)
+      console.log(sheet.advantages.magics)
     };
     document.addEventListener('stat-rating-changed', handleStatChange);
     return () => document.removeEventListener('stat-rating-changed', handleStatChange);
@@ -146,9 +147,9 @@ function CharacterSheet() {
           <SheetAbilities />
         </div>
 
-        <div className={`container ${stageList.abilities ? "Shown" : "Hidden"}`}>
+        
           <SheetAdvantages />
-        </div>
+    
       </form>
       
       <div>

@@ -1,10 +1,10 @@
-import './statRating.js';
-import './statColumn.js';
-import SheetBackgrounds from './SheetBackgrounds';
-import { useCharacterSheet } from '../hooks/CharacterContext';
-import { useGame } from '../hooks/GameContext';
+import '../statRating.js';
+import '../statColumn.js';
+import { useCharacterSheet } from '../../hooks/CharacterContext';
+import { useGame } from '../../hooks/GameContext';
 import { useEffect, useState, useMemo } from 'react';
-import { getPowers } from '../services/api';
+import { getPowers } from '../../services/api';
+import SheetMagics from './SheetBloodMagic';
 
 type StatDefinition = {
   id: number;
@@ -13,7 +13,7 @@ type StatDefinition = {
 
 function SheetDisciplines() {
   const { year, books, houseRules } = useGame();
-  const { templateName, monsterName, sheet, updateValidity, updateStat, stageList } = useCharacterSheet();
+  const { templateName, monsterName, sheet, updateValidity, updateStat } = useCharacterSheet();
   const { ghoulsAndRevenantsMastersFootsteps } = houseRules;
   const { powers } = sheet.advantages;
 
@@ -68,6 +68,11 @@ function SheetDisciplines() {
       updateValidity({ powers: powersTotal === 2 })
     }
   }, [templateName, powersTotal, updateValidity]);
+
+  const youHaveThaumaturgy = useMemo(() => {
+    console.log(powers.thaumaturgy)
+    return powers?.thaumaturgy?.value > 0
+  }, [powers?.thaumaturgy]);
   
   return (
     <stat-column total={powersTotal || youAreGhoulAndYouGetPotence ? 1 : 0} name="disciplines">
@@ -93,6 +98,7 @@ function SheetDisciplines() {
           removable={false}
           value={1}
       />}
+      {youHaveThaumaturgy && <SheetMagics bloodmagic="thaumaturgy"/>}
     </stat-column>
   );
 }

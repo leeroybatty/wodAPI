@@ -180,7 +180,7 @@
   --col-interactive-graphic: #0d0d0d;
   --col-primary-graphic: var(--theme-interface-50);
 
-  --box-shadow: 8px 8px 16px var(--theme-interface-100);;
+  --box-shadow: 8px 8px 16px var(--swatch-black);
 }
 
 body, html {

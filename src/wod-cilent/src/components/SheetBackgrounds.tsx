@@ -43,7 +43,6 @@ function SheetBackgrounds() {
 
     const handleDropdownChanged = (e: CustomEvent) => {
       const { trait, id, name } = e.detail;
-      console.log(trait)
       if (trait === 'backgrounds') {
         const dropdown = backgroundsDropdownRef.current;
         if (dropdown) {

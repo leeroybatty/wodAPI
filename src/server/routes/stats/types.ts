@@ -21,6 +21,13 @@ export enum GeneralStatCategory {
 export enum VampireStatCategory {
   DISCIPLINES = 'disciplines',
   VIRTUES = 'virtues',
+  THAUMATURGY = 'thaumaturgy',
+  ABYSS_MYSTICISM = 'abyss mysticism',
+  AKHU = 'akhu',
+  ASSAMITE_SORCERY = 'assamite sorcery',
+  KOLDUNY = 'koldunic sorcery',
+  WANGA = 'wanga',
+  NECROMANCY = 'necromancy',
   PATH = 'path' // humanity, etc.
 }
 

@@ -19,7 +19,7 @@ class StatRating extends HTMLElement {
     const max = parseInt(this.getAttribute('max')) || Math.max(5, ceiling);
     const headingId = `${name}_heading`;
     const empty = this.hasAttribute('empty') && this.getAttribute('empty') !== 'false';
-
+    const disabled = this.hasAttribute('disabled') && this.getAttribute('disabled') !== 'false';
     const chargen = this.getAttribute('chargen') || false;
     
     const zeroRating = `
@@ -52,8 +52,9 @@ class StatRating extends HTMLElement {
           return `
             <div class="sheet_stat-dot">
               <input
-                class="sheet_stat-dot-control${isFilled ? ' Filled' : ''}"
+                class="sheet_stat-dot-control${isFilled ? ' Filled' : ''}${disabled ? ' Disabled': ''}"
                 id="${name}_${dotValue}"
+                ${disabled ? 'disabled' : ''}
                 type="radio"
                 name="${name}"
                 value="${dotValue}" 
