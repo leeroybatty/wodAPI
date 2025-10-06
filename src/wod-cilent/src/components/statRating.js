@@ -99,6 +99,17 @@ class StatRating extends HTMLElement {
   `;
   }
 
+  dispatchChange () {
+    this.dispatchEvent(new CustomEvent('stat-rating-changed', {
+      detail: { 
+        name: this.getAttribute('name'), 
+        value: this.getValue(),
+        element: this
+      },
+      bubbles: true
+    }));
+  }
+
   setValue(newValue) {
     const name = this.getAttribute('name');
     const radios = this.querySelectorAll(`input[name="${name}"]`);
@@ -110,14 +121,7 @@ class StatRating extends HTMLElement {
         radio.classList.remove('Filled');
       }
     });
-    this.dispatchEvent(new CustomEvent('stat-rating-changed', {
-      detail: { 
-        name: this.getAttribute('name'), 
-        value: newValue,
-        element: this
-      },
-      bubbles: true
-    }));
+    this.dispatchChange();
   }
 
   getValue() {
@@ -187,14 +191,18 @@ class StatRating extends HTMLElement {
     return ['value', 'ceiling', 'name', 'display-name', 'min', 'max'];
   }
 
-  attributeChangedCallback(name, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (name === 'ceiling' || name === 'value') {
-       this.enforceConstraints();
-      }
-      this.render();
+   attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue === null || oldValue === newValue) return;
+
+    if (name === 'ceiling' || name === 'value') {
+      this.enforceConstraints();
     }
-  }
+    this.render();
+
+    if (name === 'value' && oldValue !== null) {
+      this.dispatchChange();
+    }
+   }
 
   enforceConstraints() {
     const ceiling = parseInt(this.getAttribute('ceiling')) || 5;
@@ -202,14 +210,21 @@ class StatRating extends HTMLElement {
     const currentValue = parseInt(this.getAttribute('value')) || 0;
     
     if (currentValue > ceiling) {
-      this.setAttribute('value', ceiling.toString());
+      const newValue = ceiling.toString();
+      const currentAttr = this.getAttribute('value');
+      if (currentAttr !== newValue) {
+        this.setAttribute('value', newValue);
+      }
     }
 
     if (min > ceiling) {
-      this.setAttribute('min', ceiling.toString());
+      const newMin = ceiling.toString();
+      const currentMin = this.getAttribute('min');
+      if (currentMin !== newMin) {
+        this.setAttribute('min', newMin);
+      }
     }
-    
-   }
+  }
 }
 
 customElements.define('stat-rating', StatRating);

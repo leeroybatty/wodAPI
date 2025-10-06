@@ -147,6 +147,9 @@ function SheetHeader() {
           monsterSubtype.setOptions(subMonsters);
         }
         break;
+      case 'monster_subtype':
+        setMonster(id, name);
+        break;
       default:
         break;
     }

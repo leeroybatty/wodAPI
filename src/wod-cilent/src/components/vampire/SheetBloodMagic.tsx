@@ -10,7 +10,7 @@ type StatDefinition = {
   name: string;
 };
 
-function SheetMagics({ bloodmagic }) {
+function SheetMagics({ bloodmagic, thaumaturgy }) {
   const { year, books } = useGame();
   const { sheet, organizationId, monsterName, updateStat, clearStatSet } = useCharacterSheet();
   const { magics, powers } = sheet.advantages;
@@ -34,12 +34,12 @@ function SheetMagics({ bloodmagic }) {
     const handleDropdownChanged = (e: CustomEvent) => {
       const { trait, name } = e.detail;
       if (trait === 'magics') {
-        if (bloodmagic === 'thaumaturgy') {
+        if (thaumaturgy) {
           console.log("Getting rid of previous stuff.")
           clearStatSet('advantages', 'magics');
         }
         // When you select a magic it auto loads in at a rating of 1.
-        const value = bloodmagic === 'thaumaturgy' ? powers.thaumaturgy.value : 1 
+        const value = thaumaturgy ? powers[bloodmagic]?.value : 1 
         console.log(`I SHOULD set ${name} to ${value}...`);
         updateStat('advantages', 'magics', name, { value });
       }
@@ -49,7 +49,7 @@ function SheetMagics({ bloodmagic }) {
     return () => {
       document.removeEventListener('dropdown-changed', handleDropdownChanged);
     };
-  }, [bloodmagic, updateStat, clearStatSet, powers.thaumaturgy.value, magics]);
+  }, [bloodmagic, updateStat, clearStatSet, powers[bloodmagic]?.value, magics]);
 
   // This totals ... how many dots you've spent on specific thaum paths.
   const magicsTotal = useMemo(() => {
@@ -61,9 +61,14 @@ function SheetMagics({ bloodmagic }) {
   const ceiling = useMemo(() => {
     const stat = powers[bloodmagic]
     console.log(`ceiling object...`)
-    console.log(stat.value)
-    return stat.value
+    console.log(stat?.value)
+    return stat?.value
   }, [powers, bloodmagic]);
+
+  const defaultPaths = {
+    'thaumaturgy' : 'path of blood'
+    // 'assamite sorcery':  none 
+  }
 
   // this effect determines what paths are available.
   useEffect(() => {
@@ -74,10 +79,16 @@ function SheetMagics({ bloodmagic }) {
       if (organizationId) options.faction = organizationId;
       const magicsData = await getStatSet(bloodmagic, options);
       setmagicDefs(magicsData);
+      if (magicsTotal === 0) {
+        const defaultPath = defaultPaths[bloodmagic]
+        if (defaultPath) {
+          const value = thaumaturgy ? powers.thaumaturgy.value : 1 
+          updateStat('advantages', 'magics', defaultPath, { value })
+        }
+      }
     };  
     getMagics();
   }, [bloodmagic, year, books, monsterName, organizationId]);
-
 
   // this effect hides the options the user has already picked.
   useEffect(() => {
@@ -89,8 +100,7 @@ function SheetMagics({ bloodmagic }) {
 }, [magics, magicDefs, bloodmagic, magicsTotal]);
 
   return (
-    <stat-column name="Blood Magic" floor={0} total={magicsTotal} max={ceiling}>
-      <span>{magicsTotal}</span>
+    <stat-column name="Blood Magic" floor={0}>
       {selectedMagics.map((stat) => (
         <stat-rating
           key={`magic-${stat.id}`}
@@ -101,19 +111,21 @@ function SheetMagics({ bloodmagic }) {
           max={5}
           subcategory="magics"
           category="advantages"
-          min={bloodmagic === 'thaumaturgy' ? 1 : 0}
-          disabled={bloodmagic === 'thaumaturgy'}
+          min={thaumaturgy ? 1 : 0}
+          disabled={thaumaturgy}
           empty={!magics[stat.name]?.value}
           removable={bloodmagic !== 'thaumaturgy'}
-          value={bloodmagic === 'thaumaturgy' ? powers.thaumaturgy.value : magics[stat.name]?.value}
+          value={thaumaturgy ? powers[bloodmagic]?.value : magics[stat.name]?.value}
         />
       ))}
-      <dropdown-select
-        slot="dropdown"
-        name="magics" 
-        label="Primary path"
-        ref={magicsDropdownRef}
-      />
+      <div className={`container ${!thaumaturgy && magicsTotal >= ceiling ? 'Hidden' : 'Shown'}`}>
+        <dropdown-select
+          slot="dropdown"
+          name="magics" 
+          label="Primary path"
+          ref={magicsDropdownRef}
+        />
+      </div>
     </stat-column> 
   );
 }

@@ -14,6 +14,7 @@ class StatColumn extends HTMLElement {
   }
 
   setupEventListeners() {
+
     this.addEventListener('dropdown-changed', (e) => {
       if (e.target.getAttribute('slot') === 'dropdown') {
         this.handleDropdownSelection(e.detail.value);
@@ -27,6 +28,8 @@ class StatColumn extends HTMLElement {
     });
 
     this.addEventListener('stat-rating-changed', (e) => {
+      console.log("Stat rating change detected")
+      console.log(e.detail)
       this.calculateTotal();
       this.render();
     });
@@ -98,22 +101,35 @@ class StatColumn extends HTMLElement {
     }
   }
 
+
   static get observedAttributes() {
-    return ['total', 'name', 'displayName', 'max'];
+    return ['total', 'floor', 'max', 'name', 'display-name'];
   }
 
-  attributeChangedCallback(oldValue, newValue) {
+  attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue !== newValue) {
+      switch(name) {
+        case 'total':
+          this.total = parseInt(newValue) || 0;
+          break;
+        case 'floor':
+          this.floor = parseInt(newValue) || 0;
+          break;
+        case 'max':
+          this.max = parseInt(newValue) || undefined;
+          break;
+      }
       this.render();
     }
   }
 
   render() {
     const name = this.getAttribute('name') || 'category';
+    console.log("Rendering stat column " + name)
     const displayName = this.getAttribute('display-name') || name;
-    const total = this.getAttribute('total') || 0;
-    const max = this.getAttribute('max') || 0;
-    
+    const total = this.total || 0;
+    const max = this.max || undefined;
+
     this.shadowRoot.innerHTML = `
       <style>
         .sheet_section-column {

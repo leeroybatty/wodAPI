@@ -49,7 +49,8 @@ function SheetDisciplines() {
         }
       }
     }
-  }, [updateStat, powerDefs, powers]);
+  // 'powers' intentionally omitted to prevent infinite loop
+  }, [updateStat, powerDefs]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (youAreGhoulAndYouGetPotence) {
@@ -69,25 +70,38 @@ function SheetDisciplines() {
     }
   }, [templateName, powersTotal, updateValidity]);
 
-  const youHaveThaumaturgy = useMemo(() => {
-    console.log(powers.thaumaturgy)
-    return powers?.thaumaturgy?.value > 0
-  }, [powers?.thaumaturgy]);
+  const magicalDisciplines = [
+    "thaumaturgy",
+    "assamite sorcery",
+    "tremere",
+    "wanga",
+    "akhu",
+    "koldunic sorcery",
+    "necromancy"
+  ];
+
+  const bloodMagics = useMemo(() => {
+    const thisisfaggotry = magicalDisciplines.filter((bm) => powers[bm]?.value > 0);
+    console.log(thisisfaggotry);
+    return thisisfaggotry;
+  }, [powers])
   
   return (
-    <stat-column total={powersTotal || youAreGhoulAndYouGetPotence ? 1 : 0} name="disciplines">
-      {powersList.map((stat) => (
-        <stat-rating
-          key={`power-${stat.id}`}
-          data-id={stat.id}
-          name={stat.name}
-          category="advantages"
-          subcategory="powers"
-          min={0}
-          ceiling={templateName === 'vampire' ? 3 : 1}
-          value={powers[stat.name]?.value || 0}
-        />
-      ))}
+    <div>
+      <stat-column total={powersTotal || youAreGhoulAndYouGetPotence ? 1 : 0} name="disciplines">
+        {powersList.map((stat) => (
+          <stat-rating
+            key={`power-${stat.id}`}
+            data-id={stat.id}
+            name={stat.name}
+            category="advantages"
+            subcategory="powers"
+            min={0}
+            ceiling={templateName === 'vampire' ? 3 : 1}
+            value={powers[stat.name]?.value || 0}
+          />
+        ))}
+      </stat-column>
       {youAreGhoulAndYouGetPotence &&
         <stat-rating
           name="potence"
@@ -98,8 +112,14 @@ function SheetDisciplines() {
           removable={false}
           value={1}
       />}
-      {youHaveThaumaturgy && <SheetMagics bloodmagic="thaumaturgy"/>}
-    </stat-column>
+      {bloodMagics && bloodMagics.map((pathName) => {
+        return (<SheetMagics
+          bloodmagic={pathName}
+          thaumaturgy={pathName != 'necromancy'}
+        />)
+      })}
+     
+    </div>
   );
 }
 

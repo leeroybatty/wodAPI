@@ -7,7 +7,7 @@ import SheetAbilities from './SheetAbilities';
 import SheetAdvantages from './SheetAdvantages';
 function CharacterSheet() {
 
-  const {updateStat, sheet, stageList, templateName, updateValidity} = useCharacterSheet();
+  const { updateStat, sheet, stageList, templateName, updateValidity } = useCharacterSheet();
   const { talents, skills, knowledges } = sheet.abilities;
   const { books, houseRules } = useGame();
   const { ghoulsAndRevenantsMastersFootsteps } = houseRules;

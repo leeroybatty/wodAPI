@@ -84,7 +84,7 @@ function SheetVirtues() {
   }, [virtuesTotal, updateValidity])
 
   return (
-    <stat-column total={virtuesTotal || 0} max={7} name="virtues" floor={-3} max={7}>
+    <stat-column total={virtuesTotal || 0} max={7} name="virtues" floor={-3}>
       {templateName === 'vampire' && <dropdown-select
         name="path" 
         label="Path"
