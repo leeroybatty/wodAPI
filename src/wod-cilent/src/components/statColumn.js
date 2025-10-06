@@ -117,7 +117,9 @@ class StatColumn extends HTMLElement {
         .sheet_section-column {
           border: none;
           display: flex;
+          padding: 0 var(--spacing-md);
           flex-direction: column;
+          max-width: 300px;
         }
 
         .sheet_column-heading {

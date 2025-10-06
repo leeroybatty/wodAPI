@@ -54,7 +54,8 @@ export async function getMonsterAncestors(
     const columns = format === "names"
       ? "m.name"
       : `m.id,
-        m.name, 
+        LOWER(m.name) as name,
+        m.name as display,
         o.name as faction,
         CASE 
           WHEN m.book_id IS NOT NULL THEN 
@@ -170,7 +171,8 @@ export async function getMonsters(
     const columns = format === "names"
       ? "m.name"
       : `m.id,
-        m.name, 
+        LOWER(m.name) as name,
+        m.name as display, 
         o.name as faction,
         CASE 
           WHEN m.book_id IS NOT NULL THEN 

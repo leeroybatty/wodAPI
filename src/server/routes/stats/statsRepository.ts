@@ -81,7 +81,8 @@ export async function getStatDefinitions(
     const columns = format === "names"
       ? "DISTINCT s.id, s.name"
       : `DISTINCT ON (s.id) s.id,
-        s.name, 
+        LOWER(s.name) as name,
+        s.name as display, 
         s.description,
         CASE 
           WHEN s.book_id IS NOT NULL THEN 
@@ -182,7 +183,8 @@ export async function getAffinityPowers(
     const columns = format === "names"
       ? "DISTINCT s.id, s.name"
       : `DISTINCT ON (s.id) s.id,
-        s.name, 
+        LOWER(s.name) as name,
+        s.name as display, 
         s.description,
         CASE 
           WHEN s.book_id IS NOT NULL THEN 
@@ -243,7 +245,8 @@ export async function getVirtuesByPath(
     const columns = format === "names"
       ? "DISTINCT s.id, s.name"
       : `DISTINCT ON (s.id) s.id,
-        s.name, 
+        LOWER(s.name) as name,
+        s.name as display, 
         s.description,
         CASE 
           WHEN s.book_id IS NOT NULL THEN 
@@ -260,7 +263,8 @@ export async function getVirtuesByPath(
       FROM bridge_paths_virtues bpv
       JOIN stats s ON bpv.stat_id = s.id
       JOIN  stats path on path.id = bpv.path_id
-      WHERE LOWER(path.name) = '$1'`;
+      LEFT JOIN wod_books b on b.id = s.book_id
+      WHERE LOWER(path.name) = LOWER($1)`;
 
     const variables = [path]
 

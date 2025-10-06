@@ -31,7 +31,7 @@ const defaultHouseRules = {
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
 export function GameProvider({ children }: { children: ReactNode }) {
-  const [year, setYear] = useState<number | null>(1100);
+  const [year, setYear] = useState<number | null>(2025);
   const [books, setBooks] = useState<string[] | null>([vampireTheMasquerade20thBooks]);
   const [gameName, setGameName] = useState<string | null>('Modern Nights');
   const [houseRules, setHouseRules] = useState<Record<string, unknown>>(defaultHouseRules)

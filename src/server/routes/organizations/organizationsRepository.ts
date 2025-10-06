@@ -60,8 +60,9 @@ export async function getOrganizations(
     const columns = format === "names"
       ? "o.name"
       : `o.id,
-        o.name, 
-       CASE 
+        LOWER(o.name) as name,
+        o.name as display,
+        CASE 
           WHEN o.book_id IS NOT NULL THEN 
             json_build_object(
               'book_id', o.book_id,

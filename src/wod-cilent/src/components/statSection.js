@@ -27,7 +27,9 @@ class StatSection extends HTMLElement {
           flex-direction: row;
           justify-content: space-between;
           font-family: var(--font-family-display);
-          font-weight: var(--font-weight-bold);
+          margin: 0 var(--spacing-md);
+          margin-bottom: var(--spacing-sm);
+          padding: 0;
         }
 
         .sheet_section-heading {
@@ -36,6 +38,7 @@ class StatSection extends HTMLElement {
           padding: 0 var(--spacing-sm);
           font-size: var(--size-font-lg);
           text-transform: capitalize;
+          font-weight: var(--font-weight-bold);
         }
       </style>
       <fieldset id="${name}-section" class="sheet_section">

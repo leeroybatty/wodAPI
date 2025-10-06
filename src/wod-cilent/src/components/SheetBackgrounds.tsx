@@ -12,7 +12,7 @@ type StatDefinition = {
 
 function SheetBackgrounds() {
   const { year, books } = useGame();
-  const { sheet, templateName, updateValidity, stageList, organizationId, monsterName, updateStat } = useCharacterSheet();
+  const { sheet, organizationId, monsterName, updateStat } = useCharacterSheet();
   const { backgrounds } = sheet.advantages;
   const backgroundsDropdownRef = useRef<DropdownSelectElement>(null);
   
@@ -63,9 +63,9 @@ function SheetBackgrounds() {
     };
   }, [backgroundDefs, updateStat, backgrounds]);
 
- const backgroundsTotal = useMemo(() => {
-   return Object.values(backgrounds).reduce((sum, stat) => sum + stat.value, 0);
- }, [backgrounds]);
+  const backgroundsTotal = useMemo(() => {
+    return Object.values(backgrounds).reduce((sum, stat) => sum + stat.value, 0);
+  }, [backgrounds]);
 
   useEffect(() => {
     const getBackgrounds = async () => {
@@ -90,16 +90,9 @@ function SheetBackgrounds() {
     getBackgrounds();
   }, [year, books, monsterName, organizationId, backgrounds]);
 
-  useEffect(() => {
-    const isValid = templateName === 'Mage'
-      ? backgroundsTotal === 7
-      : backgroundsTotal === 5
-    
-    updateValidity({ backgrounds: isValid });
-  }, [templateName, backgroundsTotal, updateValidity]);
 
   return (
-    <stat-column name="backgrounds" floor={0} total={5}>
+    <stat-column name="backgrounds" floor={0} total={backgroundsTotal}>
       {selectedBackgrounds.map((stat) => (
         <stat-rating
           key={`background-${stat.id}`}
@@ -119,9 +112,6 @@ function SheetBackgrounds() {
         label="Background"
         ref={backgroundsDropdownRef}
       />
-      <p className={`sheet_helpertext${stageList?.backgrounds ? ' Hidden' : ''}`}>
-        Select 5 dots of Backgrounds.
-      </p>
     </stat-column> 
   );
 }

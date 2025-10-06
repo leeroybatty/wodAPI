@@ -5,20 +5,10 @@ import { useCharacterSheet } from '../hooks/CharacterContext';
 import { useEffect, useState } from 'react';
 
 function SheetAttributes() {
-  const {sheet, updateStat, monsterName, templateName, updateValidity, stageList} = useCharacterSheet();
+  const {sheet, updateStat, monsterName, templateName, stageList} = useCharacterSheet();
   const {physical, mental, social} = sheet.attributes;
 
-  const [rankings, setRankings] = useState<number[]>([6,4,3]);
   const [totals, setTotals] = useState<number[]>([0,0,0]);
-
-  useEffect(() => {
-    const mortalTemplates = ['Human', 'Kinfolk', 'Sorcerer', 'Revenant', 'Ghoul'];
-    if (mortalTemplates.includes(templateName)) {
-      setRankings([6, 4, 3]);
-    } else {
-      setRankings([7, 5, 3]);
-    }
-  }, [setRankings, templateName]);
 
   useEffect(() => {
     if (monsterName) {
@@ -50,14 +40,8 @@ function SheetAttributes() {
       mentalTotal += stat.value;
     })
     const newTotals = [physicalTotal, socialTotal, mentalTotal]
-    const hasPrimary = newTotals.find((value) => value === rankings[0]);
-    const hasSecondary = newTotals.find((value) => value === rankings[1]);
-    const hasTertiary = newTotals.find((value) => value === rankings[2]);
-    const isValid = !!hasPrimary && !!hasSecondary && !!hasTertiary;
-    updateValidity({ attributes: isValid });
     setTotals(newTotals);
-
-  }, [physical, social, mental, rankings, updateValidity])
+  }, [physical, social, mental])
 
   return (
     <div>
@@ -135,11 +119,6 @@ function SheetAttributes() {
           />
         </stat-column>
       </stat-section>
-          <p className={`sheet_helpertext ${stageList?.attributes && ' Hidden'}`}>
-            Prioritize which Attribute categories are the most significant between Physical, Social, and Mental categories.
-            Spend <strong className="Bold">{rankings[0]}</strong> dots on your highest priority, <strong className="Bold">{rankings[1]}</strong> for the second, and <strong className="Bold">{rankings[2]}</strong> for the least.
-          </p>
-  
     </div>
   )
 }

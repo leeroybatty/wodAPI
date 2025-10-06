@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useMemo, useCallback } from 'react';
 import './dropdownSelect';
 import './statSection';
 import {
@@ -51,7 +51,7 @@ function SheetHeader() {
     const baseRequirementsMet = !!nature.value && !!demeanor.value && !!name.value && !!concept.value;
     if (baseRequirementsMet) {
       switch (true) {
-        case templateName === 'Human':
+        case templateName === 'human':
           updateValidity({template: true })
           break;
         default:
@@ -64,11 +64,11 @@ function SheetHeader() {
 
   useEffect(() => {
     const loadOrganizations = async () => {
-      const template = ['Revenant','Ghoul'].includes(templateName)
-        ? 'Vampire'
+      const template = ['revenant','ghoul'].includes(templateName)
+        ? 'vampire'
         : templateName;
 
-      const exclude = templateName === 'Revenant'
+      const exclude = templateName === 'revenant'
         ? ['anarchs','autarkis']
         : [];
 
@@ -101,20 +101,20 @@ function SheetHeader() {
     const monsterSubtype = monsterSubtypeRef.current;
 
     const monsterTypeLabels = {
-      'Vampire': 'Clan',
-      'Ghoul': 'Clan',
-      'Revenant': 'Family',
-      'Mage': 'Craft',
-      'Shifter': 'Beast',
-      'Possessed': 'Type',
-      'Kinfolk': 'Beast',
-      'Changeling': 'Kith',
+      'vampire': 'Clan',
+      'ghoul': 'Clan',
+      'revenant': 'Family',
+      'mage': 'Craft',
+      'shifter': 'Beast',
+      'possessed': 'Type',
+      'kinfolk': 'Beast',
+      'changeling': 'Kith',
     };
 
     const monsterSubtypeLabels = {
-      'Vampire': 'Bloodline',
-      'Shifter': 'Tribe',
-      'Kinfolk': 'Tribe',
+      'vampire': 'Bloodline',
+      'shifter': 'Tribe',
+      'kinfolk': 'Tribe',
     };
 
     switch (e.detail.trait) {
@@ -163,6 +163,12 @@ function SheetHeader() {
     updateStat
   ]);
 
+  const factionLabel = useMemo(() => {
+    return ["ghoul","revenant"].includes(templateName)
+      ? "Domitor Faction"
+      : "Faction"
+  }, [templateName])
+
   useEffect(() => {
     document.addEventListener('dropdown-changed', handleDropdownSelection);
     return () => document.removeEventListener('dropdown-changed', handleDropdownSelection);
@@ -193,7 +199,7 @@ function SheetHeader() {
         
         <dropdown-select 
           name="organization" 
-          label="Faction"
+          label={factionLabel || "Faction"}
           empty="true"
           ref={organizationRef}
           required="true"
@@ -249,7 +255,7 @@ function SheetHeader() {
           ref={monsterSubtypeRef}
         />
 
-        <div className={`sheet_trait-entry${monsterName !== 'Vampire' ? ' Hidden' : ''}`}>
+        <div className={`sheet_trait-entry${monsterName !== 'vampire' ? ' Hidden' : ''}`}>
             <span className="sheet_stat-name">Generation</span>
             <span id="vampire-generation">13</span>
         </div>

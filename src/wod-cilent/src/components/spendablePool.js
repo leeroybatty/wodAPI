@@ -1,7 +1,7 @@
 class SpendablePool extends HTMLElement {
   connectedCallback() {
-  this.render()
-  this.addEventListener('change', this.handleRatingChange.bind(this));
+    this.render()
+    this.addEventListener('change', this.handleRatingChange.bind(this));
     if (this.getAttribute('removable')) {
       this.addEventListener('change', this.handleRemoval.bind(this));
     } 
@@ -40,58 +40,53 @@ class SpendablePool extends HTMLElement {
       </label>
     </div>`;
 
-     this.innerHTML = `
-      <div class="sheet_stat-entry" id="statpool-${name}">
+    const totalDots = Math.max(rating, max);
+    const dots = Array.from({length: totalDots}, (_, i) => {
+    const dotValue = i + 1;
+    const isChecked = dotValue === value ? 'checked' : '';
+    const isFilled = dotValue <= value;
+    const permRatingIsFilled = dotValue <= rating;
+    const isCeilinged = dotValue > rating;
+      
+    return `
+      <div>
+        <div class="sheet_stat-permanent-dot ${isCeilinged ? 'Ceilinged' : permRatingIsFilled ? 'Filled' : ''}">
+        </div>
+        <div class="sheet_stat-dot">
+          ${isCeilinged ? 
+            `<div class="sheet_stat-dot-control Spendable Ceilinged"></div>` :
+            `<input
+              class="sheet_stat-dot-control Spendable ${isFilled ? ' Filled' : ''}"
+              id="${name}_${dotValue}"
+              type="radio"
+              name="${name}"
+              value="${dotValue}" 
+              ${isChecked}
+            />
+            <label
+              class="sheet_stat-dot-label"
+              for="${name}_${dotValue}"
+            >
+              ${displayName} ${dotValue}
+            </label>`
+          }
+        </div>
+      </div>
+    `;
+    }).join('');
+
+    this.innerHTML = `
+      <div class="sheet_stat-entry Spendable" id="statpool-${name}">
         <h4 class="sheet_stat-name" id="${headingId}">${displayName}</h4>
-        <div class="sheet_stat-ramp" role="radiogroup" aria-labelledby="${headingId}">
-          <div class="sheet_pool-rating">
+        <div class="sheet_pool-rating">
+          <div>
             <div class="sheet_stat-permanent-dot Ceilinged">
             </div>
             ${zeroRating}
           </div>
-          ${Array.from({length: rating}, (_, i) => {
-            const dotValue = i + 1;
-            const isChecked = dotValue === value ? 'checked' : '';
-            const isFilled = dotValue <= value;
-            const permRatingIsFilled = dotValue <= rating;
-            return `
-              <div class="sheet_pool-rating">
-                <div class="sheet_stat-permanent-dot ${permRatingIsFilled ? 'Filled' : '' }">
-                </div>
-                <div class="sheet_stat-dot">
-                  <input
-                    class="sheet_stat-dot-control Spendable ${isFilled ? ' Filled' : ''}"
-                    id="${name}_${dotValue}"
-                    type="radio"
-                    name="${name}"
-                    value="${dotValue}" 
-                    ${isChecked}
-                  />
-                  <label
-                    class="sheet_stat-dot-label"
-                    for="${name}_${dotValue}"
-                  >
-                    ${displayName} ${dotValue}
-                  </label>
-                </div>
-              </div>
-            `;
-          }).join('')}
-          ${Array.from({length: max - rating}, (_, i) => {
-            const dotValue = i + 1;
-            const isChecked = dotValue === value ? 'checked' : '';
-            const isFilled = dotValue <= value;
-            const permRatingIsFilled = dotValue <= rating;
-            return `
-              <div class="sheet_pool-rating">
-                <div class="sheet_stat-permanent-dot Ceilinged">
-                </div>
-                <div class="sheet_stat-dot">
-                  <div class="sheet_stat-dot-control Spendable Ceilinged"></div>
-                </div>
-              </div>
-            `;
-          }).join('')}
+          <div class="sheet_stat-ramp" role="radiogroup" aria-labelledby="${headingId}">
+            ${dots}
+          </div>
         </div>
       </div>
     `;
@@ -172,6 +167,16 @@ class SpendablePool extends HTMLElement {
         },
         bubbles: true
       }));
+    }
+  }
+
+  static get observedAttributes() {
+    return ['value', 'rating', 'max', 'min', 'name', 'display-name'];
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue !== newValue && oldValue !== null) {
+      this.render();
     }
   }
 }

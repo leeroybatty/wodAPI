@@ -97,7 +97,7 @@ export const getArchetypes = async (params: CommonQueryParams = {}): Promise<Mon
 
 export const getOrganizations = async (
   monster: string | number,
-  params: CommonQueryParams
+  params: CommonQueryParams = {}
 ): Promise<Organization[]> => {
   const queryParams = buildQueryParams(params);
   const response = await fetch(`/api/organizations/${monster}?${queryParams}`);
@@ -111,7 +111,7 @@ export const getOrganizations = async (
 
 export const getPowers = async (
   monster: string | number,
-  params: CommonQueryParams
+  params: CommonQueryParams = {}
 ): Promise<Stat[]> => {
   const queryParams = buildQueryParams(params);
   const response = await fetch(`/api/stats/powers/${monster}?${queryParams}`);
@@ -121,4 +121,19 @@ export const getPowers = async (
   }
   const result: ApiResponse<{ stats: Stat[] }> = await response.json();
   return result.data.stats;
+};
+
+
+export const getPathVirtues = async (
+  path: string | number,
+  params: CommonQueryParams = {}
+): Promise<Stat[]> => {
+  const queryParams = buildQueryParams(params);
+  const response = await fetch(`/api/stats/virtues/${path}?${queryParams}`);
+   if (!response.ok) {
+    if (response.status === 404) return [];
+    throw new Error(`Failed to fetch virtues: ${response.status}`);
+  }
+  const result: ApiResponse<{ stats: Stat[] }> = await response.json();
+  return result.data.stats
 };

@@ -41,7 +41,7 @@ class StatRating extends HTMLElement {
     </div>`;
 
   this.innerHTML = `
-    <div class="sheet_stat-entry${empty === true ? ' Hidden' : ''}" id="stat-${name}">
+    <div class="sheet_stat-entry${ max === 10 ? ' Long' : ''}${empty === true ? ' Hidden' : ''}" id="stat-${name}">
       <h4 class="sheet_stat-name" id="${headingId}">${displayName}</h4>
       <div class="sheet_stat-ramp" role="radiogroup" aria-labelledby="${headingId}">
         ${min === 0 ? zeroRating : ""}

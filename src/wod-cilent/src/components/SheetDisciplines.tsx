@@ -23,7 +23,7 @@ function SheetDisciplines() {
   // Masters Footsteps HR changes it to be "Pick 2 of your sire's".
   const youAreGhoulAndYouGetPotence = useMemo(() => {
     return ghoulsAndRevenantsMastersFootsteps === false
-      && ['Ghoul','Revenant'].includes(templateName);
+      && ['ghoul','revenant'].includes(templateName);
    } , [ghoulsAndRevenantsMastersFootsteps, templateName]);
 
   const powersTotal = useMemo(() => {
@@ -37,7 +37,19 @@ function SheetDisciplines() {
       setPowerDefs(powersData);
     }
     fetchPowers();
-  }, [year, youAreGhoulAndYouGetPotence, books, monsterName]);
+  }, [year, books, monsterName]);
+
+  useEffect(() => {
+    if (powerDefs && powerDefs.length > 0) {
+      const stalePowers = Object.values(powers).map((power) => power.name );
+      const currentPowers = new Set(powerDefs.map((virtue) => virtue.name))
+      for (const name of stalePowers) {
+        if (!currentPowers.has(name)) {
+          updateStat('advantages', 'powers', name, { value: 0 });
+        }
+      }
+    }
+  }, [updateStat, powerDefs, powers]);
 
   useEffect(() => {
     if (youAreGhoulAndYouGetPotence) {
@@ -50,13 +62,12 @@ function SheetDisciplines() {
   );
 
   useEffect(() => {
-    if (templateName === 'Vampire') {
-      console.log(powersTotal)
+    if (templateName === 'vampire') {
       updateValidity({ powers: powersTotal === 3 })
     } else {
       updateValidity({ powers: powersTotal === 2 })
     }
-  }, [templateName, powersTotal]);
+  }, [templateName, powersTotal, updateValidity]);
   
   return (
     <stat-column total={powersTotal || youAreGhoulAndYouGetPotence ? 1 : 0} name="disciplines">
@@ -68,7 +79,7 @@ function SheetDisciplines() {
           category="advantages"
           subcategory="powers"
           min={0}
-          ceiling={templateName === 'Vampire' ? 3 : 1}
+          ceiling={templateName === 'vampire' ? 3 : 1}
           value={powers[stat.name]?.value || 0}
         />
       ))}
@@ -82,15 +93,6 @@ function SheetDisciplines() {
           removable={false}
           value={1}
       />}
-      
-        <p className={`sheet_helpertext${stageList.powers ? ' Hidden' : '' }`}>
-        {templateName === 'Vampire' 
-          ? `Pick 3 dots of Disciplines.`
-          : `Pick ${youAreGhoulAndYouGetPotence ? 1 : 2} Discipline dot${youAreGhoulAndYouGetPotence 
-            ?`. You get Potence 1 automatically`
-            : 's'}.`
-        }
-        </p>
     </stat-column>
   );
 }

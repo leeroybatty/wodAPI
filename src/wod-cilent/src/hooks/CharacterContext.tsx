@@ -106,7 +106,13 @@ const baseSheet = {
       backgrounds: {},
       powers: {},
       virtues: {
-        courage: { value: 1 }
+        courage: { value: 1 },
+        path: { name: 'humanity' }
+      }
+    },
+    miscellaneous: {
+      pools: {
+        willpower: {},
       }
     }
 };
