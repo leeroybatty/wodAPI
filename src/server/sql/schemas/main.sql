@@ -1,21 +1,31 @@
 CREATE TABLE IF NOT EXISTS wod_books (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,
+  parent_id INT REFERENCES wod_books(id),
+  CONSTRAINT unique_book_name UNIQUE (name)
 );
 
 CREATE TABLE IF NOT EXISTS stats (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,
-  description TEXT,
   parent_id INT REFERENCES stats(id),
-  book_id INT references wod_books(id),
-  page_number INT,
+  xp_cost INT,
+  freebie_cost INT,
+  description TEXT,
+  book_id INT REFERENCES wod_books(id),
+  page_number INT, 
+  org_lock_id INT REFERENCES organizations(id),
   CONSTRAINT unique_stat_name UNIQUE (name)
 );
+
 
 CREATE TABLE IF NOT EXISTS organizations (
   id SERIAL PRIMARY KEY,
   name TEXT,
+  parent_id INT REFERENCES organizations(id),
+  book_id INT REFERENCES wod_books(id),
+  page_number INT, 
+  monster_id INT REFERENCES monsters(id),
   CONSTRAINT unique_organization_name UNIQUE (name)
 );
 
@@ -25,7 +35,14 @@ CREATE TABLE IF NOT EXISTS monsters (
   parent_id INT REFERENCES monsters(id),
   org_lock_id INT REFERENCES organizations(id),
   book_id INT REFERENCES wod_books(id),
-  page_number INT
+  page_number INT,
+  weakness VARCHAR(255)
+);
+
+CREATE TABLE IF NOT EXISTS bridge_monsters_stats (
+  id SERIAL PRIMARY KEY,
+  monster_id INT REFERENCES monsters(id),
+  stat_id INT REFERENCES stats(id)
 );
 
 CREATE TABLE IF NOT EXISTS characters (
@@ -64,6 +81,6 @@ CREATE TABLE IF NOT EXISTS bridge_characters_stats (
   character_id INT REFERENCES characters(id),
   stat_id INT REFERENCES stats(id),
   value INT,
-  background_pool_id INT REFERENCES pooled_backgrounds (id) ON DELETE CASCADE
+  background_pool_id INT REFERENCES pooled_backgrounds (id) ON DELETE CASCADE,
   CONSTRAINT unique_character_stats UNIQUE (character_id, stat_id),
 );
