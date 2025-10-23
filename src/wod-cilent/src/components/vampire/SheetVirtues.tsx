@@ -44,7 +44,6 @@ function SheetVirtues() {
    * to ghoul/revenant to keep the path.
   */ 
   useEffect(() => {
-    console.log("Setting path to humanity.")
     updateStat('advantages', 'virtues', 'path', { name: 'humanity' })
   }, [templateName, updateStat])
 
@@ -86,7 +85,9 @@ function SheetVirtues() {
   return (
     <stat-column total={virtuesTotal || 0} max={7} name="virtues" floor={-3}>
       {templateName === 'vampire' && <dropdown-select
-        name="path" 
+        name="path"
+        category="advantages"
+        subcategory="virtues"
         label="Path"
         ref={pathsDropdownRef}
       />}

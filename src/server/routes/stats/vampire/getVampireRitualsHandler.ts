@@ -1,29 +1,25 @@
 import { Response } from 'express';
-import { prepareBaseOptions } from '../helpers';
+import { parseQueryParam, prepareBaseOptions } from '../helpers';
 import { AuthenticatedRequest } from '../../middleware/auth';
 import { ErrorKeys } from '../../errors/errors.types';
-import { referenceCache } from '../../sql';
 import { ApiResponse } from '../../apiResponse.types';
-import { handleError, createErrorResponse } from '../../errors';
+import { handleError, createErrorResponse, createSuccessResponse } from '../../errors';
 import { 
-  getPathVirtues
+  getStatsInCategory
 } from './statsService';
 import { isValidStatCategory } from './helpers';
 import { AllStatCategoriesType, StatsFilters } from './types';
 
-export const getPathVirtuesHandler = async (req: AuthenticatedRequest, res: Response) => {
-  const { path } = req.params; 
-  if (path == null || path.trim() === "") {
-    throw createErrorResponse(ErrorKeys.STAT_TYPE_NOT_FOUND);
-  }
-  let pathParam = path.toLowerCase();
-  const isNumericId = !isNaN(Number(path)) && path.trim() !== '';
-  if (isNumericId) {
-    pathParam = await referenceCache.getStatName(Number(path));
-  }
+export const getVampireRitualsHandler = async (req: AuthenticatedRequest, res: Response) => {
+  const { magic } = req.params;
+
+  const category = type.toLowerCase();
   let options: StatsFilters = await prepareBaseOptions(req);
+  let monsterParam = parseQueryParam(monster).pop();
+
   try {
-    const serviceResult = await getPathVirtues(pathParam, options);
+    const serviceResult = await getStatsInCategory(category, {...options, monster: monsterParam});
+
     if (serviceResult.success) {
       return res.status(200).json(serviceResult);
     }

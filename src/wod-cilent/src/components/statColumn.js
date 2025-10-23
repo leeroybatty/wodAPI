@@ -135,7 +135,7 @@ class StatColumn extends HTMLElement {
         .sheet_section-column {
           border: none;
           display: flex;
-          padding: var(--spacing-md);
+          padding: 0 var(--spacing-md);
           flex-direction: column;
           max-width: 300px;
         }
@@ -144,7 +144,7 @@ class StatColumn extends HTMLElement {
           margin-block-start: 0;
           text-align: center;
           text-transform: capitalize;
-          margin-block-end: var(--spacing-md);
+          margin: var(--spacing-xs) 0
           display: flex;
           align-items: center;
           gap: var(--spacing-sm);

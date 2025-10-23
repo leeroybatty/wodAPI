@@ -5,7 +5,7 @@ import { getCharacterStat } from './routes/stats';
 import { getMonsterTypesHandler } from './routes/monsters/getMonsterTypesHandler';
 import { getMonstersHandler } from './routes/monsters/getMonstersHandler';
 import { getStatsByTypeHandler } from './routes/stats/getStatsByTypeHandler';
-import { getPathVirtuesHandler } from './routes/stats/getPathVirtuesHandler';
+import { getPathVirtuesHandler } from './routes/stats/vampire/getPathVirtuesHandler';
 import { getPowersByMonsterHandler } from './routes/stats/getPowersByMonsterHandler';
 import { getMonsterOrganizationsHandler } from './routes/organizations/getMonsterOrganizationsHandler';
 import { swaggerConfig } from './swagger';

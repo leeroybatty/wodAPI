@@ -17,6 +17,8 @@ function CharacterSheet() {
   useEffect(() => {
     const handleStatChange = (e: CustomEvent) => {
       const { name, value, element } = e.detail;
+           console.log(element)
+ 
       const category = element.getAttribute('category');
       const subcategory = element.getAttribute('subcategory');
       updateStat(category, subcategory, name, { value });
@@ -129,8 +131,11 @@ function CharacterSheet() {
   }, [virtues])
 
   useEffect(() => {
-    let total = 0;
-    Object.values(virtues).forEach((virtue) => total += virtue.value )
+    let total = virtues?.courage?.value;
+    const virtueList = ["conscience", "self control", "conviction", "instinct"]
+    for (const virtue of virtueList) {
+     total += virtues[virtue]?.value
+    }
     updateValidity({ virtues: total === 10})
   }, [virtues])
   /* END VAMPIRE STUFF*/
@@ -147,9 +152,7 @@ function CharacterSheet() {
           <SheetAbilities />
         </div>
 
-        
-          <SheetAdvantages />
-    
+        <SheetAdvantages />
       </form>
       
       <div>

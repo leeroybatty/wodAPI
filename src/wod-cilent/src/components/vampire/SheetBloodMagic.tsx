@@ -35,12 +35,10 @@ function SheetMagics({ bloodmagic, thaumaturgy }) {
       const { trait, name } = e.detail;
       if (trait === 'magics') {
         if (thaumaturgy) {
-          console.log("Getting rid of previous stuff.")
           clearStatSet('advantages', 'magics');
         }
         // When you select a magic it auto loads in at a rating of 1.
         const value = thaumaturgy ? powers[bloodmagic]?.value : 1 
-        console.log(`I SHOULD set ${name} to ${value}...`);
         updateStat('advantages', 'magics', name, { value });
       }
     };
@@ -49,7 +47,7 @@ function SheetMagics({ bloodmagic, thaumaturgy }) {
     return () => {
       document.removeEventListener('dropdown-changed', handleDropdownChanged);
     };
-  }, [bloodmagic, updateStat, clearStatSet, powers[bloodmagic]?.value, magics]);
+  }, [thaumaturgy, clearStatSet, powers, bloodmagic, updateStat]);
 
   // This totals ... how many dots you've spent on specific thaum paths.
   const magicsTotal = useMemo(() => {
@@ -65,14 +63,13 @@ function SheetMagics({ bloodmagic, thaumaturgy }) {
     return stat?.value
   }, [powers, bloodmagic]);
 
-  const defaultPaths = {
-    'thaumaturgy' : 'path of blood'
-    // 'assamite sorcery':  none 
-  }
-
   // this effect determines what paths are available.
   useEffect(() => {
     if (!bloodmagic) return;
+    const defaultPaths = {
+      'thaumaturgy' : 'path of blood'
+      // 'assamite sorcery':  none 
+    }
     const getMagics = async () => {
       const options = { year, books };
       if (monsterName) options.monster = monsterName;
@@ -82,13 +79,29 @@ function SheetMagics({ bloodmagic, thaumaturgy }) {
       if (magicsTotal === 0) {
         const defaultPath = defaultPaths[bloodmagic]
         if (defaultPath) {
-          const value = thaumaturgy ? powers.thaumaturgy.value : 1 
+          const value = thaumaturgy ? powers[bloodmagic]?.value : 1 
           updateStat('advantages', 'magics', defaultPath, { value })
         }
       }
     };  
     getMagics();
-  }, [bloodmagic, year, books, monsterName, organizationId]);
+  }, [
+    bloodmagic,
+    updateStat,
+    thaumaturgy,
+    year,
+    books,
+    monsterName,
+    organizationId,
+    powers,
+    getStatSet,
+    setmagicDefs,
+    magicsTotal
+  ]);
+
+  useEffect(() => {
+    clearStatSet('advantages', 'magics');
+  }, [monsterName])
 
   // this effect hides the options the user has already picked.
   useEffect(() => {
@@ -100,7 +113,7 @@ function SheetMagics({ bloodmagic, thaumaturgy }) {
 }, [magics, magicDefs, bloodmagic, magicsTotal]);
 
   return (
-    <stat-column name="Blood Magic" floor={0}>
+    <div style={{padding: '0 var(--spacing-md)'}}>
       {selectedMagics.map((stat) => (
         <stat-rating
           key={`magic-${stat.id}`}
@@ -126,7 +139,7 @@ function SheetMagics({ bloodmagic, thaumaturgy }) {
           ref={magicsDropdownRef}
         />
       </div>
-    </stat-column> 
+    </div> 
   );
 }
 

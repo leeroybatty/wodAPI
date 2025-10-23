@@ -101,9 +101,12 @@ class StatRating extends HTMLElement {
 
   dispatchChange () {
     this.dispatchEvent(new CustomEvent('stat-rating-changed', {
-      detail: { 
+      detail: {
+        id: this.getAttribute('data-id'),
         name: this.getAttribute('name'), 
         value: this.getValue(),
+        category: this.getAttribute('category'),
+        subcategory: this.getAttribute('subcategory'),
         element: this
       },
       bubbles: true
@@ -176,14 +179,7 @@ class StatRating extends HTMLElement {
           radio.classList.remove('Filled');
         }
       });
-      this.dispatchEvent(new CustomEvent('stat-rating-changed', {
-        detail: { 
-          name: this.getAttribute('name'), 
-          value: selectedValue,
-          element: this 
-        },
-        bubbles: true
-      }));
+      this.dispatchChange();
     }
   }
 

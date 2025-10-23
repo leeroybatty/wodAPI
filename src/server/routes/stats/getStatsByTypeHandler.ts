@@ -19,14 +19,12 @@ export const getStatsByTypeHandler = async (req: AuthenticatedRequest, res: Resp
       createErrorResponse(ErrorKeys.STAT_TYPE_NOT_FOUND)
     );
   };
- 
   const category = type.toLowerCase();
   let options: StatsFilters = await prepareBaseOptions(req);
   let monsterParam = parseQueryParam(monster).pop();
 
   try {
     const serviceResult = await getStatsInCategory(category, {...options, monster: monsterParam});
-
     if (serviceResult.success) {
       return res.status(200).json(serviceResult);
     }

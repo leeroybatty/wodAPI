@@ -13,7 +13,6 @@ import { AllStatCategoriesType, StatsFilters } from './types';
 export const getPowersByMonsterHandler = async (req: AuthenticatedRequest, res: Response) => {
   const monsterParam = await getMonsterFromParams(req);
   let options: StatsFilters = await prepareBaseOptions(req);
-  
   try {
     const serviceResult = await getMonsterPowers(monsterParam, {...options});
     if (serviceResult.success) {

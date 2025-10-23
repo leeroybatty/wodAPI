@@ -60,7 +60,16 @@ function SheetAdvantages() {
       <stat-section name="miscellaneous" heading="Miscellaneous">
          {isVTM && (
           <div class="sheet_column">
-            <stat-rating max={10} name={virtues.path.name || 'Humanity'} min={1} value={pathTotal} disabled={true} ceiling={10}></stat-rating>
+            <stat-rating 
+              max={10}
+              name={virtues.path.name || 'Humanity'}
+              min={1}
+              value={pathTotal}
+              category="advantages"
+              subcategory="virtues"
+              disabled={true}
+              ceiling={10}
+            />
           </div>
         )}
         <div class="sheet_column">

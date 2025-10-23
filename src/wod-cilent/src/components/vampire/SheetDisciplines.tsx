@@ -70,20 +70,17 @@ function SheetDisciplines() {
     }
   }, [templateName, powersTotal, updateValidity]);
 
-  const magicalDisciplines = [
-    "thaumaturgy",
-    "assamite sorcery",
-    "tremere",
-    "wanga",
-    "akhu",
-    "koldunic sorcery",
-    "necromancy"
-  ];
-
   const bloodMagics = useMemo(() => {
-    const thisisfaggotry = magicalDisciplines.filter((bm) => powers[bm]?.value > 0);
-    console.log(thisisfaggotry);
-    return thisisfaggotry;
+    const magicalDisciplines = [
+      "thaumaturgy",
+      "assamite sorcery",
+      "tremere",
+      "wanga",
+      "akhu",
+      "koldunic sorcery",
+      "necromancy"
+    ];
+    return magicalDisciplines.filter((bm) => powers[bm]?.value > 0);
   }, [powers])
   
   return (
@@ -118,7 +115,6 @@ function SheetDisciplines() {
           thaumaturgy={pathName != 'necromancy'}
         />)
       })}
-     
     </div>
   );
 }
