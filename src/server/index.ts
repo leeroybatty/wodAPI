@@ -8,6 +8,7 @@ import { getStatsByTypeHandler } from './routes/stats/getStatsByTypeHandler';
 import { getPathVirtuesHandler } from './routes/stats/vampire/getPathVirtuesHandler';
 import { getPowersByMonsterHandler } from './routes/stats/getPowersByMonsterHandler';
 import { getMonsterOrganizationsHandler } from './routes/organizations/getMonsterOrganizationsHandler';
+import { getVampireRitualsHandler } from './routes/stats/vampire/getVampireRitualsHandler';
 import { swaggerConfig } from './swagger';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
@@ -27,7 +28,8 @@ app.get('/api/monsters', /* authorizeGeneralAccess, */ getMonstersHandler);
 app.get('/api/monsters/:monster/type', /* authorizeGeneralAccess, */ getMonsterTypesHandler);
 app.get('/api/stats/:type', /* authorizeGeneralAccess, */ getStatsByTypeHandler);
 app.get('/api/stats/powers/:monster', /* authorizeGeneralAccess, */ getPowersByMonsterHandler);
-app.get('/api/stats/virtues/:path', /* authorizeGeneralAccess, */ getPathVirtuesHandler)
+app.get('/api/stats/virtues/:path', /* authorizeGeneralAccess, */ getPathVirtuesHandler);
+app.get('/api/stats/rituals/:path', /* authorizeGeneralAccess, */ getVampireRitualsHandler);
 app.get('/api/character/:id/stat/:statName', /* authorizeGeneralAccess, */ getCharacterStat);
 
 

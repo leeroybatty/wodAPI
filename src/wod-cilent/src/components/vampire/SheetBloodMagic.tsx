@@ -113,7 +113,7 @@ function SheetMagics({ bloodmagic, thaumaturgy }) {
 }, [magics, magicDefs, bloodmagic, magicsTotal]);
 
   return (
-    <div style={{padding: '0 var(--spacing-md)'}}>
+    <div>
       {selectedMagics.map((stat) => (
         <stat-rating
           key={`magic-${stat.id}`}

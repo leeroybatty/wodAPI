@@ -84,21 +84,20 @@ function SheetDisciplines() {
   }, [powers])
   
   return (
-    <div>
-      <stat-column total={powersTotal || youAreGhoulAndYouGetPotence ? 1 : 0} name="disciplines">
-        {powersList.map((stat) => (
-          <stat-rating
-            key={`power-${stat.id}`}
-            data-id={stat.id}
-            name={stat.name}
-            category="advantages"
-            subcategory="powers"
-            min={0}
-            ceiling={templateName === 'vampire' ? 3 : 1}
-            value={powers[stat.name]?.value || 0}
-          />
-        ))}
-      </stat-column>
+    <stat-column total={powersTotal || youAreGhoulAndYouGetPotence ? 1 : 0} name="disciplines">
+      {powersList.map((stat) => (
+        <stat-rating
+          key={`power-${stat.id}`}
+          data-id={stat.id}
+          name={stat.name}
+          category="advantages"
+          subcategory="powers"
+          min={0}
+          ceiling={templateName === 'vampire' ? 3 : 1}
+          value={powers[stat.name]?.value || 0}
+        />
+      ))}
+
       {youAreGhoulAndYouGetPotence &&
         <stat-rating
           name="potence"
@@ -115,7 +114,7 @@ function SheetDisciplines() {
           thaumaturgy={pathName != 'necromancy'}
         />)
       })}
-    </div>
+    </stat-column>
   );
 }
 

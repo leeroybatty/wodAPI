@@ -1,4 +1,4 @@
-import { getStatDefinitions, getAffinityPowers, getVirtuesByPath } from './statsRepository';
+import { getStatDefinitions, getAffinityPowers, getVirtuesByPath, getRitualsByPath } from './statsRepository';
 import { reconcileIncludeExclude } from '../helpers';
 import { ApiResponse } from '../../apiResponse.types';
 import { referenceCache } from '../../sql';
@@ -18,6 +18,21 @@ export const getPathVirtues = async (
   options: FilterOptions
 ): Promise<ApiResponse<unknown>> => {
   return await getVirtuesByPath(path, options);
+}
+
+export const getVampireRituals = async (
+  path: number | string,
+  options: FilterOptions & { level?: number }
+): Promise<ApiResponse<unknown>> => {
+
+  let pathId: number;
+  if (isNaN(Number(path)) && typeof path === 'string') {
+    pathId = await referenceCache.getStatId(path);
+  } else {
+    pathId = Number(path);
+  }
+
+  return await getRitualsByPath(pathId as number, options);
 }
 
 export const getVampireMoralityPaths = async (

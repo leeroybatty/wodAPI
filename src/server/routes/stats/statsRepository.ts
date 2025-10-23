@@ -8,6 +8,14 @@ import { createStringArrayPlaceholders } from '../helpers';
 import { ValidFormat } from '../types';
 import { StatsFilters } from './types';
 import { FilterOptions } from '../types';
+import { 
+  buildBookFilter,
+  buildExceptionFilter,
+  buildFactionFilter,
+  buildMonsterFilter,
+  buildStatColumns,
+  optionalCondition
+} from '../../sql/queryBuilders';
 
 type StatsData = {
   id: string,
@@ -20,10 +28,32 @@ type StatsData = {
   }
 };
 
+const formatStatsResponse =  function(
+  rows: StatsData[],
+  format?: string
+): { stats: StatsData[] | string[] } {
+
+  if (format && format === "names") {
+    const rowNames = rows
+      .map((stat: any) => stat.name)
+      .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+
+    return {
+      stats: rowNames
+    };
+  }
+
+  const rowData = rows
+    .sort((a: StatsData, b: StatsData) => {
+      return a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+    });
+    return { stats: rowData };
+}
+
 export async function getStatDefinitions(
   categories: string[],
   options: StatsFilters
-): Promise<ApiResponse<{ stats: StatsData[] }>> {
+): Promise<ApiResponse<{ stats: StatsData[] | string[]  }>> {
   console.log(options)
   try {
     const { bookIds, exclude, include, monster, faction, format } = options;
@@ -34,67 +64,31 @@ export async function getStatDefinitions(
       ? `LOWER(p.name) = $1`
       : `LOWER(p.name) IN (${statPlaceholders})`;
 
-    let isIncluded = '';
-    if (include && include.length > 0) {
-      const inclusionPlaceholders = createStringArrayPlaceholders(include, variables.length + 1);
-      isIncluded = `LOWER(s.name) IN (${inclusionPlaceholders})`;
-      variables = [...variables, ...include];
-    }
-    
-    let isFoundInTheseBooks = ''
-    if (bookIds && bookIds.length > 0) {
-      const bookIdPlaceholders = createStringArrayPlaceholders(bookIds, variables.length + 1);
-      isFoundInTheseBooks = `(s.book_id IS NULL OR s.book_id IN (${bookIdPlaceholders}))`;
-      variables = [...variables, ...bookIds];
-    }
+    const includeFilter = buildExceptionFilter(include, variables, 'include');
+    const isIncluded = includeFilter.condition;
+    variables = includeFilter.variables;
 
-    let joins = `JOIN stats p ON p.id = s.parent_id
+    const bookFilter = buildBookFilter(bookIds, variables);
+    const isFoundInTheseBooks = bookFilter.condition;
+    variables = bookFilter.variables;
+
+    const joins = `JOIN stats p ON p.id = s.parent_id
     LEFT JOIN wod_books b on b.id = s.book_id
-    LEFT JOIN bridge_monsters_stats bms ON bms.stat_id = s.id`
+    LEFT JOIN bridge_monsters_stats bms ON bms.stat_id = s.id`;
 
-    let isAccessibleToMonster ='';
-    if (monster) { 
-      const monsterIdList = await referenceCache.getMonsterChain(monster);
-      const monsterPlaceholders = createStringArrayPlaceholders(monsterIdList, variables.length + 1);
-      isAccessibleToMonster = `(bms.monster_id IS NULL OR bms.monster_id IN (${monsterPlaceholders}))`;
-      variables = [...variables, ...monsterIdList];
-    } else {
-      isAccessibleToMonster = 'bms.monster_id IS NULL';
-    }
+    const monsterFilter = await buildMonsterFilter(monster, variables);
+    const isAccessibleToMonster = monsterFilter.condition;
+    variables = monsterFilter.variables;
 
-    let isAccessibleToFaction = '';
-    if (faction) {
-      const orgId = await referenceCache.getOrganizationId(faction);
-      isAccessibleToFaction = `(s.org_lock_id IS NULL OR s.org_lock_id = $${variables.length + 1})`;
-      variables.push(orgId);
-    } else {
-      isAccessibleToFaction = 's.org_lock_id IS NULL';
-    }
+    const factionFilter = await buildFactionFilter(faction, variables);
+    const isAccessibleToFaction = factionFilter.condition;
+    variables = factionFilter.variables;
 
-    let isNotExcluded = '';
-    if (exclude && exclude.length > 0) {
-      const exclusionPlaceholders = createStringArrayPlaceholders(exclude, variables.length + 1);
-      isNotExcluded += `LOWER(s.name) NOT IN (${exclusionPlaceholders})`;
-      variables = [...variables, ...exclude];
-    }
+    const excludeFilter = buildExceptionFilter(exclude, variables, 'exclude');
+    const isNotExcluded = excludeFilter.condition;
+    variables = excludeFilter.variables;
 
-    const columns = format === "names"
-      ? "DISTINCT s.id, s.name"
-      : `DISTINCT ON (s.id) s.id,
-        LOWER(s.name) as name,
-        s.name as display, 
-        s.description,
-        CASE 
-          WHEN s.book_id IS NOT NULL THEN 
-            json_build_object(
-              'book_id', s.book_id,
-              'book_name', b.name,
-              'page_number', s.page_number
-            )
-          ELSE NULL
-        END as reference`
-
-    const optionalCondition = (condition?: string) => condition || 'TRUE';
+    const columns = buildStatColumns(format);
 
     const statsQuery = `
       SELECT ${columns}
@@ -107,20 +101,13 @@ export async function getStatDefinitions(
         )
         ${isNotExcluded ? ` AND ${isNotExcluded}` : ''}
       ORDER BY s.id, s.name ASC
-    `;    
+    `; 
 
     const statsResult = await queryDbConnection(statsQuery, variables);
+    const formattedStats = formatStatsResponse(statsResult.rows, format); 
 
-    if (format === "names") {
-      return createSuccessResponse({
-        stats: statsResult.rows.map((stat) => stat.name).sort((a, b) => a.name - b.name)
-      });
-    }
-    
-    return createSuccessResponse({
-      stats: statsResult.rows.sort((a, b) => a - b)
-    });
-    
+    return createSuccessResponse(formattedStats);
+
   } catch (error) {
     console.error('Query error:', error);
     return createErrorResponse(
@@ -133,98 +120,56 @@ export async function getStatDefinitions(
 export async function getAffinityPowers(
   monster: string,
   options: FilterOptions
-): Promise<ApiResponse<{ stats: StatsData[] }>> {
+): Promise<ApiResponse<{ stats: StatsData[] | string[] }>> {
   try {
     const { bookIds, exclude, include, faction, format } = options;
     let variables: (string | number)[] = [];
-    console.log("Get affinity powers");
-    console.log(options);
 
-    let isIncluded = '';
-    if (include && include.length > 0) {
-      const inclusionPlaceholders = createStringArrayPlaceholders(include, variables.length + 1);
-      isIncluded = `LOWER(s.name) IN (${inclusionPlaceholders})`;
-      variables = [...variables, ...include];
-    }
-    
-    let isFoundInTheseBooks = ''
-    if (bookIds && bookIds.length > 0) {
-      const bookIdPlaceholders = createStringArrayPlaceholders(bookIds, variables.length + 1);
-      isFoundInTheseBooks = `(s.book_id IS NULL OR s.book_id IN (${bookIdPlaceholders}))`;
-      variables = [...variables, ...bookIds];
-    }
+    const includeFilter = buildExceptionFilter(include, variables, 'include');
+    const isIncluded = includeFilter.condition;
+    variables = includeFilter.variables;
 
-    let joins = `JOIN stats p ON p.id = s.parent_id
+    const bookFilter = buildBookFilter(bookIds, variables);
+    const isFoundInTheseBooks = bookFilter.condition;
+    variables = bookFilter.variables;
+
+    const joins = `JOIN stats p ON p.id = s.parent_id
     LEFT JOIN wod_books b on b.id = s.book_id
     JOIN bridge_monsters_stats bms ON bms.stat_id = s.id`
 
-    const monsterId = await referenceCache.getMonsterId(monster);
-    const isAccessibleToMonster = `bms.monster_id = $${variables.length + 1}`;
-    variables.push(monsterId);
+    const monsterFilter = await buildMonsterFilter(monster, variables);
+    const isAccessibleToMonster = monsterFilter.condition;
+    variables = monsterFilter.variables;
 
     const isPower = `LOWER(p.name) IN ('disciplines','spheres','arts','numina','arcanoi','lores','edges','hekau')`;
-  
-    let isAccessibleToFaction = '';
-    if (faction) {
-      const orgId = await referenceCache.getOrganizationId(faction);
-      isAccessibleToFaction = `(s.org_lock_id IS NULL OR s.org_lock_id = $${variables.length + 1})`;
-      variables.push(orgId);
-    } else {
-      isAccessibleToFaction = 's.org_lock_id IS NULL';
-    }
 
-    let isNotExcluded = '';
-    if (exclude && exclude.length > 0) {
-      const exclusionPlaceholders = createStringArrayPlaceholders(exclude, variables.length + 1);
-      isNotExcluded += `LOWER(s.name) NOT IN (${exclusionPlaceholders})`;
-      variables = [...variables, ...exclude];
-    }
+    const factionFilter = await buildFactionFilter(faction, variables);
+    const isAccessibleToFaction = factionFilter.condition;
+    variables = factionFilter.variables;
 
-    const columns = format === "names"
-      ? "DISTINCT s.id, s.name"
-      : `DISTINCT ON (s.id) s.id,
-        LOWER(s.name) as name,
-        s.name as display, 
-        s.description,
-        CASE 
-          WHEN s.book_id IS NOT NULL THEN 
-            json_build_object(
-              'book_id', s.book_id,
-              'book_name', b.name,
-              'page_number', s.page_number
-            )
-          ELSE NULL
-        END as reference`
+    const excludeFilter = buildExceptionFilter(exclude, variables, 'exclude');
+    const isNotExcluded = excludeFilter.condition;
+    variables = excludeFilter.variables;
 
-    const optionalCondition = (condition?: string) => condition || 'TRUE';
+    const columns = buildStatColumns(format);
 
     const statsQuery = `
       SELECT ${columns}
       FROM stats s ${joins}
       WHERE ${isPower}
-        AND (${isAccessibleToMonster} ${isIncluded ? ` OR ${isIncluded}` : ''})
-        AND (
-          ${optionalCondition(isAccessibleToFaction)}
-          AND ${optionalCondition(isFoundInTheseBooks)}
+        AND (${optionalCondition(isAccessibleToMonster)}
+            AND ${optionalCondition(isAccessibleToFaction)}
+            AND ${optionalCondition(isFoundInTheseBooks)}
+          ${isIncluded ? ` OR ${isIncluded}` : ''}
         )
         ${isNotExcluded ? ` AND ${isNotExcluded}` : ''}
       ORDER BY s.id, s.name ASC
-    `;    
+    `; 
 
     const statsResult = await queryDbConnection(statsQuery, variables);
-
-    if (format === "names") {
-      return createSuccessResponse({
-        stats: statsResult.rows.map((stat) => stat.name)
-      });
-    }
-
-    console.log(statsQuery)
-    console.log(variables)
+    const formattedStats = formatStatsResponse(statsResult.rows, format);
     
-    return createSuccessResponse({
-      stats: statsResult.rows
-    });
+    return createSuccessResponse(formattedStats);
     
   } catch (error) {
     console.error('Query error:', error);
@@ -234,6 +179,57 @@ export async function getAffinityPowers(
     );
   }
 }
+
+export async function getRitualsByPath(
+  pathId: number,
+  options: FilterOptions & { level?: number }
+): Promise<ApiResponse<{ stats: StatsData[] | string[] }>> {
+  try {
+    const { bookIds, include, exclude, format, level } = options;
+    let variables: (string | number)[] = [pathId];
+
+    const columns = buildStatColumns(format, 'r');
+
+    const bookFilter = buildBookFilter(bookIds, variables);
+    const isFoundInTheseBooks = bookFilter.condition;
+    variables = bookFilter.variables;
+
+    const includeFilter = buildExceptionFilter(include, variables, 'include');
+    const isIncluded = includeFilter.condition;
+    variables = includeFilter.variables;
+
+    const excludeFilter = buildExceptionFilter(exclude, variables, 'exclude');
+    const isNotExcluded = excludeFilter.condition;
+    variables = excludeFilter.variables;
+
+    const statsQuery = `
+      SELECT ${columns}
+      FROM rituals r
+      LEFT JOIN wod_books b on b.id = s.book_id
+      JOIN stats s on r.stat_id = s.id
+      WHERE LOWER(s.id) = LOWER($1)
+      AND (${optionalCondition(isFoundInTheseBooks)}
+          ${isIncluded ? `OR ${isIncluded}` : ''}
+        )
+        ${isNotExcluded ? ` AND ${isNotExcluded}` : ''}
+      ORDER BY r.name, r.id ASC
+    `;
+
+    const statsResult = await queryDbConnection(statsQuery, variables);
+
+    const formattedStats = formatStatsResponse(statsResult.rows, format);
+    
+    return createSuccessResponse(formattedStats);
+
+  } catch (error) {
+    console.error('Query error:', error);
+    return createErrorResponse(
+      ErrorKeys.GENERAL_SERVER_ERROR,
+      error instanceof Error ? error.message : 'Unknown error occurred'
+    );
+  }
+}
+
 
 export async function getVirtuesByPath(
   path: string,
