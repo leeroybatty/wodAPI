@@ -35,7 +35,7 @@ export const getMonsters = {
         required: false,
         style: 'form',
         explode: false,
-        description: `Comma-separated list of splats. If you do not provide this, it will return everything. This will add anything that was introduced at any point within that gameline.  'Human' will always be included - exclude it with the exclude query parameter.
+        description: `Comma-separated list of splats. If you do not provide this, it will return everything. This will add anything that was introduced at any point within that gameline.  'Human' will always be included - exclude it with the exclude query parameter. This is great for if you want to add a splat wholesale. 
 
           - Vampire: Adds Vampires, Ghouls, Revenants.
 
@@ -53,7 +53,6 @@ export const getMonsters = {
         `,
         example: "vampire,mage"
       },
-      getMonstersExclude,
       getMonstersInclude,
       format
     ],

@@ -4,7 +4,7 @@ import { AuthenticatedRequest } from '../../middleware/auth';
 import { handleError, createErrorResponse, createSuccessResponse } from '../../errors';
 import { ErrorKeys } from '../../errors/errors.types';
 import { ApiResponse } from '../../apiResponse.types';
-import { createStringArrayPlaceholders } from '../helpers';
+import { createStringArrayPlaceholders, reconcileIncludeExclude } from '../helpers';
 import { FilterOptions } from '../types';
 import { 
   buildBookFilter,
@@ -24,22 +24,12 @@ type MonsterData = {
 export async function getMonsterAncestors(
   splats: string[],
   options: FilterOptions): Promise<ApiResponse<{ monsters: MonsterData[] }>> {
-   try {
-
-    const { exclude, include, faction, format } = options;
+  try {
+    const { exclude, include, format } = options;
     let variables: (string | number)[] = [];
 
-    const includeFilter = buildExceptionFilter(include, variables, 'include');
-    const isIncluded = includeFilter.condition;
-    variables = includeFilter.variables;
-
-    const excludeFilter = buildExceptionFilter(exclude, variables, 'exclude');
-    const isNotExcluded = excludeFilter.condition;
-    variables = excludeFilter.variables;
-
-    let isPartOfTheseSplats = '';
+    let splatList: string[] = [];
     if (splats.length > 0) {
-      let splatList = ['human'];
       for (let splat of splats) {
         switch (splat) {
           case 'vampire':
@@ -59,9 +49,25 @@ export async function getMonsterAncestors(
             break;
         }
       }
-      isPartOfTheseSplats = `LOWER(m.name) IN (${createStringArrayPlaceholders(splatList, variables.length + 1)})`;
-      variables = [...variables, ...splatList];
     }
+
+    let combinedIncludes = [...(include || []), ...splatList];
+
+    const reconciledIncludes = exclude 
+    ? reconcileIncludeExclude(exclude, combinedIncludes)
+    : combinedIncludes;
+
+    console.log(exclude)
+    console.log("Reconciled----------------------------------")
+    console.log(reconciledIncludes)
+
+    const includeFilter = buildExceptionFilter(reconciledIncludes, variables, 'include', 'm');
+    const isIncluded = includeFilter.condition;
+    variables = includeFilter.variables;
+
+    const excludeFilter = buildExceptionFilter(exclude, variables, 'exclude', 'm');
+    const isNotExcluded = excludeFilter.condition;
+    variables = excludeFilter.variables;
    
     const columns = buildColumns(format, 'm');
 
@@ -69,11 +75,10 @@ export async function getMonsterAncestors(
       SELECT ${columns}
       FROM monsters m 
         LEFT JOIN wod_books b on b.id = m.book_id
-      WHERE m.parent_id IS NULL
-      AND (${optionalCondition(isPartOfTheseSplats)}
-          ${isIncluded ? ` OR ${isIncluded}` : ''}
-        )
-        ${isNotExcluded ? ` AND ${isNotExcluded}` : ''}
+      WHERE
+        m.parent_id IS NULL
+        ${isIncluded ? `AND ${isIncluded}` : ''}
+        ${isNotExcluded ? `AND ${isNotExcluded}` : ''}
       ORDER BY m.id, m.name ASC
     `;
 
@@ -86,7 +91,7 @@ export async function getMonsterAncestors(
     }
     
     return createSuccessResponse({
-      monsters: monsterResult.rows,
+      monsters: monsterResult.rows
     });
     
   } catch (error) {
