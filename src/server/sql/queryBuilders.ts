@@ -130,7 +130,11 @@ export async function buildFactionFilter(
 
 export const optionalCondition = (condition?: string) => condition || 'TRUE';
 
-export function buildStatColumns(format: string = 'all', tableAlias: string = 's'): string {
+export function buildColumns(
+  format: string = 'all',
+  tableAlias: string = 's',
+  additionalColumns: string = ''
+): string {
   if (format === "names") {
     return `DISTINCT ${tableAlias}.id, ${tableAlias}.name`;
   }
@@ -139,6 +143,7 @@ export function buildStatColumns(format: string = 'all', tableAlias: string = 's
     LOWER(${tableAlias}.name) as name,
     ${tableAlias}.name as display, 
     ${tableAlias}.description,
+    ${additionalColumns ? `${additionalColumns},`: ''}
     CASE 
       WHEN ${tableAlias}.book_id IS NOT NULL THEN 
         json_build_object(

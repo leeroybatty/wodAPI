@@ -25,5 +25,7 @@ export enum MonsterTemplates {
   MALKAVIAN = 'malkavian',
   SALUBRI = 'salubri',
   TZIMISCE = 'tzimisce',
-  VENTRUE = 'ventrue'
+  VENTRUE = 'ventrue',
+  SUPERNATURAL = 'supernatural being',
+  ARTIFICIAL = 'artificial being'
 }

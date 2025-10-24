@@ -19,13 +19,14 @@ import { referenceCache } from '../../sql';
 import { MonsterTemplates } from './types';
 
 export const getAllTopLevelMonsters = async(
+  splats: string[],
   options: FilterOptions): Promise<ApiResponse<unknown>> => {
-  const {year, bookIds, exclude, include, faction, format} = options;
+  const {exclude, include, format} = options;
   let defaultExclusions: string[] = [];
   const exclusions = include
     ? reconcileIncludeExclude(include, defaultExclusions)
     : defaultExclusions;
-  return await getMonsterAncestors({...options, exclude: exclusions});   
+  return await getMonsterAncestors(splats, {...options, exclude: exclusions});   
 }
 
 const buildHistoricalMonsterInclusions = (

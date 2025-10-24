@@ -23,12 +23,133 @@ components:
           type: string
           example: Request completed successfully
 paths:
+  /api/monsters:
+    get:
+      summary: Get playable "races" (e.g. Vampire) by source books
+      description: Retrieve available monsters at the splat level ('Vampire', 'Mage', etc.), filtered by source books.
+      tags:
+        - Monsters
+      parameters:
+        - in: query
+          name: splats
+          schema:
+            type: string
+            enum:
+              - vampire
+              - mage
+              - shifter
+              - demon
+              - mummy
+              - hunter
+              - changeling
+          required: false
+          style: form
+          explode: false
+          description: >-
+            Comma-separated list of splats. If you do not provide this, it will return everything. This will add
+            anything that was introduced at any point within that gameline.  'Human' will always be included - exclude
+            it with the exclude query parameter.
+
+                      - Vampire: Adds Vampires, Ghouls, Revenants.
+
+                      - Mage: Adds Mage, Sorcerer, and 'Companion' (types of characters defined in Gods And Monsters).
+
+                      - Shifter: Adds Shifters, Kinfolk, and 'Possessed' (fomori, drones and kami).
+
+                      - Demon: Adds Demons.
+
+                      - Mummy: Adds Mummies. 
+
+                      - Changeling: Adds Changelings and Kinain.
+
+                      - Hunter: Adds Hunter the Reckoning style hunters with Edges.
+                    
+          example: vampire,mage
+        - in: query
+          name: exclude
+          required: false
+          schema:
+            type: string
+          description: >-
+            A list of entries to  override default behavior and explicitly exclude by name, not database ID.  This is
+            intended for conveniently doing little tweaks in your game world - maybe you want to allow every single
+            entry in a category but one or two.For example: you want a Vampire game, but you don't want to allow ghouls
+            or revenants by default.
+          example: ghouls,revenants
+        - in: query
+          name: include
+          required: false
+          schema:
+            type: string
+          description: >-
+            A list of entries to override default behavior and explicitly include by name, not database ID.  This is
+            intended for conveniently doing little tweaks in your game world - maybe you have a house rule that brings
+            in a stat from an existing source.You want literally only Vampires and that's it.  Instead of using the
+            'splat' argument (which would select Vampire, ghouls, revenants, and humans) and then excluding 3 things, 
+            you include 'vampire' by itself.
+          example: vampire
+        - in: query
+          name: format
+          required: false
+          schema:
+            type: string
+            enum:
+              - all
+              - names
+          description: >-
+            An option to return full data or just a list.  You might just need a list when, for example, building a
+            MUSH-side CG where the user only needs the available options on the menu.
+          example: names
+      responses:
+        '200':
+          description: Successful response with monster data
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          monsters:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                  description: Name of the monster
+                                  example: Shifter
+                                book:
+                                  type: string
+                                  description: Full name of the source book
+                                  example: 'Vampire: the Masquerade 20th Anniversary Core'
+                            description: List of available monster types with source information.
+                            example:
+                              - name: Vampire
+                                book: 'Vampire: The Masquerade 20th Anniversary Core'
+                              - name: Ghoul
+                                book: 'Vampire: The Masquerade 20th Anniversary Core'
+                              - name: Mage
+                                book: 'Mage: The Ascension 20th Anniversary Core'
+                              - name: Sorcerer
+                                book: 'Mage 20th Anniversary: Sorcerer'
+        '500':
+          description: General server error.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiErrorResponse'
   /api/monsters/{monster}/type:
     get:
       summary: Get monster clans/types by source books
       description: |-
-        Retrieve available monster clans or types filtered by source books and in-character year.
-              Historical filtering automatically excludes clans that didn't exist in the specified year.
+        Retrieve available monster types filtered by source books and in-character year.
+              Historical filtering automatically excludes things that didn't exist in the specified year.
+              
       tags:
         - Monsters
       parameters:
@@ -41,9 +162,10 @@ paths:
               - vampire
               - ghoul
               - revenant
-              - werewolf
+              - shifter
               - kinfolk
               - mage
+              - companion
               - sorcerer
               - changeling
               - kinain
@@ -52,28 +174,67 @@ paths:
               - demon
               - thrall
               - mummy
-          description: |-
-            The type of monster/supernatural being!
+              - human
+              - possessed
+              - assamite
+              - cappadocian
+              - follower of set
+              - gangrel
+              - gargoyle
+              - lasombra
+              - malkavian
+              - salubri
+              - tzimisce
+              - ventrue
+              - supernatural being
+              - artificial being
+          description: >-
+            The type of monster/supernatural being that logically holds the subcategory you're looking for.  Without
+            other filters like books and factions, the behavior is completely indiscriminate.  See the filter
+            descriptions for how to refine the results further.  This is mostly intuitive ('vampire' yields a list of
+            clans, plug in a clan and see the list of bloodlines), but here are the nonintuitive things: 
 
-            - 'vampire' will yield clans, e.g. "Brujah"
 
-            - 'ghoul' will yield clan vassals, e.g. "Brujah Vassal"
+                    Vampire: the Masquerade
+                    - If you have Ghouls in your game, there is a difference in the database between a 'nosferatu' and a 'nosferatu vassal', for instance.  So, to give a user a selection of the types of Ghoul they can be, you will want to pass 'ghoul' as your monster type, NOT try to get vampire clans.
 
-            - 'revenant' will yield families, e.g. "Bratovich"
 
-            - 'werewolf' will yield species, e.g. "Garou"
+                    Mage: the Ascension
+                    - If you use 'Sorcerer' as your 'type', you will get 'Psychic' and 'Hedge Witch'. 
 
-            - 'changeling' will yield kiths, e.g. "Boggan"
+                    - Gods and Monsters makes a bunch of different types of Companions available.  If you use 'companion' as your monster type, you will see "Acolyte", "Consor" and "Sorcerer", as well as "Animal", "Artificial Being", "Object", and "Supernatural Being".  
 
-            - 'mage' will yield crafts, e.g. "Order of Hermes"
+                    - Using 'artificial being' as your 'type' will list Construct, Reanimate, and Robot.
+                    - Using 'supernatural being' as your 'type' will list Alien, Bygone, and Spirit.
 
-            - 'demon' will yield lores, e.g. "Defiler"
 
-            - 'hunter' will yield creeds, e.g. "Defender"
-
-            - 'wraith' will yield  "ghost", "risen", or "spectre" (for antagonists!)
+                    Werewolf: the Apocalypse
+                    - You want 'shifter', not 'werewolf', to yield the list of playable shapeshifter types.  This yields Garou plus ALL Changing Breeds and 'Mockery'.
+                    - To get specific tribes you will want to put in that species, for instance, to see 'Fianna' et al you put in 'Garou' not 'Werewolf'. 
                     
           example: vampire
+        - in: query
+          name: faction
+          schema:
+            type: string
+          style: form
+          explode: false
+          example: Sabbat
+          description: >-
+            Filter for a faction. Filling this out will restrict results to either stats universally available OR
+            available to a sect.
+        - in: query
+          name: format
+          required: false
+          schema:
+            type: string
+            enum:
+              - all
+              - names
+          description: >-
+            An option to return full data or just a list.  You might just need a list when, for example, building a
+            MUSH-side CG where the user only needs the available options on the menu.
+          example: names
         - in: query
           name: books
           schema:
@@ -83,6 +244,23 @@ paths:
           description: >-
             Comma-separated list of book names. Can also be sent as multiple parameters. Book names are
             case-insensitive.
+
+                    Without filters, this endpoint will indiscriminately load anything relevant to a given monster category no matter how obscure. Using the Books filter is one way to broad-stroke exclude results, here are the main intended cases:
+
+                    - For Werewolf: the Apocalypse
+                      - When hitting /api/monsters/shifter/type, but you don't want Changing Breeds or Mockeries:
+                        pass in 'Werewolf: the Apocalypse Core' by itself to only have 'Garou' as the Shifter option and knock out 'Mockery' and all of the Changing Breeds.
+
+                      - When you want MOST but not all of the Changing Breeds:
+                        add in 'Changing Breeds' to your booklist, and then use the 'exclude' parameter to pick off the one or two you have in mind. 
+
+                    - For Mage: the Ascension
+                      - When hitting /api/monsters/companion/type, but you just want Consors and Acolytes, not BYGONES:
+                        pass in 'Mage: the Ascension Core' by itself to exclude Sorcerer and all the Familiar types in Gods and Monsters.
+                        
+                      - If you do still want Sorcerer while filtering out the Bygones and so on:
+                        Add 'Sorcerer' to the book list, or use the 'include' parameter, as it's designed for one-offs.
+                    
           example: vampire 20th anniversary,dark ages core
         - in: query
           name: year
@@ -91,94 +269,71 @@ paths:
             default: 2025
           description: >-
             In-character year for historical filtering. Pass a negative integer for BCE years. Affects which results are
-            available:
+            available.
 
-            - Pre-1999 (6th Great Maelstrom): No Demon Houses, no Mummy Amenti/Wu T'iang, no Hunter Creeds
-
-            - Pre 1969: No Sidhe (vanished in 1350)
-
-            - Pre-1950: No Serpents of the Light
-
-            - Pre-1900: No Blood Brothers
-
-            - Pre-1914: No New World Order
-
-            - Pre 1897: No Iteration X, Progenitors, or Void Engineers
-
-            - Pre-1851: No Syndicate
-
-            - Pre-1823: No Virtual Adepts/Mercurial Elite
-
-            - Pre-1806: No Hollow Ones, Society/Sons of Ether
-
-            - Pre-1750 (Pre African Slave Trade): No Bata'a
-
-            - Post-1697 (Fall of the last Mayan kingdom): No Camazotz
-
-            - Post-1600 (Well after the Dark Ages): No Bonsam, Impundulu, Niktuku, or Ramanga
-
-            - Pre-1565: No Oprichniki (Ivan the Terrible made them that year); no Rossellini
-
-            - Post-1530: No Capacocha mummies until post-1999
-
-            - Post-1500: No Apis (CB specifies they disappeared 500 years ago)
-
-            - Pre-1452: No Celestial Chorus, Dreamspeakers
-
-            - Pre-1450: No Daughters of Cacophony, no Servants of Anushin-Rawan
-
-            - Pre-1440: No Cult of Ecstasy, Verbena
-
-            - Post-1350 (Black Death): No Sidhe until 1969
-
-            - Pre 1315: (Pre Great Famine crisis) No Euthantos or Solificati; no Grimaldi
-
-            - Pre 1200 (Pre-Inca Period): No Chaksimallki; Ducheski are called Krevcheski, no Obertus
-
-            - Pre-1167: No Gargoyles
-
-            - Pre 1128: No Knights Templar
-
-            - Pre-1100: (Rise of Great Zimbabwe, emperor Toba) No Ngoma, no Kitsune, no Zantosa
-
-            - Pre-1055: No Giovanni
-
-            - Pre-1090: No Tremere
-
-            - Pre-1000 (Medieval feudalism in Eastern Europe): No Bratovitch
-
-            - Pre 800: (Early Dark Ages) No Rafastio or Enrathi as Revenants
-
-            - Pre-767: No Order of Hermes
-
-            - Pre-745: No Kairouan Brotherhood (Kairouan was not described as a 'great' city until then)
-
-            - Pre-500 BCE: (Pre-Greek classical period): No Cabiri
-
-            - Pre-513 BCE: (Before Persian Empire was at height): No Ahl-i-Batin 
-
-            - Pre-800 BCE: (Pre Greek city states, pre Chou dynasty): No Hyppolytoi, Wu Lung
-
-            - Pre-1530 BCE (Pre-Chimu culture): No Intimallki
-
-            - Pre-1770 BCE: (Pre-contact between Andean and Amazonian cultures) - No Uchumallki
-
-            - Pre-2300 BCE: (Before Sargon of Akkad unites early Taftani) No Taftani
-
-            - Pre-3500 BCE: (Pre Egyptian civilization): No mummies!
-
-            - Pre-5050 BCE: (Pre Chinchorro civilization): No South American mummies
-
-            - Pre-10K BCE (End of last Ice Age): No Grondr, Tzimisce
+                    - Pre-1999 (6th Great Maelstrom): No Hunter Creeds! Hunters in your game would be mortals without Edges.
+                    - Pre 1969: No Sidhe (vanished in 1350)
+                    - Pre-1950: No Serpents of the Light
+                    - Pre-1900: No Blood Brothers
+                    - Pre-1914: No New World Order
+                    - Pre 1897: No Iteration X, Progenitors, or Void Engineers
+                    - Pre-1851: No Syndicate
+                    - Pre-1823: No Virtual Adepts/Mercurial Elite
+                    - Pre-1806: No Hollow Ones, Society/Sons of Ether
+                    - Pre-1750 (Pre African Slave Trade): No Bata'a
+                    - Post-1697 (Fall of the last Mayan kingdom): No Camazotz
+                    - Post-1600 (Well after the Dark Ages): No Niktuku (as a chargen option). Bonsam, Impundulu, and Ramanga likewise disappear under the assumption that you're not running Dark Ages. To include them anyway, use the 'books' query parameter and include 'Ebony Kingdom.'
+                    - Pre-1565: No Oprichniki (Ivan the Terrible made them that year); no Rossellini
+                    - Post-1530: No Capacocha mummies until post-1999
+                    - Post-1500: No Apis (CB specifies they disappeared 500 years ago)
+                    - Pre-1452: No Celestial Chorus, Dreamspeakers
+                    - Pre-1450: No Daughters of Cacophony, no Servants of Anushin-Rawan
+                    - Pre-1440: No Cult of Ecstasy, Verbena
+                    - Post-1350 (Black Death): No Sidhe until 1969
+                    - Pre 1315: (Pre Great Famine crisis) No Euthantos or Solificati; no Grimaldi
+                    - Pre 1200 (Pre-Inca Period): No Chaksimallki; Ducheski are called Krevcheski, no Obertus
+                    - Pre-1167: No Gargoyles
+                    - Pre 1128: No Knights Templar
+                    - Pre-1100: (Rise of Great Zimbabwe, emperor Toba) No Ngoma, no Kitsune, no Zantosa
+                    - Pre-1055: No Giovanni
+                    - Pre-1090: No Tremere
+                    - Pre-1000 (Medieval feudalism in Eastern Europe): No Bratovitch
+                    - Pre 800: (Early Dark Ages) No Rafastio or Enrathi as Revenants
+                    - Pre-767: No Order of Hermes
+                    - Pre-745: No Kairouan Brotherhood (Kairouan was not described as a 'great' city until then)
+                    - Pre-500 BCE: (Pre-Greek classical period): No Cabiri
+                    - Pre-513 BCE: (Before Persian Empire was at height): No Ahl-i-Batin 
+                    - Pre-800 BCE: (Pre Greek city states, pre Chou dynasty): No Hyppolytoi, no Wu Lung
+                    - Pre-1530 BCE (Pre-Chimu culture): No Intimallki
+                    - Pre-1770 BCE: (Pre-contact between Andean and Amazonian cultures) - No Uchumallki
+                    - Pre-2300 BCE: (Before Sargon of Akkad unites early Taftani) No Taftani
+                    - Pre-3500 BCE: (Pre Egyptian civilization): No Egyptian M  ummies!
+                    - Pre-5050 BCE: (Pre Chinchorro civilization): No South American mummies.
+                    - Pre-10K BCE (End of last Ice Age): No Grondr
           example: 1200
         - in: query
           name: exclude
+          required: false
           schema:
             type: string
-          style: form
-          explode: false
-          description: Comma-separated list of clan/type names to exclude from results (case-insensitive)
-          example: giovanni,tremere
+          description: >-
+            A list of entries to  override default behavior and explicitly exclude by name, not database ID.  This is
+            intended for conveniently doing little tweaks in your game world - maybe you want to allow every single
+            entry in a category but one or two.For example: you want a W:TA game, but you don't want Red Talons in your
+            urban setting.
+          example: red talons
+        - in: query
+          name: include
+          required: false
+          schema:
+            type: string
+          description: >-
+            A list of entries to override default behavior and explicitly include by name, not database ID.  This is
+            intended for conveniently doing little tweaks in your game world - maybe you have a house rule that brings
+            in a stat from an existing source.For example: in your V:TM game, you want to make sure Lasombra are
+            available, even in the Camarilla (if you filter for 'Camarilla' with the faction arg then it'd get rid of
+            the Lasombra).
+          example: lasombra
       responses:
         '200':
           description: Successful response with monster data
@@ -236,167 +391,292 @@ paths:
               schema:
                 allOf:
                   - $ref: '#/components/schemas/ApiErrorResponse'
-/api/stats/{type}/:
-  get:
-    summary: Get stat lists within a stat category
-    description: Retrieve available stats optionally filtered by source books.
-    tags:
-      - Stats
-    parameters:
-      - in: path
-        name: monster
-        required: true
-        schema:
-          type: string
-          enum:
-            - archetypes
-            - attributes
-            - physical
-            - social
-            - mental
-            - talents
-            - skills
-            - knowledges
-            - abilities
-            - backgrounds
-            - statpool
-            - disciplines
-            - virtues
-            - path
-            - spheres
-            - arete
-            - gifts
-            - renown
-        description: >-
-          The stat category.  "Statpool" refers to stats that have a temporary rating and a permanent rating, e.g.
-          Gnosis, Rage, Vitae, Quintessence and Willpower.
-        example: backgrounds
-      - in: query
-        name: format
-        schema:
-          type: string
-          enum:
-            - names
-            - all
-          default: all
-        style: form
-        example: all
-        explode: false
-        description: >-
-          Format for results. "Names" will present just an array of the stat names, and "all" will present an array of
-          objects with all expected fields.
-      - in: query
-        name: faction
-        schema:
-          type: string
-        style: form
-        explode: false
-        example: Sabbat
-        description: >-
-          Filter for a faction. Filling this out wil restrict results to either stats universally available OR available
-          to a sect. So, if you passed "Sabbat" in to find Backgrounds that are Sabbat-specific, then regular
-          Backgrounds like Resources would show up, but also "Rituals" and "Black Hand Membership."
-      - in: query
-        name: books
-        schema:
-          type: string
-        style: form
-        explode: false
-        description: >-
-          Comma-separated list of book names, to limit results to stats that are only found in those specified books,
-          including universally available stats (e.g. "Resources" or "Strength"). Book names are case-insensitive.
-        example: 'Mage the Ascension: 20th Anniversary Core'
-      - in: query
-        name: year
-        schema:
-          type: integer
-          default: 2025
-          description: |
-            The IC year! The year your game is set in will make some alterations to what is sensibly available.
-            - 1980+: Computer included
-            - 1914+: Seneschal excluded; WWI collapsed 'great house' culture.
-            - 1950+: Technology included; transistors, etc. become a thing
-            - 1930+: Ride excluded; cars eclipsed use of horses by far
-            - 1910+: Drive included; cars prominent enough to be a core stat
-            - 1890+: Archery excluded; firearms used by majority of people
-            - 1750+: Commerce excluded; world shifts to industrial logistics at this point
-            - 1700+: Legerdemain, Enigmas, Theology, and Hearth Wisdom excluded; Age of Enlightenment underway
-            - 1500+: Firearms included; matchlocks and muskets proliferate armies
+  /api/stats/{type}/:
+    get:
+      summary: Get stat lists within a stat category
+      description: Retrieve available stats optionally filtered by source books.
+      tags:
+        - Stats
+      parameters:
+        - in: path
+          name: monster
+          required: true
+          schema:
+            type: string
+            enum:
+              - archetype
+              - attributes
+              - physical
+              - social
+              - mental
+              - talents
+              - skills
+              - knowledges
+              - abilities
+              - backgrounds
+              - statpool
+              - disciplines
+              - virtues
+              - thaumaturgy
+              - abyss mysticism
+              - akhu
+              - assamite sorcery
+              - koldunic sorcery
+              - wanga
+              - necromancy
+              - path
+              - spheres
+              - arete
+              - gifts
+              - renown
+          description: >-
+            The stat category.  "Statpool" refers to stats that have a temporary rating and a permanent rating, e.g.
+            Gnosis, Rage, Vitae, Quintessence and Willpower.
+          example: backgrounds
+        - in: query
+          name: format
+          schema:
+            type: string
+            enum:
+              - names
+              - all
+            default: all
+          style: form
+          example: all
+          explode: false
+          description: >-
+            Format for results. "Names" will present just an array of the stat names, and "all" will present an array of
+            objects with all expected fields.
+        - in: query
+          name: faction
+          schema:
+            type: string
+          style: form
+          explode: false
+          example: Sabbat
+          description: >-
+            Filter for a faction. Filling this out wil restrict results to either stats universally available OR
+            available to a sect. So, if you passed "Sabbat" in to find Backgrounds that are Sabbat-specific, then
+            regular Backgrounds like Resources would show up, but also "Rituals" and "Black Hand Membership."
+        - in: query
+          name: books
+          schema:
+            type: string
+          style: form
+          explode: false
+          description: >-
+            Comma-separated list of book names, to limit results to stats that are only found in those specified books,
+            including universally available stats (e.g. "Resources" or "Strength"). Book names are case-insensitive.
+          example: 'Mage the Ascension: 20th Anniversary Core'
+        - in: query
+          name: year
+          schema:
+            type: integer
+            default: 2025
+            description: |
+              The IC year! The year your game is set in will make some alterations to what is sensibly available.
+              - 1980+: Computer included
+              - 1914+: Seneschal excluded; WWI collapsed 'great house' culture.
+              - 1950+: Technology included; transistors, etc. become a thing
+              - 1930+: Ride excluded; cars eclipsed use of horses by far
+              - 1910+: Drive included; cars prominent enough to be a core stat
+              - 1890+: Archery excluded; firearms used by majority of people
+              - 1750+: Commerce excluded; world shifts to industrial logistics at this point
+              - 1700+: Legerdemain, Enigmas, Theology, and Hearth Wisdom excluded; Age of Enlightenment underway
+              - 1500+: Firearms included; matchlocks and muskets proliferate armies
 
-            Please note that the books argument also has an effect on filtering out stats and default behavior.
-            You can override the above described default behavior with the 'include' parameter.
-      - in: query
-        name: exclude
-        schema:
-          type: string
-        style: form
-        explode: false
-        description: Comma-separated list of stat names to exclude from results (case-insensitive)
-        example: node
-      - in: query
-        name: include
-        schema:
-          type: string
-        style: form
-        explode: false
-        description: Comma-separated list of stat names to include in results (case-insensitive)
-        example: archery
-    responses:
-      '200':
-        description: Successful response with stat data
-        content:
-          application/json:
-            schema:
-              allOf:
-                - $ref: '#/components/schemas/ApiSuccessResponse'
-                - type: object
-                  properties:
-                    data:
-                      type: object
-                      properties:
-                        monsters:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              name:
-                                type: string
-                                description: Name of the stat
-                                example: Ananta
-                              page_number:
-                                type: integer
-                                description: Page number in the source book, if it is unique to that book.
-                                example: 211
-                              book:
-                                type: string
-                                description: Full name of the source book
-                                example: 'Werewolf 20th Anniversary: Changing Breeds'
-                          description: >-
-                            List of available stats within that type with source information. Null values are for
-                            universally available stats.
-                          example:
-                            - name: Resources
-                              page_number: null
-                              book: null
-                            - name: Majordomo
-                              page_number: 124
-                              book: 'Vampire 20th Anniversary: Ghouls And Revenants'
-      '400':
-        description: Invalid request on behalf of user.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ApiErrorResponse'
-      '404':
-        description: Resource was not found with given parameters.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ApiErrorResponse'
-      '500':
-        description: General server error.
-        content:
-          application/json:
-            schema:
-              allOf:
-                - $ref: '#/components/schemas/ApiErrorResponse'
+              Please note that the books argument also has an effect on filtering out stats and default behavior.
+              You can override the above described default behavior with the 'include' parameter.
+        - in: query
+          name: exclude
+          schema:
+            type: string
+          style: form
+          explode: false
+          description: Comma-separated list of stat names to exclude from results (case-insensitive)
+          example: node
+        - in: query
+          name: include
+          schema:
+            type: string
+          style: form
+          explode: false
+          description: Comma-separated list of stat names to include in results (case-insensitive)
+          example: archery
+      responses:
+        '200':
+          description: Successful response with stat data
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          monsters:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                  description: Name of the stat
+                                  example: Ananta
+                                page_number:
+                                  type: integer
+                                  description: Page number in the source book, if it is unique to that book.
+                                  example: 211
+                                book:
+                                  type: string
+                                  description: Full name of the source book
+                                  example: 'Werewolf 20th Anniversary: Changing Breeds'
+                            description: >-
+                              List of available stats within that type with source information. Null values are for
+                              universally available stats.
+                            example:
+                              - name: Resources
+                                page_number: null
+                                book: null
+                              - name: Majordomo
+                                page_number: 124
+                                book: 'Vampire 20th Anniversary: Ghouls And Revenants'
+        '400':
+          description: Invalid request on behalf of user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '404':
+          description: Resource was not found with given parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: General server error.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiErrorResponse'
+  /api/stats/rituals/{path}:
+    get:
+      summary: Get blood magic rituals from a given blood magic path.
+      description: Retrieve available rituals optionally filtered by source books and ritual level.
+      tags:
+        - Stats
+        - Vampire
+      parameters:
+        - in: query
+          name: level
+          required: false
+          schema:
+            type: array
+            items:
+              type: integer
+            description: A rating from 1 to 5 to limit the available rituals
+          example:
+            - 1
+            - 2
+            - 3
+        - in: path
+          name: path
+          schema:
+            oneOf:
+              - type: integer
+              - type: string
+          style: form
+          example: Thaumaturgy
+          explode: false
+          description: ''
+        - in: query
+          name: books
+          schema:
+            type: string
+          style: form
+          explode: false
+          description: >-
+            Comma-separated list of book names, to limit results to stats that are only found in those specified books,
+            including universally available stats (e.g. "Resources" or "Strength"). Book names are case-insensitive.
+          example: Lore of the Bloodines
+        - in: query
+          name: exclude
+          schema:
+            type: string
+          style: form
+          explode: false
+          description: Comma-separated list of stat names to exclude from results (case-insensitive)
+          example: widow's spite
+        - in: query
+          name: include
+          schema:
+            type: string
+          style: form
+          explode: false
+          description: Comma-separated list of stat names to include in results (case-insensitive)
+          example: turn the impaling shaft
+      responses:
+        '200':
+          description: Successful response with ritual data
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          monsters:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                display:
+                                  type: string
+                                  description: Name of the ritual
+                                  example: Wake With Evening's Freshness
+                                name:
+                                  type: string
+                                  description: Name of the ritual to lower case
+                                  example: wake with evening's freshness
+                                page_number:
+                                  type: integer
+                                  description: Page number in the source book, if it is unique to that book.
+                                  example: 211
+                                book:
+                                  type: string
+                                  description: Full name of the source book
+                                  example: 'Vampire: the Masquerade 20th Anniversary Core'
+                            description: List of available rituals within that discipline of blood magic with source information.
+                            example:
+                              - display: Wake With Evening's Freshness
+                                name: wake with evening's freshness
+                                description: Do the big magic thing wake up real nice
+                                reference:
+                                  page_number: 124
+                                  book_name: Some Book Name
+                                  book_id: 1
+        '400':
+          description: Invalid request on behalf of user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '404':
+          description: Resource was not found with given parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: General server error.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiErrorResponse'

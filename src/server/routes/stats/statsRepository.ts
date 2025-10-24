@@ -13,7 +13,7 @@ import {
   buildExceptionFilter,
   buildFactionFilter,
   buildMonsterFilter,
-  buildStatColumns,
+  buildColumns,
   optionalCondition
 } from '../../sql/queryBuilders';
 
@@ -88,7 +88,7 @@ export async function getStatDefinitions(
     const isNotExcluded = excludeFilter.condition;
     variables = excludeFilter.variables;
 
-    const columns = buildStatColumns(format);
+    const columns = buildColumns(format);
 
     const statsQuery = `
       SELECT ${columns}
@@ -151,7 +151,7 @@ export async function getAffinityPowers(
     const isNotExcluded = excludeFilter.condition;
     variables = excludeFilter.variables;
 
-    const columns = buildStatColumns(format);
+    const columns = buildColumns(format);
 
     const statsQuery = `
       SELECT ${columns}

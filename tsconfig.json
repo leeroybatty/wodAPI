@@ -8,9 +8,9 @@
     "strict": true,
     "baseUrl": ".",
     "paths": {
-      "*": ["*", "*/index"],
-      "@logger": ["./server/services/logger"],
-      "@logger/*": ["./server/services/logger/*"],
+      "@/*": ["src/*"],
+      "@logger": ["src/server/services/logger"],
+      "@logger/*": ["src/server/services/logger/*"]
     }
   },
   "ts-node": {

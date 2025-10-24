@@ -7,11 +7,12 @@ import { handleError, createErrorResponse, createSuccessResponse } from '../../e
 import { getAllTopLevelMonsters } from './monsterService';
 
 export const getMonstersHandler = async (req: AuthenticatedRequest, res: Response) => {
-  const { books, year, exclude } = req.query;
+  const { splats } = req.query;
+  const splatsParam = parseQueryParam(splats) || [];
 
   try {
     const options = await prepareBaseOptions(req);
-    const serviceResult = await getAllTopLevelMonsters(options)
+    const serviceResult = await getAllTopLevelMonsters(splatsParam, options)
 
     if (serviceResult.success) {
       return res.status(200).json(serviceResult);
