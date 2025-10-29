@@ -11,6 +11,7 @@ import { getPowersByMonsterHandler } from './routes/stats/getPowersByMonsterHand
 import { getMonsterOrganizationsHandler } from './routes/organizations/getMonsterOrganizationsHandler';
 import { getVampireRitualsHandler } from './routes/stats/vampire/getVampireRitualsHandler';
 import { swaggerConfig } from './swagger';
+import { authRouter } from './routes/auth';
 
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
@@ -25,7 +26,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   customSiteTitle: 'TTRPG API Documentation'
 }));
 
-app.post('/api/user/signup', signupHandler);
+app.use('/api/auth', authRouter);
 
 app.get('/api/organizations/:monster', /* authorizeGeneralAccess, */ getMonsterOrganizationsHandler);
 app.get('/api/monsters', /* authorizeGeneralAccess, */ getMonstersHandler);
