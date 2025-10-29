@@ -1,12 +1,64 @@
 import {
   createUser,
+  getUserCredentials
 } from "../outbound/userRepository";
+import { createUserSessionCookie } from './outbound/userSessionCookie';
 import { requireEnvVar } from "@logger/envcheck";
 import { ErrorKeys } from "@errors/errors.types";
-import { hashEmail, hashPassword } from "@services/encryption/hash";
+import { hashEmail, hashPassword, compareHash } from "@services/encryption/hash";
 import { encrypt } from '@services/encryption'
 
 const SECRET_KEY_JWT = requireEnvVar("SECRET_KEY_JWT");
+
+type UserCredentials = {
+  password: string;
+  email: string; 
+}
+
+export const loginUser = async (credentials: UserCredentials) => {
+  const { email, password } = credentials;
+  if (!email || !password) {
+    const invalidLogin = new Error(ErrorKeys.CREDENTIALS_INVALID);
+    throw invalidLogin
+  }
+
+  const sanitizedEmail = email.replace(/[^a-zA-Z0-9@._-]/gi, "");
+  const hashedEmail = hashEmail(sanitizedEmail);
+
+  try {
+    const userCredentials = await getUserCredentials(
+      "hashed_email",
+      hashedEmail,
+    );
+
+    if (!userCredentials || !userCredentials.id) {
+      logger.log("loginUser - invalid user credentials");
+      return { success: false };
+    }
+
+    const storedPassword = userCredentials.password;
+    if (storedPassword) {
+      const isMatch = await compareHash(password, storedPassword);
+      if (isMatch) {
+        const idString = userCredentials.id.toString();
+        const sessionCookie = await createUserSessionCookie(idString);
+        return {
+          success: true,
+          userId: userCredentials.id,
+          username: userCredentials.username,
+          sessionCookie,
+        };
+      }
+    }
+  } catch (error: any) {
+    logger.error(error);
+    return {
+      success: false,
+      error: ErrorKeys.GENERAL_SERVER_ERROR,
+    };
+  }
+  return { success: false };
+};
 
 export const registerUser = async (
   password: string,
