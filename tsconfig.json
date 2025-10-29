@@ -9,6 +9,9 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
+      "@errors": ["src/server/errors"],
+      "@errors/*": ["src/server/errors/*"],
+      "@services/*": ["src/serer/services/*"],
       "@logger": ["src/server/services/logger"],
       "@logger/*": ["src/server/services/logger/*"]
     }

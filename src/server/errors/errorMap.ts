@@ -53,5 +53,21 @@ export const CORE_ERROR_MAP: Record<ErrorKeys, ErrorInfo> = {
   [ErrorKeys.SESSION_INVALID]: {
     message: "You need to be properly logged in.",
     statusCode: 401
+  },
+  [ErrorKeys.EMAIL_INVALID]: {
+    message: "Could not log in.",
+    statusCode: 403
+  },
+  [ErrorKeys.USERNAME_INVALID]: {
+    message: "Could not log in.",
+    statusCode: 403
+  }
+  [ErrorKeys.EMAIL_TAKEN]: {
+    message: "Please use a different email address.",
+    statusCode: 400
+  },
+  [ErrorKeys.USERNAME_TAKEN]: {
+    message: "Please use a different username.",
+    statusCode: 400
   }
 }

@@ -1,19 +1,9 @@
-import { createUserSessionCookie } from "../outbound/userSessionCookie";
 import {
   createUser,
-  getUserCredentials,
-  getPasswordResetCredentials,
-  clearUserSession,
-  getUser,
-  editUser,
 } from "../outbound/userRepository";
-import jwt from "jsonwebtoken";
-import { requireEnvVar } from "../../../services/logger/envcheck";
-import { ErrorKeys } from "../errors.types";
-import logger from "../../../services/logger";
-import { User, UserCredentials } from "../user.types";
-import { encrypt, decrypt } from "@services/encryption";
-import { sendSingleEmail } from "../../../services/emailer";
+import { requireEnvVar } from "@logger/envcheck";
+import { ErrorKeys } from "@errors/errors.types";
+import { encrypt, hashEmail, hashPassword } from "@services/encryption/hash";
 
 const SECRET_KEY_JWT = requireEnvVar("SECRET_KEY_JWT");
 
