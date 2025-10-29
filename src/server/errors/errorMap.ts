@@ -14,7 +14,7 @@ export const CORE_ERROR_MAP: Record<ErrorKeys, ErrorInfo> = {
     message: "I'm afraid I can't let you do that, dave",
     statusCode: 403
   },
-   [ErrorKeys.INVALID_REQUEST]: {
+  [ErrorKeys.INVALID_REQUEST]: {
     message: "There's some issue with your request, look it over.",
     statusCode: 400
   },
@@ -54,14 +54,10 @@ export const CORE_ERROR_MAP: Record<ErrorKeys, ErrorInfo> = {
     message: "You need to be properly logged in.",
     statusCode: 401
   },
-  [ErrorKeys.EMAIL_INVALID]: {
+  [ErrorKeys.CREDENTIALS_INVALID]: {
     message: "Could not log in.",
     statusCode: 403
   },
-  [ErrorKeys.USERNAME_INVALID]: {
-    message: "Could not log in.",
-    statusCode: 403
-  }
   [ErrorKeys.EMAIL_TAKEN]: {
     message: "Please use a different email address.",
     statusCode: 400

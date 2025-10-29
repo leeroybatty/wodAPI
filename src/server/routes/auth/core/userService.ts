@@ -3,7 +3,8 @@ import {
 } from "../outbound/userRepository";
 import { requireEnvVar } from "@logger/envcheck";
 import { ErrorKeys } from "@errors/errors.types";
-import { encrypt, hashEmail, hashPassword } from "@services/encryption/hash";
+import { hashEmail, hashPassword } from "@services/encryption/hash";
+import { encrypt } from '@services/encryption'
 
 const SECRET_KEY_JWT = requireEnvVar("SECRET_KEY_JWT");
 
@@ -17,7 +18,7 @@ export const registerUser = async (
   if (!emailRegex.test(email)) {
     return {
       success: false,
-      error: ErrorKeys.EMAIL_INVALID,
+      error: ErrorKeys.CREDENTIALS_INVALID
     };
   }
 
@@ -25,7 +26,7 @@ export const registerUser = async (
   if (!validUsername.test(name)) {
     return {
       success: false,
-      error: ErrorKeys.USERNAME_INVALID,
+      error: ErrorKeys.CREDENTIALS_INVALID
     };
   }
   const encryptedEmail = encrypt(email);

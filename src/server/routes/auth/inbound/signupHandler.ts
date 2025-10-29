@@ -1,12 +1,13 @@
 import { Response, Request } from 'express';
-import { ErrorKeys } from '../errors.types'
+import { ErrorKeys } from '@errors/errors.types'
 import { registerUser } from '../core/userService';
-import { handleError, createErrorResponse, createSuccessResponse } from '../../errors';
+import { handleError, createErrorResponse, createSuccessResponse } from '@errors';
 
 export const signupHandler = async (req: Request, res: Response) => {
   if (req.method !== 'POST') {
     const rejection = createErrorResponse(ErrorKeys.METHOD_NOT_ALLOWED);
-    return res.status(rejection.statusCode).json(rejection);
+    const {error} = rejection
+    return res.status(error.code).json(error.message);
   }
   try {
     const {password, name, email} = req.body;

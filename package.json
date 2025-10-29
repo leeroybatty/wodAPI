@@ -4,7 +4,7 @@
   "description": "An API for OWOD games for RP servers.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "ts-node -r tsconfig-paths/register src/server/index.ts"
   },
   "author": "leeroybatty",
   "license": "ISC",
@@ -21,10 +21,13 @@
     "node": "^24.8.0",
     "pg": "^8.16.3",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1",
-    "ts-node": "^10.9.2"
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
-    "@types/js-yaml": "^4.0.9"
+    "@types/bcrypt": "^6.0.0",
+    "@types/js-yaml": "^4.0.9",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.9.3"
   }
 }

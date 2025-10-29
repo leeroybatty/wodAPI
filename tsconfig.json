@@ -8,10 +8,10 @@
     "strict": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
       "@errors": ["src/server/errors"],
       "@errors/*": ["src/server/errors/*"],
-      "@services/*": ["src/serer/services/*"],
+      "@services/*": ["src/server/services/*"],
+      "@server/*": ["src/server/*"],
       "@logger": ["src/server/services/logger"],
       "@logger/*": ["src/server/services/logger/*"]
     }

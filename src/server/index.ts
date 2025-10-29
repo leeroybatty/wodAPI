@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import path from 'path';
 import { PoolConnection } from './sql/connection';
 import { getCharacterStat } from './routes/stats';
+import { signupHandler } from './routes/auth/inbound/signupHandler';
 import { getMonsterTypesHandler } from './routes/monsters/getMonsterTypesHandler';
 import { getMonstersHandler } from './routes/monsters/getMonstersHandler';
 import { getStatsByTypeHandler } from './routes/stats/getStatsByTypeHandler';
@@ -10,6 +11,7 @@ import { getPowersByMonsterHandler } from './routes/stats/getPowersByMonsterHand
 import { getMonsterOrganizationsHandler } from './routes/organizations/getMonsterOrganizationsHandler';
 import { getVampireRitualsHandler } from './routes/stats/vampire/getVampireRitualsHandler';
 import { swaggerConfig } from './swagger';
+
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 
@@ -22,6 +24,8 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   customCss: '.swagger-ui .topbar { display: none }',
   customSiteTitle: 'TTRPG API Documentation'
 }));
+
+app.post('/api/user/signup', signupHandler);
 
 app.get('/api/organizations/:monster', /* authorizeGeneralAccess, */ getMonsterOrganizationsHandler);
 app.get('/api/monsters', /* authorizeGeneralAccess, */ getMonstersHandler);

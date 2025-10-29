@@ -11,6 +11,7 @@ export enum ErrorKeys {
     MONSTER_TYPE_NOT_FOUND = "No such monster type supported.",
     STAT_TYPE_NOT_FOUND = "No such stat type supported.",
     SESSION_INVALID = "That session is invalid. Please log in again.",
-    EMAIL_INVALID = "Could not log in.",
-    USERNAME_INVALID = "Could not log in."
+    EMAIL_TAKEN = "Please use a different email.",
+    CREDENTIALS_INVALID = "Could not log in.",
+    USERNAME_TAKEN = "Please use a different username."
 }
