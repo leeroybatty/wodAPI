@@ -1,3 +1,10 @@
+import { 
+  commonParams,
+  generalServerError500
+} from '../../../docs/common';
+
+const { exclude, include, format } = commonParams;
+
 export const getVampireRituals = {
   get: {
     summary: 'Get blood magic rituals from a given blood magic path.',
@@ -6,7 +13,7 @@ export const getVampireRituals = {
     parameters: [
       {
         in: 'query',
-        name: 'level',
+        name: 'levels',
         required: false,
         schema: {
           type: 'array',
@@ -31,38 +38,14 @@ export const getVampireRituals = {
         explode: false,
         description: ''
       },
+      books,
       {
-        in: 'query',
-        name: 'books',
-        schema: {
-          type: 'string'
-        },
-        style: 'form',
-        explode: false,
-        description: 'Comma-separated list of book names, to limit results to stats that are only found in those specified books, including universally available stats (e.g. "Resources" or "Strength"). Book names are case-insensitive.',
-        example: "Lore of the Bloodines"
-      },
-      {
-        in: 'query',
-        name: 'exclude',
-        schema: {
-          type: 'string'
-        },
-        style: 'form',
-        explode: false,
-        description: 'Comma-separated list of stat names to exclude from results (case-insensitive)',
+        ...exclude,
         example: "widow's spite"
-      },
+      }
       {
-        in: 'query',
-        name: 'include',
-        schema: {
-          type: 'string'
-        },
-        style: 'form',
-        explode: false,
-        description: 'Comma-separated list of stat names to include in results (case-insensitive)',
-        example: "turn the impaling shaft"
+        ...include,
+        example: "burning blade"
       }
     ],
     responses: {
@@ -128,7 +111,8 @@ export const getVampireRituals = {
             }
           }
         }
-      }
+      },
+      500: generalServerError500
     }
   }
 }

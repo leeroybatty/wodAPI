@@ -182,10 +182,10 @@ export async function getAffinityPowers(
 
 export async function getRitualsByPath(
   pathId: number,
-  options: FilterOptions & { level?: number }
+  options: FilterOptions & { levels?: number[] }
 ): Promise<ApiResponse<{ stats: StatsData[] | string[] }>> {
   try {
-    const { bookIds, include, exclude, format, level } = options;
+    const { bookIds, include, exclude, format, levels } = options;
     let variables: (string | number)[] = [pathId];
 
     const columns = format === 'names'
@@ -217,10 +217,11 @@ export async function getRitualsByPath(
     const isNotExcluded = excludeFilter.condition;
     variables = excludeFilter.variables;
 
-    let isThisLevel = '';
-    if (level) {
-      isThisLevel = `r.value = $${variables.length + 1}`;
-      variables.push(level);
+    let isWithinLevels = '';
+    if (levels && levels.length > 0) {
+      const levelsPlaceholders = createStringArrayPlaceholders(levels, variables.length + 1);
+      isWithinLevels = `r.value IN (${levelsPlaceholders})`;
+      variables = [...variables, ...levels];
     }
 
     const statsQuery = `
@@ -230,7 +231,7 @@ export async function getRitualsByPath(
       LEFT JOIN wod_books b on b.id = r.book_id
       WHERE s.id = $1
       AND (${optionalCondition(isFoundInTheseBooks)}
-          AND ${optionalCondition(isThisLevel)}
+          AND ${optionalCondition(isWithinLevels)}
           ${isIncluded ? `OR ${isIncluded}` : ''}
         )
         ${isNotExcluded ? ` AND ${isNotExcluded}` : ''}

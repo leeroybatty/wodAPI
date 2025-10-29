@@ -57,10 +57,6 @@ export async function getMonsterAncestors(
     ? reconcileIncludeExclude(exclude, combinedIncludes)
     : combinedIncludes;
 
-    console.log(exclude)
-    console.log("Reconciled----------------------------------")
-    console.log(reconciledIncludes)
-
     const includeFilter = buildExceptionFilter(reconciledIncludes, variables, 'include', 'm');
     const isIncluded = includeFilter.condition;
     variables = includeFilter.variables;

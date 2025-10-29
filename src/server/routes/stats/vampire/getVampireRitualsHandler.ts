@@ -13,16 +13,18 @@ export const getVampireRitualsHandler = async (req: AuthenticatedRequest, res: R
   const { path } = req.params;
   let options: StatsFilters = await prepareBaseOptions(req);
   
-  const { level } = req.query;
-  const isLevelNumeric = level && !isNaN(Number(level));
+  const { levels } = req.query;
+  const parsedLevels = parseQueryParam(levels);
+  const numberedLevels = []
 
-  if (level && !isLevelNumeric) {
-    return res.status(400).json(createErrorResponse(ErrorKeys.INVALID_REQUEST));
+  for (let level of parsedLevels) {
+    if (!isNaN(Number(level))) {
+      numberedLevels.push(Number(level));
+    }
   }
-  const levelParam = Number(level);
 
   try {
-    const serviceResult = await getVampireRituals(path, {...options, level: levelParam });
+    const serviceResult = await getVampireRituals(path, {...options, levels: numberedLevels });
     if (serviceResult.success) {
       return res.status(200).json(serviceResult);
     }

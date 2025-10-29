@@ -38,7 +38,6 @@ export const getMonstersByType = {
         - Using 'artificial being' as your 'type' will list Construct, Reanimate, and Robot.
         - Using 'supernatural being' as your 'type' will list Alien, Bygone, and Spirit.
 
-
         Werewolf: the Apocalypse
         - You want 'shifter', not 'werewolf', to yield the list of playable shapeshifter types.  This yields Garou plus ALL Changing Breeds and 'Mockery'.
         - To get specific tribes you will want to put in that species, for instance, to see 'Fianna' et al you put in 'Garou' not 'Werewolf'. 

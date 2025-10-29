@@ -22,7 +22,7 @@ export const getPathVirtues = async (
 
 export const getVampireRituals = async (
   path: number | string,
-  options: FilterOptions & { level?: number }
+  options: FilterOptions & { levels?: number[] }
 ): Promise<ApiResponse<unknown>> => {
 
   let pathId: number;
@@ -31,7 +31,6 @@ export const getVampireRituals = async (
   } else {
     pathId = Number(path);
   }
-
   return await getRitualsByPath(pathId as number, options);
 }
 

@@ -49,28 +49,8 @@ const generateOpenAPISpec = () => {
       }
     },
     paths: {
-      '/api/monsters': {
-        ...getMonsters,
-        get: {
-          ...getMonsters.get,
-          responses: {
-            ...getMonsters.get.responses,
-            500: generalServerError500
-          }
-        },
-      },
-      '/api/monsters/{monster}/type': {
-        ...getMonstersByType,
-        get: {
-          ...getMonstersByType.get,
-          responses: {
-            ...getMonstersByType.get.responses,
-            400: badRequestError400,
-            404: notFoundError404,
-            500: generalServerError500
-          }
-        }
-      },
+      '/api/monsters': getMonsters,
+      '/api/monsters/{monster}/type': getMonstersByType,
     '/api/stats/{type}/': {
       ...getStatsByType,
       get: {
@@ -83,18 +63,7 @@ const generateOpenAPISpec = () => {
         }
       }
     },
-    '/api/stats/rituals/{path}': {
-      ...getVampireRituals,
-      get: {
-        ...getVampireRituals.get,
-        responses: {
-          ...getVampireRituals.get.responses,
-          400: badRequestError400,
-          404: notFoundError404,
-          500: generalServerError500
-        }
-      }
-    },
+    '/api/stats/rituals/{path}': getVampireRituals
     // '/api/organizations/{monster}': {},
     // '/api/stats/:type': {},
     // '/api/stats/powers/:monster': {},
