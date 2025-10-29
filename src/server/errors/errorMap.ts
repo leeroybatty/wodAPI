@@ -49,5 +49,9 @@ export const CORE_ERROR_MAP: Record<ErrorKeys, ErrorInfo> = {
   [ErrorKeys.STAT_TYPE_NOT_FOUND]: {
     message: "No such stat type found.",
     statusCode: 404
+  },
+  [ErrorKeys.SESSION_INVALID]: {
+    message: "You need to be properly logged in.",
+    statusCode: 401
   }
 }

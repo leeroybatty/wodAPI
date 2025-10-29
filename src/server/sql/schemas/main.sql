@@ -18,7 +18,6 @@ CREATE TABLE IF NOT EXISTS stats (
   CONSTRAINT unique_stat_name UNIQUE (name)
 );
 
-
 CREATE TABLE IF NOT EXISTS organizations (
   id SERIAL PRIMARY KEY,
   name TEXT,
@@ -84,3 +83,44 @@ CREATE TABLE IF NOT EXISTS bridge_characters_stats (
   background_pool_id INT REFERENCES pooled_backgrounds (id) ON DELETE CASCADE,
   CONSTRAINT unique_character_stats UNIQUE (character_id, stat_id),
 );
+
+-- Players: Read-only. Admin: Can edit characters.  Lead: Can edit game settings.
+CREATE TYPE user_role AS ENUM ('Player', 'Administrator', 'Lead');
+
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(250) UNIQUE NOT NULL,
+  email VARCHAR(250) UNIQUE NOT NULL,        -- Emails are encypted non-deterministicaly.
+  hashed_email VARCHAR(250) UNIQUE NOT NULL, -- Hashes used to check for existing emails.
+  password VARCHAR(512) NOT NULL,
+  password_reset_token VARCHAR(250),
+  password_reset_expiry TIMESTAMP,
+  verified BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+  role user_role DEFAULT 'Player'
+);
+
+CREATE TABLE IF NOT EXISTS users_sessions (
+  id SERIAL PRIMARY KEY,
+  user_id INT REFERENCES users(id) ON DELETE CASCADE,
+  session_token VARCHAR(250) UNIQUE NOT NULL,
+  expiration_date TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE OR REPLACE FUNCTION update_timestamp()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  NEW.updated_at := NOW();
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS update_users_modtime ON users;
+CREATE TRIGGER update_users_modtime
+BEFORE UPDATE ON users
+FOR EACH ROW
+EXECUTE PROCEDURE update_timestamp();
