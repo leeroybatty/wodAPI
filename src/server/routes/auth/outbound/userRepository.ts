@@ -1,41 +1,81 @@
 import { Response } from 'express';
-import { queryDbConnection, getOneRowResult } from '@server/sql';
-import { handleError, createErrorResponse, createSuccessResponse } from '@errors';
+import { queryDbConnection, getOneRowResult, editTable } from '@server/sql';
+import { handleError, createErrorResponse, createSuccessResponse, QueryExecutionError, ValidationError } from '@errors';
 import { ErrorKeys } from '@errors/errors.types';
 import { ApiResponse } from '@server/apiResponse.types';
-import { UserSession, CreatedUserResult, UserCredentials } from '../types';
+import { UserSession, CreatedUserResult, UserCredentials, PasswordResetCredentials, User } from '../types';
 import { QueryResult } from 'pg';
+import { GenericStringMap } from '@server/sql';
+import { convertUTCStringToDate } from '@server/services/timestamps';
 
-// export async function getUserSession(
-//   token: string
-// ): Promise<UserSession | null> {
-//   const query = `
-//     SELECT * FROM users_sessions WHERE session_token = $1
-//   `;
-//   const values = [token];
-//   const result = await queryDbConnection(query, values);
-//   try {
-//     return getOneRowResult(result);
-//   }
-//   catch (error) {
-//     return createErrorResponse(
-//       ErrorKeys.GENERAL_SERVER_ERROR,
-//       error instanceof Error ? error.message : 'Unknown error occurred'
-//     );
-//   }
-// };
+export async function getPasswordResetCredentials(
+  hashedEmail: string
+): Promise<PasswordResetCredentials> {
+  const query = `
+    SELECT
+      id,
+      password_reset_token,
+      password_reset_expiry
+    FROM users 
+    WHERE hashed_email = $1
+  `;
 
-
-export class UserDomainError extends Error {
-  code?: string;
-  constraint?: string;
-
-  constructor(message: string, code?: string, constraint?: string) {
-    super(message);
-    this.name = 'User Database Error';
-    this.code = code;
-    this.constraint = constraint;
+  const values = [hashedEmail];
+  const result = await queryDbConnection(query, values);
+  const credentials = getOneRowResult(result);
+  
+  if (!credentials) {
+    throw new QueryExecutionError(
+      "No user found with provided email",
+      query,
+      values,
+      ErrorKeys.CREDENTIALS_MISSING
+    );
   }
+  
+  return credentials as PasswordResetCredentials;
+}
+
+export async function editUser(
+  id: number,
+  update: Partial<User>
+): Promise<QueryResult | null> {
+  if (!id) {
+    throw new ValidationError(
+      'User ID required for edit',
+      'editUser',
+      [id],
+      ErrorKeys.VALIDATION_ERROR
+    );
+  }
+  
+  const updatedValues: GenericStringMap = {
+    ...update,
+    password_reset_expiry: update.password_reset_expiry
+      ? update.password_reset_expiry instanceof Date 
+        ? update.password_reset_expiry
+        : convertUTCStringToDate(update.password_reset_expiry)
+      : null 
+  };
+
+  return await editTable(
+    'users',
+    'id',
+    id,
+    updatedValues
+  );
+}
+
+export async function clearUserSession(
+  userId: string,
+  token: string
+): Promise<boolean> {
+  const query = `DELETE FROM users_sessions WHERE user_id = $1 and session_token = $2`;
+  const values = [userId, token];
+  const result = await queryDbConnection(query, values);
+  
+  const deletions = result.rowCount;
+  return deletions === 1; 
 }
 
 export async function createUserSession(
@@ -51,35 +91,31 @@ export async function createUserSession(
     RETURNING user_id, id, session_token
   `;
   const values = [userId, token, expirationDate];
+  const result: QueryResult<UserSession> = await queryDbConnection(query, values);
+  return getOneRowResult(result);
+}
 
-  try {
-    const result: QueryResult<UserSession> = await queryDbConnection(query, values);
-    return getOneRowResult(result);
-  } catch (error: any) {
-    throw error;
-  }
-};
+export async function getUserCredentials(
+  hashedIdentifier: string
+): Promise<UserCredentials | null> {
+  const query = `
+    SELECT
+      id,
+      username,
+      email,
+      password,
+      password_reset_token,
+      password_reset_expiry,
+      verified,
+      role
+    FROM users 
+    WHERE hashed_email = $1
+  `;
 
-export async function getUserCredentials(hashedIdentifier: string): Promise<UserCredentials | null> {
-  const query = `SELECT
-    id,
-    username,
-    email,
-    password,
-    password_reset_token,
-    password_reset_expiry,
-    verified,
-    role
-  FROM users WHERE hashed_email = $1`;
-
-  const values = [hashedIdentifier]
+  const values = [hashedIdentifier];
   const result: QueryResult<UserCredentials> = await queryDbConnection(query, values);
-  try {
-    return getOneRowResult(result) as UserCredentials | null
-  } catch (error: any) {
-    throw error;
-  }
-};
+  return getOneRowResult(result) as UserCredentials | null;
+}
 
 export async function createUser(
   username: string,
@@ -95,26 +131,33 @@ export async function createUser(
     RETURNING id
   `;
   const values = [username, email, hashedEmail, password];
+  
   try {
     const result = await queryDbConnection(query, values);
     return getOneRowResult(result);
-  }
-  catch (error: any) {
+  } catch (error: any) {
     const {code, constraint} = error;
-    let errorMessage = ErrorKeys.GENERAL_SERVER_ERROR;
-    if (code && code === '23505') {
+    let errorKey = ErrorKeys.GENERAL_SERVER_ERROR;
+    
+    if (code === '23505') {
       switch (constraint) {
-      case 'users_username_key':
-        errorMessage = ErrorKeys.USERNAME_TAKEN;
-        break;
-      case 'users_email_key':
-        errorMessage = ErrorKeys.EMAIL_TAKEN;
-        break;
-      default:
-        errorMessage = ErrorKeys.GENERAL_SERVER_ERROR;
-        break;
+        case 'users_username_key':
+          errorKey = ErrorKeys.USERNAME_TAKEN;
+          break;
+        case 'users_email_key':
+          errorKey = ErrorKeys.EMAIL_TAKEN;
+          break;
+        default:
+          errorKey = ErrorKeys.GENERAL_SERVER_ERROR;
+          break;
       }
     }
-    throw new UserDomainError(errorMessage, code, constraint);
+    
+    throw new QueryExecutionError(
+      `Failed to create user: ${errorKey}`,
+      query,
+      values,
+      errorKey
+    );
   }
-};
+}

@@ -1,7 +1,7 @@
 import { Response, Request } from 'express';
-import { ErrorKeys } from '@server/errors/errors.types'
+import { ErrorKeys } from '@errors/errors.types'
 import { registerUser } from '../core/userService';
-import { handleError, createErrorResponse, createSuccessResponse } from '@errors';
+import { handleError } from '@errors';
 import { onlyAcceptPost } from '@server/routes/methodGatekeepers';
 
 export const signupHandler = async (req: Request, res: Response) => {

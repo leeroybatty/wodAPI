@@ -37,7 +37,6 @@ app.get('/api/stats/virtues/:path', /* authorizeGeneralAccess, */ getPathVirtues
 app.get('/api/stats/rituals/:path', /* authorizeGeneralAccess, */ getVampireRitualsHandler);
 app.get('/api/character/:id/stat/:statName', /* authorizeGeneralAccess, */ getCharacterStat);
 
-
 app.use(express.static(path.join(__dirname, '../client')));
 
 app.use((req: Request, res: Response) => {

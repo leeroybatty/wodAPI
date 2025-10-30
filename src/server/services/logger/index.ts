@@ -1,15 +1,15 @@
 export const logger = {
-    info: (message: string ) => {
-      console.log(message)
-    },
-    log: (message: string ) => {
-      console.log(message)
-    },
-    warn: (message: string ) => {
-      console.log(message)
-    },
-    error: (message: string, error?: Error | any) => {
-      console.log(message)
-      if (error) console.log(error)
-    }
+  info: (message: string) => {
+    console.log(`[INFO] ${message}`)
+  },
+  log: (message: string | object) => {
+    console.log('[LOG]', message)
+  },
+  warn: (message: string) => {
+    console.log(`[WARN] ${message}`)
+  },
+  error: (message: string | object, error?: Error | any) => {
+    console.log('[ERROR]', message)
+    if (error) console.log(error)
+  }
 }
