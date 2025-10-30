@@ -3,7 +3,8 @@ import { queryDbConnection, getOneRowResult } from '@server/sql';
 import { handleError, createErrorResponse, createSuccessResponse } from '@errors';
 import { ErrorKeys } from '@errors/errors.types';
 import { ApiResponse } from '@server/apiResponse.types';
-import { UserSession, CreatedUserResult } from '../types';
+import { UserSession, CreatedUserResult, UserCredentials } from '../types';
+import { QueryResult } from 'pg';
 
 // export async function getUserSession(
 //   token: string
@@ -24,6 +25,7 @@ import { UserSession, CreatedUserResult } from '../types';
 //   }
 // };
 
+
 export class UserDomainError extends Error {
   code?: string;
   constraint?: string;
@@ -35,6 +37,49 @@ export class UserDomainError extends Error {
     this.constraint = constraint;
   }
 }
+
+export async function createUserSession(
+  userId: string,
+  token: string,
+  expirationDate: Date
+): Promise<UserSession | null> {
+  const query = `
+    INSERT INTO users_sessions
+    (user_id, session_token, expiration_date)
+    VALUES
+    ($1, $2, $3)
+    RETURNING user_id, id, session_token
+  `;
+  const values = [userId, token, expirationDate];
+
+  try {
+    const result: QueryResult<UserSession> = await queryDbConnection(query, values);
+    return getOneRowResult(result);
+  } catch (error: any) {
+    throw error;
+  }
+};
+
+export async function getUserCredentials(hashedIdentifier: string): Promise<UserCredentials | null> {
+  const query = `SELECT
+    id,
+    username,
+    email,
+    password,
+    password_reset_token,
+    password_reset_expiry,
+    verified,
+    role
+  FROM users WHERE hashed_email = $1`;
+
+  const values = [hashedIdentifier]
+  const result: QueryResult<UserCredentials> = await queryDbConnection(query, values);
+  try {
+    return getOneRowResult(result) as UserCredentials | null
+  } catch (error: any) {
+    throw error;
+  }
+};
 
 export async function createUser(
   username: string,

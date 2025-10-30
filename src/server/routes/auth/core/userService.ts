@@ -2,8 +2,9 @@ import {
   createUser,
   getUserCredentials
 } from "../outbound/userRepository";
-import { createUserSessionCookie } from './outbound/userSessionCookie';
+import { createUserSessionCookie } from '../outbound/userSessionCookie';
 import { requireEnvVar } from "@logger/envcheck";
+import { logger } from '@logger';
 import { ErrorKeys } from "@errors/errors.types";
 import { hashEmail, hashPassword, compareHash } from "@services/encryption/hash";
 import { encrypt } from '@services/encryption'
@@ -26,10 +27,7 @@ export const loginUser = async (credentials: UserCredentials) => {
   const hashedEmail = hashEmail(sanitizedEmail);
 
   try {
-    const userCredentials = await getUserCredentials(
-      "hashed_email",
-      hashedEmail,
-    );
+    const userCredentials = await getUserCredentials(hashedEmail);
 
     if (!userCredentials || !userCredentials.id) {
       logger.log("loginUser - invalid user credentials");
