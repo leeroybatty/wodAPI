@@ -1,0 +1,43 @@
+.link {
+  text-decoration: underline;
+  cursor: pointer;
+  display: inline-flex;
+  outline: 3px solid transparent;
+  outline-offset: 0;
+  color: var(--col-interactive-01);
+  padding: 0;
+  transition: 0.25s ease-in-out color,
+              0.25s ease-in-out outline-offset,
+              0.25s ease-in-out outline;
+}
+
+.link:hover,
+.link:focus {
+  color: var(--col-interactive-01-hover);
+  outline: 3px solid var(--col-interactive-02);
+  outline-offset: 0;
+  transition: 0.125s ease-in-out color,
+              0.125s ease-in-out outline-offset,
+              0.125s ease-in-out outline;
+}
+
+.link.Disabled {
+  pointer-events: none;
+  color:  var(--col-disabled);
+}
+.button {
+  text-decoration: none;
+  font-family: var(--typeface-heading);
+}
+
+.link.Inverse {
+  color: var(--col-interactive-01-inverse);
+}
+
+.link.Navigation {
+  text-decoration: none;
+  padding: var(--spacing-2xs);
+}
+.link.Navigation:hover, .link.Navigation:focus {
+   outline-offset: var(--spacing-2xs);
+}

@@ -1,0 +1,80 @@
+.tabgroup {
+  margin-bottom: var(--spacing-md);
+}
+
+.tabgroup_tab-selection {
+  display: flex;
+  width: 100%;
+}
+
+.tabgroup_tab {
+  background: var(--theme-interface-00);
+  color: var(--col-interactive-01);
+  border: var(--size-border-width) solid var(--col-interactive-border);
+  padding: var(--spacing-xs);
+  margin: var(--spacing-xs);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+    transition: 0.25s ease-in-out background-color,
+    0.25s ease-in-out border,
+    0.25s ease-in-out color,
+    0.25s ease-in-out box-shadow;
+  flex-grow: 1;
+  box-shadow: 0px 4px 8px var(--color-shadow),
+              inset 0px 4px 4px rgba(255,255,255,0.5),
+              inset 0px -4px 4px rgba(0,0,0,0.25);
+  font-family: var(--typeface-heading);
+  font-weight: 700;
+  font-size: var(--size-font-lg);
+}
+.tabgroup_tab:first-of-type {
+  margin-inline-start: 0;
+}
+.tabgroup_tab:last-of-type {
+  margin-inline-end: 0;
+}
+
+.tabgroup_tab:hover {
+  border-color: var(--col-button-hover);
+  border-bottom-color: var(--col-interactive-01-hover);
+  color: var(--col-button-label);
+  background-color: var(--col-button-hover);
+    transition: 0.25s ease-in-out background-color,
+    0.25s ease-in-out border,
+    0.25s ease-in-out color,
+    0.25s ease-in-out box-shadow;
+}
+
+.tabgroup_tab:focus {
+  box-shadow: inset 0px 0px 0 1px var(--col-border), inset -0px 0px 0px 5px var(--col-focus);
+  transition: 0.25s ease-in-out background-color,
+    0.125s ease-in-out box-shadow,
+    0.25s ease-in-out color;
+  outline: none;
+}
+
+.tabgroup_tab.Active {
+	color: var(--col-text);
+	background: var(--col-backdrop);
+	border-bottom-color: var(--col-focus);
+}
+
+.tabgroup_content {
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius);
+  background-color: var(--col-backdrop);
+  border: var(--size-border-width) solid var(--col-border);
+}
+
+/* Small devices (landscape phones, less than 768px) */
+@media (max-width: 767.98px) { 
+  .tabgroup_tab-selection {
+    margin: var(--spacing-sm) 0;
+    flex-wrap: wrap;
+  }
+  .tabgroup_tab {
+    margin: 0;
+    font-size: var(--size-font-md);
+    padding:  var(--spacing-sm) 0;
+  }
+}

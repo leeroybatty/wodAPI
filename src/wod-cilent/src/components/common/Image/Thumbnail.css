@@ -1,0 +1,26 @@
+.thumbnail {
+  position: relative;
+  cursor: pointer;
+  border: 1px solid var(--col-border);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  padding:  0;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.thumbnail img {
+  width: 100%;
+}
+
+.thumbnail_info {
+  position: absolute;
+  top: var(--spacing-xs);
+  left: var(--spacing-xs);
+  background-color: var(--col-backdrop-inverse);
+  color: var(--col-text-inverse);
+  padding: var(--spacing-2xs) var(--spacing-sm);
+  border-radius: var(--border-radius)
+}
+

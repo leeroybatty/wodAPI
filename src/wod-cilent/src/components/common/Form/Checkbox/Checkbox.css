@@ -1,0 +1,100 @@
+.checkbox_group {
+  border: none;
+}
+
+.checkbox_control {
+  display: flex;
+  height: 0;
+  margin: 0;
+  opacity: 0;
+  padding: 0;
+  width: 0;
+}
+
+.checkbox_control + label::before,
+.checkbox_control + label::after {
+  border: 2px solid transparent;
+  border-radius: var(--border-radius);
+  content: '';
+  display: inline-block;
+  left: calc(-1 * var(--spacing-md));
+  position: absolute;
+}
+
+.checkbox_control + label::before {
+  border: 2px solid var(--col-interactive-02);
+  border-radius: var(--size-border-radius);
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+  transition: all 0.125s ease-out;
+}
+
+.checkbox_control + label::after {
+  width: 0;
+  transform: rotate(-55deg);
+}
+
+.checkbox_control:checked + label::after {
+  border-color: var(--col-button-label);
+  border-width: 3px;
+  border-top: 2px solid transparent;
+  border-right: 2px solid transparent;
+  border-radius:  2px;
+  height: calc(var(--spacing-2xs) / 3);
+  margin-bottom:var(--spacing-3xs);
+  width: var(--spacing-sm);
+  transition: all 0.125s ease-out;
+}
+
+.checkbox_control:checked + label::before {
+  background-color: var(--col-interactive-01);
+  border-color: var(--col-border);
+}
+
+.checkbox_control:disabled + label {
+  cursor: not-allowed;
+}
+
+.checkbox_control:disabled + label::before {
+  border-color:  var(--col-disabled);
+}
+.checkbox_control:disabled:checked + label::before {
+  background-color: var(--col-disabled);
+}
+
+.checkbox_label {
+  font-weight: 400;
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  padding: var(--spacing-3xs);
+  padding-top: 0;
+  margin-inline-start: var(--spacing-md);
+  align-items: center;
+  font-family: var(--font-stack-display);
+}
+
+.checkbox_label:active,
+.checkbox_label:focus {
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+
+.checkbox_helpertext {
+  color: var(--col-text-secondary);
+  margin-inline-start: var(--spacing-md);
+  padding-block-start: 0;
+  margin-block-start: 0;
+  padding-left: var(--spacing-sm);
+  font-size: var(--size-font-sm);
+}
+
+label.checkbox_label:not([for]) {
+  color: red !important;
+}
+
+.checkbox_control:focus + .checkbox_label::before {
+  outline: 3px solid var(--col-focus);
+  border-color: transparent;
+}

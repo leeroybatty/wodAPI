@@ -1,0 +1,118 @@
+.loadingspinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Full viewport height */
+  position: relative;
+}
+
+/* create the paw prints */
+.pad {
+  width: 25px;
+  height: 27px;
+  background-color: var(--theme-interface-50);
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  display: block;
+  position: absolute;
+}
+.large {
+  width: 70px;
+  height: 80px;
+  transform: rotate(80deg);
+  left: 100px;
+  top: 50px;
+}
+.small-1 {
+  transform: rotate(50deg);
+  left: 145px;
+  top: 28px;
+}
+.small-2 {
+  transform: rotate(65deg);
+  left: 174px;
+  top: 50px;
+}
+.small-3 {
+  transform: rotate(98deg);
+  position: absolute;
+  left: 178px;
+  top: 87px;
+}
+.small-4 {
+  transform: rotate(140deg);
+  position: absolute;
+  left: 158px;
+  top: 117px;
+}
+
+/* Position and animate */
+.paw-print-1 {
+  opacity: 0;
+  position: absolute;
+  left: -150px; 
+  top: 100px; 
+  transform: rotate(-40deg);
+  animation: walk 3s linear infinite;
+}
+.paw-print-2 {
+  opacity: 0;
+  position: absolute;
+  left: 50px; 
+  top: 120px; 
+  transform: rotate(-5deg);
+  animation: walk 3s linear infinite 0.25s;
+}
+.paw-print-3 {
+  opacity: 0;
+  position: absolute;
+  left: 150px; 
+  top: 270px; 
+  transform: rotate(-10deg);
+  animation: walk 3s linear infinite 0.5s;
+}
+.paw-print-4 {
+  opacity: 0;
+  position: absolute;
+  left: 350px; 
+  top: 120px; 
+  transform: rotate(-20deg);
+  animation: walk 3s linear infinite 0.75s;
+}
+.paw-print-5 {
+  opacity: 0;
+  position: absolute;
+  left: 500px; 
+  top: 350px; 
+  transform: rotate(10deg);
+  animation: walk 3s linear infinite 1s;
+}
+.paw-print-6 {
+  opacity: 0;
+  position: absolute;
+  left: 650px; 
+  top: 200px; 
+  transform: rotate(10deg);
+  animation: walk 3s linear infinite 1.25s;
+}
+.paw-print-7 {
+  opacity: 0;
+  position: absolute;
+  left: 850px; 
+  top: 350px; 
+  transform: rotate(20deg);
+  animation: walk 3s linear infinite 1.5s;
+}
+.paw-print-8 {
+  opacity: 0;
+  position: absolute;
+  left: 925px; 
+  top: 150px; 
+  transform: rotate(10deg);
+  animation: walk 3s linear infinite 1.75s;
+}
+
+/* Walking effect animation keyframes */
+@keyframes walk {
+  25% { opacity: 1; }
+  100% { opacity: 0; }
+}

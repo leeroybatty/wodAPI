@@ -1,0 +1,93 @@
+.modal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  max-height: 0;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+  opacity: 0;
+  z-index: 100;
+  background-color: rgba(0, 0, 0, 0.25);
+}
+
+.modal.Closed {
+  opacity: 0;
+  height: 0;
+  transition: all 0.3s ease-in;
+}
+
+.modal.Open {
+  max-height: 99em;
+  opacity: 1;
+  overflow: visible;
+  z-index: 500;
+  transition: all 0.3s ease-in;
+}
+
+.Closed .modal_body {
+  position: fixed;
+  height: 0;
+  overflow: hidden;
+  top: 0;
+}
+
+.modal_content {
+  display: block;
+  border: 1px solid var(--col-border);
+  background-color: var(--col-backdrop);
+}
+.modal_content.Small {
+  width: calc(var(--spacing-sm) * 25);
+}
+.modal_content.Medium {
+  width: calc(var(--spacing-md) * 25);
+}
+.modal_content.Large {
+  width: calc(var(--spacing-lg) * 25);
+}
+
+.modal_header {
+  display: flex;  
+  font-weight: 700;
+  align-items: center;
+  padding: var(--spacing-md);
+  padding-bottom: 0;
+  justify-content: space-between;
+}
+
+.modal_body {
+  padding: var(--spacing-md);
+  max-height: 75vh;
+  overflow-y: scroll;
+}
+
+.modal_body::-webkit-scrollbar {
+  display: none;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.modal_footer {
+  padding: var(--spacing-md);
+  width: 100%;
+  display: flex;
+  background-color: var(--col-background);
+}
+
+.modal_close {
+  align-self: right;
+  background: transparent;
+  border: none;
+  width: var(--spacing-lg);
+  height: var(--spacing-lg);
+  position: relative;
+  margin-inline-start: var(--spacing-lg);
+  cursor:  pointer;
+}

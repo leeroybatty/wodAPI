@@ -1,0 +1,28 @@
+.tag {
+	background-color: var(--theme-interface-20);
+	margin-inline-end: var(--spacing-sm);
+	margin-block-end:  var(--spacing-sm);
+	padding: var(--spacing-xs) var(--spacing-md);
+	border-radius: var(--spacing-xl);
+	font-size: var(--size-font-sm);
+	outline: 1px solid var(--theme-interface-30);
+	display: inline-flex;
+	align-items: center;
+	width: fit-content;
+}
+
+.tag:first-of-type {
+	margin-inline-start: 0;
+	outline:  1px solid red;
+}
+
+.tag.Removable {
+  margin-inline-end: 0;
+  padding: 0;
+  padding-inline-start: var(--spacing-md);
+}
+
+.tag .Badge {
+	margin: 0;
+	margin-inline-start: var(--spacing-sm);
+}

@@ -1,0 +1,41 @@
+.accordion {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--col-border);
+}
+
+.accordion_heading {
+  padding: var(--spacing-xs) var(--spacing-md);
+  width: 100%;
+  font-weight: bold;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.accordion_title {
+  margin: 0;
+  color: var(--theme-interface-80);
+  font-size: var(--size-font-md);
+}
+
+.accordion_body {
+  overflow-y: hidden;
+  padding: 0 var(--spacing-md);
+  transition: max-height 0.33s ease, opacity 0.5s ease;
+  overflow-x: hidden;
+}
+
+.accordion_body.Closed {
+  visibility: hidden;
+  max-height: 0;
+  opacity: 0;
+}
+
+.accordion_body.Open {
+  max-height: 100vh;
+  opacity: 1;
+  overflow-y: scroll;
+}
