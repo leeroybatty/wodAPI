@@ -1,5 +1,5 @@
 :root {
-  --swatch-gray-100: #262626;
+/*  --swatch-gray-100: #262626;
   --swatch-gray-90: #424242;
   --swatch-gray-80: #505050;
   --swatch-gray-70: #636363;
@@ -183,7 +183,7 @@
   --col-disabled: var(--color-disabled, var(--theme-interface-30));
   --col-error: var(--color-error, var(--theme-tertiary-60));
   --col-success: var(--color-success, var(--theme-success-60));
-}
+}*/
 
 * {
   margin: 0;

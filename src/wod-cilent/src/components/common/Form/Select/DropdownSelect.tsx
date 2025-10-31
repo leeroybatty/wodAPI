@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import '../../design/style.css';
 import '../Form.css';
 import FormField from '../atoms/FormField';
-import {InputProps} from '../../types/input';
+import type {InputProps} from '../../types/input';
 import {default as Label} from '../atoms/Label';
 
 type Option = {

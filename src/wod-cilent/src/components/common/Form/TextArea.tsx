@@ -1,12 +1,10 @@
 import React from 'react'
-import WriteInField, {WriteInFieldProps, writeInDefaults} from './atoms/WriteInField'
-
+import WriteInField from './atoms/WriteInField'
+import type {WriteInFieldProps}  from './atoms/WriteInField'
 const TextArea: React.FC<WriteInFieldProps> = (props) => {
   return(
     <WriteInField {...props} type="textarea" />
   )
 }
-
-TextArea.defaultProps = writeInDefaults;
 
 export default TextArea;

@@ -1,4 +1,4 @@
-import {UniversalProps} from './universal'
+import type {UniversalProps} from './universal'
 
 export interface InteractiveProps extends UniversalProps {
     /**

@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import '../design/style.css';
 import './Tag.css';
 import { Badge } from '../Button';
-import { InteractiveProps, InteractiveDefaults } from '../types/interactive'
+import type { InteractiveProps } from '../types/interactive'
 
 
 export interface TagProps extends InteractiveProps {
@@ -44,15 +44,6 @@ export interface TagProps extends InteractiveProps {
     | 'match text';
 };
 
-export const TagDefaults: TagProps = {
-  ...InteractiveDefaults,
-  label: '',
-  size: 'md',
-  onClose: () => {},
-  removable: false,
-  icon: '',
-  look: 'neutral',
-} as TagProps
 
 const Tag:React.FC<TagProps> = (props) => {
   const {

@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import '../design/style.css';
 import './Link.css';
 import '../Button/Button.css';
-import { InteractiveProps } from '../types/interactive';
+import type { InteractiveProps } from '../types/interactive';
 
 export interface LinkProps extends InteractiveProps {
   /**

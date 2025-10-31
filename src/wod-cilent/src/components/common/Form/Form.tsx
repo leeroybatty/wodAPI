@@ -1,7 +1,7 @@
 import React, { useState, ReactNode } from "react";
 import "./Form.css";
 import { Button, ButtonSet } from "../Button";
-import { InteractiveProps } from "../types/interactive";
+import type { InteractiveProps } from "../types/interactive";
 
 type FormValues = {
   [key: string]: any;

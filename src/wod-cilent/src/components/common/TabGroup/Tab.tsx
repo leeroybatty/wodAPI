@@ -1,5 +1,5 @@
 import React from 'react';
-import { InteractiveProps } from '../types/interactive';
+import type { InteractiveProps } from '../types/interactive';
 import './TabGroup.css';
 import classNames from 'classnames';
 

@@ -1,5 +1,5 @@
 import { RefObject } from 'react';
-import { InteractiveProps, InteractiveDefaults } from './interactive'
+import type { InteractiveProps } from './interactive'
 
 export interface InputProps extends InteractiveProps {
     /**
@@ -43,18 +43,3 @@ export interface InputProps extends InteractiveProps {
     required?: boolean;
     value?: "checked" | string | number;
 }
-
-export const InputDefaults = {
-  ...InteractiveDefaults,
-  labelText: "",
-  ariaLabel: "",
-  ariaLabelledby: "",
-  hasError: false,
-  isValid: false,
-  name: "",
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  onChange: () => {},
-  refer: null,
-  required: false,
-  value: undefined,
-} as InputProps

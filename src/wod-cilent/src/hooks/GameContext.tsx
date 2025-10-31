@@ -47,9 +47,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
       houseRules,
       setHouseRules
     }}>
-      <div className='navbar'>
-        {gameName}
-      </div>
       {children}
     </GameContext.Provider>
   );

@@ -1,8 +1,7 @@
 import React, { useState, useMemo } from "react";
-import { UniversalProps } from "../types/universal";
+import type { UniversalProps } from "../types/universal";
 import Tab from "./Tab";
 import "./TabGroup.css";
-import classNames from "classnames";
 
 interface TabMeta extends UniversalProps {
   key: string;
