@@ -2,16 +2,11 @@ import React, { useState, useEffect } from "react";
 import UserProvider from "./components/users/UserProvider";
 import TopLevelLayout from './components/layouts/main';
 import './index.css';
-import SheetBuilder from './components/SheetBuilder';
-import { CharacterProvider } from './hooks/CharacterContext';
-import { GameProvider } from './hooks/GameContext';
-import { BrowserRouter } from 'react-router-dom';
-
-
-interface MainLayoutProps {
-  children: React.ReactNode;
-  requireLogin?: boolean;
-}
+import CharacterGenerator from './pages/chargen'
+import TermsofService from './pages/tos';
+import PrivacyPolicy from './pages/privacy';
+import ContentPolicy from './pages/content';
+import { Routes, Route, BrowserRouter } from 'react-router-dom';
 
 function App() {
 
@@ -35,25 +30,26 @@ function App() {
 
   // }, [requireLogin, verifyUser, router]);
 
-  const closeAuthModal = () => {
-    setAuthModalOpen(false);
-  };
+  // const closeAuthModal = () => {
+  //   setAuthModalOpen(false);
+  // };
 
-  const openAuthModal = (whichMode: "Sign Up" | "Log In") => {
-    setAuthMode(whichMode);
-    setAuthModalOpen(true);
-  };
+  // const openAuthModal = (whichMode: "Sign Up" | "Log In") => {
+  //   setAuthMode(whichMode);
+  //   setAuthModalOpen(true);
+  // };
 
   return (
     <div id="app">
     <BrowserRouter>
       <UserProvider>
         <TopLevelLayout>
-          <GameProvider>
-            <CharacterProvider>
-              <SheetBuilder />
-            </CharacterProvider>
-          </GameProvider>
+            <Routes>
+              <Route path="/tos" element={<TermsofService />} />
+              <Route path="/chargen" element={<CharacterGenerator />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/content" element={<ContentPolicy />} />
+            </Routes>
           </TopLevelLayout>
         </UserProvider>
       </BrowserRouter>
@@ -62,37 +58,3 @@ function App() {
 }
 
 export default App;
-
-
-// const App: React.FC<MainLayoutProps> = ({
-//   children,
-//   requireLogin = false,
-// }) => {
-
-
-
-//   return (
-//     <div id="app">
-//       <Head>
-//         <title>Big Damn MUSH</title>
-//         <meta name="viewport" content="width=device-width, initial-scale=1" />
-//         <link rel="icon" href="/favicon.ico" />
-//       </Head>
-
-
-//       <AuthModal
-//         isOpen={authModalOpen}
-//         onClose={closeAuthModal}
-//         initial={authMode}
-//       />
-
-//       <div className="wrapper">
-//         <main>{children}</main>
-//       </div>
-
-//       <SiteFooter />
-//     </div>
-//   );
-// };
-
-// export default App;

@@ -1,8 +1,8 @@
 .horizontal-nav {
   width: 100%;
   padding:  var(--spacing-md);
-  background-image: linear-gradient(to top, var(--col-background), transparent),
-     url('/img/brand/tiling_hands.jpg');
+  background-image: linear-gradient(to top, var(--theme-primary-100), transparent),
+    url('/background_vampire.jpg');
 }
 
 .horizontal-nav_inner, .footer {
@@ -11,14 +11,18 @@
   margin: auto;
   align-items: center;
 }
+
 .horizontal-nav_inner {
   justify-content: space-between;
 }
+
 .footer {
   flex-direction: column;
   justify-content: center;
   font-size: var(--size-font-sm);
+  padding:  var(--spacing-lg);
 }
+
 .footer-nav a {
   margin: var(--spacing-md);
 }

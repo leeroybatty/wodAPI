@@ -14,7 +14,7 @@
   background: none;
   opacity: 0;
   z-index: 100;
-  background-color: rgba(0, 0, 0, 0.25);
+  background-color: rgba(0, 0, 0, 0.66);
 }
 
 .modal.Closed {
@@ -42,6 +42,7 @@
   display: block;
   border: 1px solid var(--col-border);
   background-color: var(--col-backdrop);
+  box-shadow: var(--box-shadow);
 }
 .modal_content.Small {
   width: calc(var(--spacing-sm) * 25);
@@ -57,13 +58,13 @@
   display: flex;  
   font-weight: 700;
   align-items: center;
-  padding: var(--spacing-md);
+  padding: var(--spacing-lg);
   padding-bottom: 0;
   justify-content: space-between;
 }
 
 .modal_body {
-  padding: var(--spacing-md);
+  padding: var(--spacing-lg);
   max-height: 75vh;
   overflow-y: scroll;
 }

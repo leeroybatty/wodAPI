@@ -513,3 +513,10 @@ h1, h2, h3, h4, h5, h6 {
   background-color: #224134;
   background-image: url('/background_vampire.jpg');
 }
+
+.wrapper {
+  background-color: var(--color-background);
+  max-width: var(--grid-maxwidth);
+  margin:  0 auto;
+  padding: var(--spacing-lg) 0;
+}
