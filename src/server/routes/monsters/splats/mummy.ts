@@ -1,7 +1,7 @@
 export const buildHistoricalMummyExclusions = (
   year = 2025,
 ): string[] => {
-  let exclusions = [];
+  let exclusions: string[] = [];
   const ancientMummies = ['shemsu-heru', 'ishmaelites', 'cabiri'];
   const amentiDynasties = ['kher-minu', 'khri-habi', 'mesektet', 'sakhmu', 'sefekhi', 'udja-sen'];
   const wuTian = ['wu feng', 'xian lung'];

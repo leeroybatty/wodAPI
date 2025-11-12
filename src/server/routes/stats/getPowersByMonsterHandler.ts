@@ -1,6 +1,5 @@
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { parseQueryParam, prepareBaseOptions, getMonsterFromParams } from '../helpers';
-import { AuthenticatedRequest } from '../../middleware/auth';
 import { ErrorKeys } from '../../errors/errors.types';
 import { ApiResponse } from '../../apiResponse.types';
 import { handleError, createErrorResponse, createSuccessResponse } from '../../errors';
@@ -10,7 +9,7 @@ import {
 import { isValidStatCategory } from './helpers';
 import { AllStatCategoriesType, StatsFilters } from './types';
 
-export const getPowersByMonsterHandler = async (req: AuthenticatedRequest, res: Response) => {
+export const getPowersByMonsterHandler = async (req: Request, res: Response) => {
   const monsterParam = await getMonsterFromParams(req);
   let options: StatsFilters = await prepareBaseOptions(req);
   try {

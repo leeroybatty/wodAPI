@@ -1,6 +1,5 @@
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { prepareBaseOptions, getMonsterFromParams } from '../helpers';
-import { AuthenticatedRequest } from '../../middleware/auth';
 import { ErrorKeys } from '../../errors/errors.types';
 import { ApiResponse } from '../../apiResponse.types';
 import { handleError, createErrorResponse } from '../../errors';
@@ -9,7 +8,7 @@ import {
 } from './organizationsService';
 import { MonsterTemplates } from '../monsters/types';
 
-export const getMonsterOrganizationsHandler = async (req: AuthenticatedRequest, res: Response) => {
+export const getMonsterOrganizationsHandler = async (req: Request, res: Response) => {
   const options = await prepareBaseOptions(req);
 
   const monsterParam = await getMonsterFromParams(req, true) as MonsterTemplates;

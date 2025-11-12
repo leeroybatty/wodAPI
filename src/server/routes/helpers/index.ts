@@ -2,7 +2,7 @@ import { QueryExecutionError, createErrorResponse } from '../../errors';
 import { queryDbConnection, referenceCache } from '../../sql';
 import { PoolClient } from 'pg';
 import { ErrorKeys } from '../../errors/errors.types';
-import { AuthenticatedRequest } from '../../middleware/auth';
+import { Request } from 'express';
 import { ValidFormat } from '../types';
 import { MonsterTemplates } from '../monsters/types';
 
@@ -18,7 +18,7 @@ export function parseQueryParam (param: unknown): string[] {
   return [];
 };
 
-export async function getMonsterFromParams (req: AuthenticatedRequest, strict: boolean = false): Promise<string> {
+export async function getMonsterFromParams (req: Request, strict: boolean = false): Promise<string> {
   const { monster } = req.params; 
   if (monster == null || monster.trim() === "") {
     throw createErrorResponse(ErrorKeys.MONSTER_TYPE_NOT_FOUND);
@@ -38,7 +38,7 @@ export async function getMonsterFromParams (req: AuthenticatedRequest, strict: b
   return monster.toLowerCase() as MonsterTemplates;
 }
 
-export async function prepareBaseOptions (req: AuthenticatedRequest) {
+export async function prepareBaseOptions (req: Request) {
   const { books, year, exclude, include, faction, format } = req.query;
   const bookNames = parseQueryParam(books);
   const bookIds = await referenceCache.getBookIds(bookNames);

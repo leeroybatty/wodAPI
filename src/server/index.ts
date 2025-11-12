@@ -1,7 +1,6 @@
 import express, { Request, Response } from 'express';
 import path from 'path';
 import { PoolConnection } from './sql/connection';
-import { getCharacterStat } from './routes/stats';
 import { signupHandler } from './routes/auth/inbound/signupHandler';
 import { getMonsterTypesHandler } from './routes/monsters/getMonsterTypesHandler';
 import { getMonstersHandler } from './routes/monsters/getMonstersHandler';
@@ -35,7 +34,6 @@ app.get('/api/stats/:type', /* authorizeGeneralAccess, */ getStatsByTypeHandler)
 app.get('/api/stats/powers/:monster', /* authorizeGeneralAccess, */ getPowersByMonsterHandler);
 app.get('/api/stats/virtues/:path', /* authorizeGeneralAccess, */ getPathVirtuesHandler);
 app.get('/api/stats/rituals/:path', /* authorizeGeneralAccess, */ getVampireRitualsHandler);
-app.get('/api/character/:id/stat/:statName', /* authorizeGeneralAccess, */ getCharacterStat);
 
 app.use(express.static(path.join(__dirname, '../client')));
 

@@ -3,7 +3,7 @@ import {
   generalServerError500
 } from '../../../docs/common';
 
-const { exclude, include, format } = commonParams;
+const { exclude, include, format, books } = commonParams;
 
 export const getVampireRituals = {
   get: {
@@ -42,7 +42,7 @@ export const getVampireRituals = {
       {
         ...exclude,
         example: "widow's spite"
-      }
+      },
       {
         ...include,
         example: "burning blade"

@@ -6,6 +6,7 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
+    "typeRoots": ["./node_modules/@types", "./src/server/declarations"],
     "baseUrl": ".",
     "paths": {
       "@errors": ["src/server/errors"],
@@ -16,7 +17,11 @@
       "@logger/*": ["src/server/services/logger/*"]
     }
   },
+   "include": [
+    "src/server/**/*"
+  ],
   "ts-node": {
-    "esm": false
+    "esm": false,
+    "files": true 
   }
 }

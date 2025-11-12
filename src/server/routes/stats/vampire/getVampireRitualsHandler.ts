@@ -1,6 +1,5 @@
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { parseQueryParam, prepareBaseOptions } from '../../helpers';
-import { AuthenticatedRequest } from '../../../middleware/auth';
 import { ErrorKeys } from '../../../errors/errors.types';
 import { ApiResponse } from '../../../apiResponse.types';
 import { handleError, createErrorResponse, createSuccessResponse } from '../../../errors';
@@ -9,7 +8,7 @@ import {
 } from '../statsService';
 import { StatsFilters } from '../types';
 
-export const getVampireRitualsHandler = async (req: AuthenticatedRequest, res: Response) => {
+export const getVampireRitualsHandler = async (req: Request, res: Response) => {
   const { path } = req.params;
   let options: StatsFilters = await prepareBaseOptions(req);
   

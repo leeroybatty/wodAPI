@@ -1,12 +1,11 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { prepareBaseOptions, parseQueryParam } from '../helpers';
-import { AuthenticatedRequest } from '../../middleware/auth';
 import { ErrorKeys } from '../../errors/errors.types';
 import { ApiResponse } from '../../apiResponse.types';
 import { handleError, createErrorResponse, createSuccessResponse } from '../../errors';
 import { getAllTopLevelMonsters } from './monsterService';
 
-export const getMonstersHandler = async (req: AuthenticatedRequest, res: Response) => {
+export const getMonstersHandler = async (req: Request, res: Response) => {
   const { splats } = req.query;
   const splatsParam = parseQueryParam(splats) || [];
 

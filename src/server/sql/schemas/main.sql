@@ -101,14 +101,6 @@ CREATE TABLE IF NOT EXISTS users (
   role user_role DEFAULT 'Player'
 );
 
-CREATE TABLE IF NOT EXISTS users_sessions (
-  id SERIAL PRIMARY KEY,
-  user_id INT REFERENCES users(id) ON DELETE CASCADE,
-  session_token VARCHAR(250) UNIQUE NOT NULL,
-  expiration_date TIMESTAMPTZ,
-  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-);
-
 CREATE OR REPLACE FUNCTION update_timestamp()
 RETURNS trigger
 LANGUAGE plpgsql

@@ -1,4 +1,4 @@
-import { ErrorKeys as CoreErrors } from './errors.types';
+import { ErrorKeys as CoreErrors } from '@errors/errors.types';
 
 export type ApplicationErrorKey = 
   | CoreErrors;

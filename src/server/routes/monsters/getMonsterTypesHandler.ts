@@ -1,7 +1,6 @@
-  import { Response } from 'express';
+  import { Request, Response } from 'express';
   import { prepareBaseOptions, parseQueryParam,  getMonsterFromParams } from '../helpers';
   import { MonsterTemplates } from './types';
-  import { AuthenticatedRequest } from '../../middleware/auth';
   import { ErrorKeys } from '../../errors/errors.types';
   import { ApiResponse } from '../../apiResponse.types';
   import { handleError, createErrorResponse, createSuccessResponse } from '../../errors';
@@ -9,7 +8,7 @@
     getAllMonsterTypes
   } from './monsterService';
 
-  export const getMonsterTypesHandler = async (req: AuthenticatedRequest, res: Response) => {
+  export const getMonsterTypesHandler = async (req: Request, res: Response) => {
   const monsterParam = await getMonsterFromParams(req, true) as MonsterTemplates;
 
   try {

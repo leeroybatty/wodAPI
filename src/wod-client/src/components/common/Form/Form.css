@@ -1,0 +1,159 @@
+.form .Invisible {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  whiteSpace: nowrap;
+  width: 1px;
+}
+
+.form {
+  margin-block-end:  1rem;
+}
+
+.form .Inacessible {
+  display: none;
+  visibility: hidden;
+}
+
+fieldset, .fieldset {
+  border: none;
+  margin: var(--spacing-sm) 0;
+}
+
+legend, .legend {
+  font-size: var(--size-font-md);
+  font-weight: 700;
+}
+
+.fieldset_collection {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.fieldset_collection * {
+  min-width: 20ch;
+  margin-inline-end: var(--spacing-sm);
+}
+
+.form_server-message {
+  display: block;
+  margin-inline-start: var(--spacing-md);
+  align-items: center;
+  color:  var(--col-error);
+  font-size: var(--size-font-md);
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin: var(--spacing-md);
+  margin-inline-start: 0;
+  margin-block-start: 0;
+}
+.form-field:last-of-type {
+  margin-inline-end:  0;
+}
+
+.form-field.Compact {
+  margin: 0
+}
+
+.form-field.Error .form-field_helpertext {
+  color: var(--col-error);
+}
+.form-field.Error .form-field_control {
+  outline: 1px solid var(--col-error);
+  background:  var(--col-background);
+}
+.form-field.Disabled.Valid .form-field_control {
+  outline-color: var(--col-border);
+}
+.form-field.Valid .form-field_control {
+  outline: 1px solid var(--col-success);
+}
+
+.form-field_label {
+  font-size: var(--size-font-sm);
+  font-weight: 700;
+  margin-inline-end: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+  letter-spacing: 0.5px;
+  flex-direction: row;
+}
+
+.form-field_requirement-icon {
+  margin-inline-start:  var(--spacing-xs);
+}
+
+.form-field_label.Required:after {
+  content: "*";
+
+}
+
+.form-field.Disabled {
+  pointer-events: none;
+}
+
+.form-field.Disabled .form-field_label,
+.form-field.Disabled .form-field_control,
+.form-field.Disabled .form-field_helpertext {
+  color: var(--col-disabled);
+}
+
+.form-field_control {
+  width: 100%;
+  display: block;
+  background-color: var(--theme-interface-10);
+  border: none;
+  color:  var(--col-text);
+  padding: var(--spacing-sm);
+  font-size: var(--size-font-md);
+  border-radius: var(--spacing-xs);
+  outline: 1px solid var(--col-border);
+  font-family: var(--typeface-body);
+}
+
+.form-field_control:focus {
+  outline: 3px solid var(--col-focus);
+    background-color: var(--theme-interface-00);
+}
+
+.form-field_control::placeholder {
+  color: var(--col-text-secondary)
+}
+
+.form-field_helpertext {
+  color: var(--col-text-secondary);
+  font-size: var(--size-font-sm);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-top: var(--spacing-xs);
+  margin-bottom: 0;
+}
+
+.form-field_honeypot {
+  aria-hidden: true;
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  whiteSpace: nowrap;
+  width: 1px;
+}
+
+.form-feedback {
+  text-align: center;
+  font-size: var(--size-font-lg);
+}
+.form-feedback.Error {
+  color: var(--col-error);
+  font-size: var(--size-font-md);
+}

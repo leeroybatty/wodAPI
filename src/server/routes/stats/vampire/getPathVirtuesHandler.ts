@@ -1,6 +1,5 @@
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { prepareBaseOptions } from '../../helpers';
-import { AuthenticatedRequest } from '../../../middleware/auth';
 import { ErrorKeys } from '../../../errors/errors.types';
 import { referenceCache } from '../../../sql';
 import { ApiResponse } from '../../../apiResponse.types';
@@ -11,7 +10,7 @@ import {
 import { isValidStatCategory } from '../helpers';
 import { AllStatCategoriesType, StatsFilters } from '../types';
 
-export const getPathVirtuesHandler = async (req: AuthenticatedRequest, res: Response) => {
+export const getPathVirtuesHandler = async (req: Request, res: Response) => {
   const { path } = req.params; 
   if (path == null || path.trim() === "") {
     throw createErrorResponse(ErrorKeys.STAT_TYPE_NOT_FOUND);

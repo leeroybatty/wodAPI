@@ -38,6 +38,8 @@ export async function withTransaction<T>(callback: (client: PoolClient) => Promi
   }
 }
 
+import { DatabaseError } from 'pg';
+
 export async function queryDbConnection(
   queryString: string, 
   values: any[] = [],
@@ -48,17 +50,8 @@ export async function queryDbConnection(
     try {
       return await client.query(queryString, values);
     } catch (error) {
-      if (error instanceof Error) {
-        logger.error('Query failed', { query: queryString, error });
-        throw new QueryExecutionError(
-          'Failed to execute database query',
-          queryString,
-          values,
-          ErrorKeys.GENERAL_SERVER_ERROR 
-        );
-      } else {
-        return handleUnknownError();
-      }
+      logger.error('Query failed', { query: queryString, error });
+      throw error;
     }
   } else {
     const pool = PoolConnection.get();
@@ -66,17 +59,8 @@ export async function queryDbConnection(
     try {
       return await newClient.query(queryString, values);
     } catch (error) {
-      if (error instanceof Error) {
-        logger.error('Query failed', { query: queryString, error });
-        throw new QueryExecutionError(
-          'Failed to execute database query',
-          queryString,
-          values,
-          ErrorKeys.GENERAL_SERVER_ERROR 
-        );
-      } else {
-        return handleUnknownError();
-      }
+      logger.error('Query failed', { query: queryString, error });
+      throw error; 
     } finally {
       newClient.release();
     }

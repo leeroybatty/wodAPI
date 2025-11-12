@@ -12,7 +12,7 @@ export const signupHandler = async (req: Request, res: Response) => {
     if (result.success) {
       return res.status(200).send("success")
     } else {
-      return res.status(result.error === ErrorKeys.GENERAL_SERVER_ERROR ? 500 : 400).send(result.error);
+      return res.status(result.error === ErrorKeys.GENERAL_SERVER_ERROR ? 500 : 400).send({ error: result.error });
     }
   } catch (error) {
     handleError(error, req, res)

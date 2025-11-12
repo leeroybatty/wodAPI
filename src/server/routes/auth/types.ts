@@ -32,14 +32,6 @@ export type UserCredentials = Pick<User,
   'role'
 >;
 
-export type UserSession = {
-    id: number;
-    user_id: number;
-    session_token: string;
-    expiration_date: Date | null;
-    created_at: Date;
-};
-
 export type CreatedUserResult = {
     id: number;
 }

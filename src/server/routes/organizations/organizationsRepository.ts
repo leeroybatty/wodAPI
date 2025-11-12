@@ -1,6 +1,5 @@
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { queryDbConnection, referenceCache } from '../../sql';
-import { AuthenticatedRequest } from '../../middleware/auth';
 import { handleError, createErrorResponse, createSuccessResponse } from '../../errors';
 import { ErrorKeys } from '../../errors/errors.types';
 import { ApiResponse } from '../../apiResponse.types';

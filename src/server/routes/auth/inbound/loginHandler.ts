@@ -18,7 +18,7 @@ export const loginHandler = async (req: Request, res: Response) => {
       return res.status(403).json(errorResponse);
     }
     
-    const result = await loginUser({ password, email });
+    const result = await loginUser(email, password);
 
     if (result.success && result.sessionCookie) {
       res.setHeader('Set-Cookie', result.sessionCookie);

@@ -20,8 +20,10 @@ export class QueryExecutionError extends Error {
   constructor(
     message: string, 
     public query: string, 
-    public params: any[], 
-    public errorKey: ErrorKeys = ErrorKeys.GENERAL_SERVER_ERROR
+    public params: any[],
+    public errorKey: ErrorKeys = ErrorKeys.GENERAL_SERVER_ERROR,
+    code?: string | undefined,
+    constraint?: string | undefined
   ) {
     super(message);
     this.name = 'QueryExecutionError';
@@ -50,7 +52,7 @@ export function createErrorResponse(
   return {
     success: false,
     error: {
-      code: publicErrorKey,
+      code: publicErrorKey || ErrorKeys.GENERAL_SERVER_ERROR,
       message: publicErrorInfo.message,
       details,
       endpoint
