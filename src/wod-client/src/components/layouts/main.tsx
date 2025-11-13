@@ -31,7 +31,7 @@ const TopLevelLayout: React.FC<MainLayoutProps> = ({
         onSignup={() => openAuthModalInMode("Sign Up")}
         onLogIn={() => openAuthModalInMode("Log In")}
         onLogout={logoutUser}
-        loggedIn={isAuthenticated()}
+        loggedIn={isAuthenticated}
       />
       <div className="wrapper">
         <div className="wrapper-inner">

@@ -14,6 +14,8 @@ export enum ActionType {
     Loading = "LOADING",
     ViewProfile = "VIEW_PROFILE",
     UpdateProfile = "UPDATE_PROFILE",
+    CloseAuthModal = "CLOSE_AUTH_MODAL",
+    OpenAuthModal = "OPEN_AUTH_MODAL"
 }
 
 export type LoginLoggerPayload = {
@@ -22,7 +24,6 @@ export type LoginLoggerPayload = {
 };
 
 export type LogoutLoggerPayload = {
-  user: User;
   reason?: string;
 };
 
@@ -52,6 +53,7 @@ export type UserAuthState = {
     isAuthenticated?: boolean;
     isLoading: boolean;
     authError: ErrorLoggerPayload | null;
+    isAuthModalOpen?: boolean;
 };
 
 export type VerifyLoggerPayload = {
@@ -85,4 +87,6 @@ export type UserContextType = [
     (email: string, password: string) => Promise<void>,
     () => Promise<void>,
     () => Promise<UserProfile>,
+    () => void,
+    () => void
 ];

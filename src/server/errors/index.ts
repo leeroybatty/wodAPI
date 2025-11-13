@@ -2,7 +2,7 @@ import { ApiResponse, ApiErrorResponse, ApiSuccessResponse } from '../apiRespons
 import { ErrorKeys } from './errors.types';
 import { Request, Response } from 'express';
 import { CORE_ERROR_MAP, getPublicError } from './errorMap';
-import { logger } from '@logger';
+import { logger } from '../services/logger';
 
 export class ValidationError extends Error {
   constructor(

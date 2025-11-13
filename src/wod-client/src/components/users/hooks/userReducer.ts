@@ -40,7 +40,7 @@ import { ActionType } from '../user.types';
 
 const userReducer = (state: UserAuthState, action: UserAction): UserAuthState => {
     switch (action.type) {
-      case ActionType.CloseAuthModal: 
+      case ActionType.CloseAuthModal:
         return {
           ...state,
           isAuthModalOpen: false,

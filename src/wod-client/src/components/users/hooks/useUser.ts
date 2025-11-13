@@ -42,21 +42,14 @@ export const useUser = () => {
 
     const [state, dispatch, verifyUser, loginUser, logoutUser, viewProfile, openAuthModal, closeAuthModal] = context;
 
-    const isAuthenticated = () => state.isAuthenticated;
-    const isAuthModalOpen = () => state.isAuthModalOpen;
-    const getUser = () => state.user;
-
     return {
         ...state,
         dispatch,
         loginUser,
         logoutUser,
         verifyUser,
-        isAuthenticated,
         viewProfile,
-        getUser,
         openAuthModal,
-        closeAuthModal,
-        isAuthModalOpen
+        closeAuthModal
     };
 };

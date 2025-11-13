@@ -64,13 +64,25 @@ const UserProvider: React.FC<UserProviderProps> = function ({ children }) {
     const [state, _dispatch] = useReducer(userReducer, initialState);
     const navigate = useNavigate();
 
+    const dispatch = useCallback((action: UserAction) => {
+        const logFunction = loggerMap[action.type];
+        if (logFunction) {
+            logFunction(action.payload);
+        } else if (dev) {
+            console.log(`Unknown action type: ${action.type}`);
+        }
+        _dispatch(action);
+    }, []);
+
     const closeAuthModal = useCallback(() => {
+      console.log("close auth modal");
       dispatch({
         type: ActionType.CloseAuthModal
       })
     }, [dispatch]);
 
     const openAuthModal = useCallback(() => {
+      console.log("open auth modal");
       dispatch({
         type: ActionType.OpenAuthModal
       })
@@ -87,15 +99,7 @@ const UserProvider: React.FC<UserProviderProps> = function ({ children }) {
      *
      * @param {UserAction} action - The action to be dispatched and logged.
      */
-    const dispatch = useCallback((action: UserAction) => {
-        const logFunction = loggerMap[action.type];
-        if (logFunction) {
-            logFunction(action.payload);
-        } else if (dev) {
-            console.log(`Unknown action type: ${action.type}`);
-        }
-        _dispatch(action);
-    }, []);
+   
 
     const handleErrorWithDispatch = useCallback(handleError(dispatch), [
         dispatch,
@@ -186,10 +190,11 @@ const UserProvider: React.FC<UserProviderProps> = function ({ children }) {
         });
         try {
             const response = await axios.post("/api/auth/logout");
+            console.log("Response received")
             dispatch({
                 type: ActionType.Logout,
-                payload: response.data,
             });
+            console.log("Dispatch performed");
             navigate("/");
         } catch (error: any) {
             handleErrorWithDispatch(error);
@@ -259,11 +264,11 @@ const UserProvider: React.FC<UserProviderProps> = function ({ children }) {
                 loginUser,
                 logoutUser,
                 viewProfile,
+                openAuthModal,
+                closeAuthModal
             ] as UserContextType,
-        [state, dispatch, verifyUser, loginUser, logoutUser, viewProfile],
+        [state, dispatch, verifyUser, loginUser, logoutUser, viewProfile, openAuthModal, closeAuthModal],
     );
-
-    
 
     /**
      * UserContext.Provider is the provider component for the UserContext.

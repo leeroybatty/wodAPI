@@ -12,8 +12,12 @@ interface AuthProps {
 const AuthModal: React.FC<AuthProps> = ({ initial, onClose }) => {
  
   const [authMode, setAuthMode] = useState<'Log In' | 'Sign Up' | ''>(initial);
-  const { isAuthModalOpen } = useUser()
-  
+  const { isAuthModalOpen, closeAuthModal } = useUser();
+
+  useEffect(() => {
+    console.log(`Auth modal ${isAuthModalOpen ? 'is' : 'is NOT'} open: ${isAuthModalOpen}.`)
+  }, [isAuthModalOpen])
+
   useEffect(() => {
     setAuthMode(initial)
   }, [initial]);
@@ -46,10 +50,10 @@ const AuthModal: React.FC<AuthProps> = ({ initial, onClose }) => {
       id="authmodal_sign-up"
       ariaLabel={authMode}
       heading={authMode === 'Log In' ? 'Log in' : 'Sign up'}
-      isOpen={isOpen}
-      onClose={onClose}
+      isOpen={isAuthModalOpen === true}
+      onClose={closeAuthModal}
     >
-      {isOpen && renderContent()}
+      {isAuthModalOpen && renderContent()}
     </Modal>
   );
 };
